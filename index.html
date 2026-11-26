@@ -3658,14 +3658,27 @@ function layerPool(I,fam,rank){
  const gen=Array.from({length:I.L<=5?1:3},(_,i)=>`g${fam}_${I.L*131+i*17+rank}_${rank}`);
  return I.L<=3&&base.length?base:[...base,...gen];
 }
+/* 難易度の自動調整
+   ・その階層の「想定レベル」より仲間が強ければ、敵のレベルも一部だけ追いつく（育てた分の有利は4割残る）
+   ・ダンジョンの結果（楽勝／ギリギリ／全滅）で GS.adapt を少しずつ上下させ、敵の強さに反映する */
+const expLv=L=>1+(L-1)*1.6;
+const lvAdj=L=>{const d=avgLv()-expLv(L);return d>0?d*.6:d*.3;};
+const ADAPT_MIN=-.3,ADAPT_MAX=1.2;
+const adaptLabel=()=>{const a=(GS&&GS.adapt)||0;return a<-.1?['やさしめ','#81c784']:a<.15?['ふつう','#fff']:a<.4?['つよめ','#ffb74d']:['てごわい','#ef5350'];};
+function adaptFoe(e){const a=(GS&&GS.adapt)||0;if(e.metal||!a)return e;
+ e.hp=Math.max(1,Math.round(e.hp*(1+a)));e.max=e.hp;e.atk=Math.round(e.atk*(1+a*.75));e.int=Math.round(e.int*(1+a*.75));return e;}
+function adaptAfter(res){if(!GS)return;let a=GS.adapt||0;
+ if(res==='wipe')a-=.12;else{const ps=party(),dead=ps.some(m=>m.hp<=0),r=ps.reduce((s,m)=>s+m.hp/as(m,maxHP),0)/Math.max(1,ps.length);a+=dead?0:r>.6?.08:.03;}
+ GS.adapt=Math.max(ADAPT_MIN,Math.min(ADAPT_MAX,+a.toFixed(3)));}
 function rollFoe(){
- const I=D.I,lvl=I.off+D.di*2+D.floor-1,[r0,r1]=I.r;
- if(D.floor===D.total&&D.boss)return foeFrom(I.boss,lvl+2,'boss');
- if(D.floor===D.total){const fam=pick(I.fams);return foeFrom(pick(layerPool(I,fam,Math.min(10,r1+1))),lvl+1,'boss');}
+ const I=D.I,lvl=Math.max(0,Math.round(I.off+D.di*2+D.floor-1+lvAdj(I.L))),[r0,r1]=I.r;
+ if(D.floor===D.total&&D.boss)return adaptFoe(foeFrom(I.boss,lvl+2,'boss'));
+ if(D.floor===D.total){const fam=pick(I.fams),early=I.L<=2;const e=foeFrom(pick(layerPool(I,fam,early?r1:Math.min(10,r1+1))),lvl+1,'boss');
+  if(early){e.hp=e.max=Math.round(e.hp*(I.L===1?.6:.7));e.atk=Math.round(e.atk*.85);e.int=Math.round(e.int*.85);}return adaptFoe(e);}
  const x=Math.random();let rank=x<.06?r1+1+(Math.random()<.3?1:0):x<.32?r1:r0;
  const elite=Math.random()<.12;if(elite)rank++;
  rank=Math.max(1,Math.min(10,rank));
- return foeFrom(pick(layerPool(I,pick(I.fams),rank)),lvl,elite?'elite':'normal',Math.random()<.02+Math.min(.03,I.L*.002));
+ return adaptFoe(foeFrom(pick(layerPool(I,pick(I.fams),rank)),lvl,elite?'elite':'normal',Math.random()<.02+Math.min(.03,I.L*.002)));
 }
 function rollGroup(){
  const r=Math.random(),n=r<.45?1:r<.8?2:3;if(n===1)return rollFoe();
@@ -3775,7 +3788,7 @@ function tabDungeon(n){
  }
  $('#app').innerHTML=`${header('ダンジョン')}${n?`<div class="win">${n}</div>`:''}
  <div class="seg two">${segs.map(([k,t])=>`<button data-s="${k}" class="${DTAB===k?'on':''}">${t}</button>`).join('')}</div>
- ${DTAB==='normal'?`<div class="win rest"><span>到達：<b class="gold">第${max}層</b>${FRONT>max?`<small>　全体の最前線：第${FRONT}層</small>`:''}</span><span class="rbtns"><button id="recb">みんなの<br>記録</button><button id="inn" ${GS.gold<innCost()||!needsRest()?'disabled':''}>宿屋で休む<small>${innCost()}G</small></button></span></div>`:''}
+ ${DTAB==='normal'?`<div class="win rest"><span>到達：<b class="gold">第${max}層</b><small style="display:block">敵の強さ：<b style="color:${adaptLabel()[1]}">${adaptLabel()[0]}</b>（戦いぶりで自動調整）</small>${FRONT>max?`<small>　全体の最前線：第${FRONT}層</small>`:''}</span><span class="rbtns"><button id="recb">みんなの<br>記録</button><button id="inn" ${GS.gold<innCost()||!needsRest()?'disabled':''}>宿屋で休む<small>${innCost()}G</small></button></span></div>`:''}
  <div class="lays">${body}</div>`;
  document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{SE('click');DTAB=b.dataset.s;tabDungeon('');if(DTAB!=='normal')window.scrollTo(0,0);});
  if($('#recb'))$('#recb').onclick=()=>{SE('click');renderRecords();};
@@ -3853,7 +3866,7 @@ function battleIn(foe){
  startBattle(foe,{label:`${D.floor}/${D.total}`,bg:D.dun.bg,
   drop:e=>{if(e.metal&&e.kind!=='boss')return [];const l=rollDrops(e);addDrops(D.drops,l);return l.map(([k,c])=>`${e.name}は ${DROPN[k]}${k==='gem'?`◆${c}`:''}を 落とした！`);},
   onWin:notes=>{if(D.floor>=D.total)return clearDungeon(notes);D.floor++;saveGame();runFloor(notes);},
-  onLose:()=>{const nt=[];giveDrops(D.drops,nt,true);const L=D.L;D=null;party().forEach(m=>as(m,heal));playBGM('main');
+  onLose:()=>{const nt=[];giveDrops(D.drops,nt,true);const L=D.L;if(L&&!D.special)adaptAfter('wipe');D=null;party().forEach(m=>as(m,heal));playBGM('main');
    const msg=['全滅して 町へ運ばれた…','拾ったアイテムの半分だけ 持ち帰った。経験・成長はそのまま。',...(nt.length?['持ち帰ったもの：'+nt.join('、')]:[])];
    if(L)renderLayer(L,msg.join('<br>'));else renderMain('dungeon',msg);},
   onRun:()=>{if(D.floor>=D.total)return clearDungeon([]);D.floor++;runFloor(['うまく逃げて 先へ進んだ。']);},
@@ -3862,7 +3875,7 @@ function battleIn(foe){
 function clearDungeon(notes){
  bump('clr');
  const dn=D.dun,dropN=[],rew=[];giveDrops(D.drops,dropN);
- let gold=dn.gold,gems=10,first=false,unlockL=0;const L=D.L,di=D.di;
+ let gold=dn.gold,gems=10,first=false,unlockL=0;const L=D.L,di=D.di;if(L&&!D.special)adaptAfter('clear');
  if(D.special==='raid'){gems=100;GS.items.ball=(GS.items.ball||0)+3;rew.push('スカウト玉 ×3');}
  if(D.special==='kira')gems=15;
  if(D.special==='phantom')gems=50;
