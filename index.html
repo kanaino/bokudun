@@ -903,6 +903,9 @@ body{line-height:1.4}
 .tselb{display:grid;grid-template-columns:1fr 1.4fr;gap:6px;margin-top:6px}
 .tselb button{text-align:center;border:2px solid #ffffff44;border-radius:10px;min-height:44px}
 .tselb .cta{margin:0}
+.rest{flex-wrap:wrap}.lrate{flex-basis:100%;font-size:13px;margin-top:2px;padding-top:4px;border-top:1px solid #ffffff22}.lrate b{font-weight:bold}.lrate .sub{font-size:11px}
+.tpop{pointer-events:none;opacity:.96}.tpop .tpx{pointer-events:auto}.tpop .tst{margin-top:5px;font-size:12px;color:#ffe9b0}.tpop .tst.pk{color:#4fc3f7;font-weight:bold}.tpop .tst.ng{color:#ff8a80}.tpop .tst small{font-weight:normal}
+.stn.lock .corr{display:none}.stn.lock .sname2{margin:0 0 0 70px;font-size:13px;-webkit-text-stroke-width:3px}.stn.lock{padding:10px 10px 4px;margin-top:2px}.stn.lock .plate{font-size:14px;top:-9px;min-width:0;padding:0 8px}.stn.lock .plate::before,.stn.lock .plate::after{font-size:10px}.stn.lock .bub{top:-9px;font-size:10px;padding:1px 7px}.stn.lock .bub::after{display:none}.stn.lock+.stn.lock{margin-top:0}.stn.lock.bossl .sname2{margin-left:120px}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2a2018">
@@ -1265,14 +1268,14 @@ function renderTree(next,msg){
   const n=sel&&G.by[sel],refund=P.tree.reduce((s,id)=>s+((P.G.by[id]||{}).cost||0),0)+(P.fused?fzTreeEffs(P).reduce((s,x)=>s+(x.cost||0),0):0);
   let pop='';
   if(n){const o=own(n.id),pk=pick.includes(n.id),av=avail(n),pw=210,left0=Math.max(4,Math.min(W-pw-4,X(n.x)-pw/2)),below=Y(n.y)<H/2,R0=R[n.kind]+10;
-   const btn=n.kind==='root'?'':o?'<p class="sub tst">習得済み</p>':pk?`<button class="tpb off" id="tpick">選択を外す</button>`:av?(left()>=n.cost?`<button class="tpb" id="tpick">選ぶ（${n.cost}pt）</button>`:`<p class="sub tst">ポイントが足りません（あと${n.cost-left()}pt）</p>`):'<p class="sub tst">まだつながっていません</p>';
+   const btn=n.kind==='root'?'':o?'<p class="tst">習得済み</p>':pk?`<p class="tst pk">✔ 選択中（${pick.indexOf(n.id)+1}番目）<small class="sub">もう一度タップで解除</small></p>`:av?(left()>=n.cost?`<p class="tst">タップで選択できます</p>`:`<p class="tst ng">ポイントが足りません（あと${n.cost-left()}pt）</p>`):'<p class="tst ng">まだつながっていません</p>';
    pop=`<div class="tpop ${below?'dn':'up'}" style="left:${left0}px;${below?`top:${Y(n.y)+R0}px`:`bottom:${H-Y(n.y)+R0}px`}"><button class="tpx" id="tpx" aria-label="閉じる">×</button>
     <b>${n.kind==='cap'?'★ ':''}${title(n)}</b>${n.lane!=null?`<small class="sub">${PJ.lanes[n.lane].name}の道</small>`:''}
     <p>${n.kind==='root'?'ここから全ての道が始まります。':n.eff.n?descOf(n.eff):(n.kind==='small'?'ステータス強化ノード':'')}</p>
     ${n.kind!=='root'?`<p class="sub">必要 <span class="cost">${n.cost}</span>pt</p>`:''}${btn}</div>`;}
   const pc=pcost();
   const det=pick.length?`<div class="tsel"><div><b>${pick.length}個 選択中</b>　合計 <span class="cost">${pc}</span>pt<small class="sub">（のこり ${P.sp-pc}pt）</small></div><div class="tselb"><button id="pclr">選択を全部外す</button><button class="cta" id="learnall">まとめて習得する</button></div></div>`
-   :'<p class="sub">ノードをタップすると、その近くに詳細が出ます。金枠のノードを「選ぶ」でいくつも選んでから、まとめて習得できます（選んだ先につながるノードも続けて選べます）。</p>';
+   :'<p class="sub">金枠のノードをタップすると選択、もう一度タップで解除。いくつも選んでから まとめて習得できます（選んだ先につながるノードも続けて選べます）。タップしたノードの近くに詳細が出ます。</p>';
   $('#app').innerHTML=`<div class="win treebar"><div><h2 style="margin:0">${esc(P.name)}のスキルツリー</h2><p class="sub">${msg||'どの道をどう進むかは自由です'}</p></div>
    <div>スキルポイント <span class="pts">${P.sp}</span></div></div>
   <div class="tpages">${Array.from({length:maxP},(_,i)=>`<button class="tpg ${i+1===pg?'on':''}" data-p="${i+1}">${i+1}枚目</button>`).join('')}<button class="tpg lock" disabled>${maxP+1}枚目 🔒<small>★を取ると解放</small></button>${P.fused?`<button class="tpg fz ${pg==='F'?'on':''}" data-p="F">合体ツリー</button>`:''}</div>
@@ -1281,9 +1284,8 @@ function renderTree(next,msg){
   <div class="win treebar"><button id="reset" ${refund?'':'disabled'}>ツリーをリセット（${refund}pt返却）</button><button class="cta" id="done" style="margin:0;width:auto">${P.sp>0?'とじる（ポイントは貯めておく）':'とじる'}</button></div>`;
   const bd=$('#board');bd.scrollLeft=window._treeScroll||0;bd.onscroll=()=>window._treeScroll=bd.scrollLeft;
   bd.onclick=e=>{if(e.target.closest('.tpop'))return;const g=e.target.closest('[data-id]');if(g){const id=g.dataset.id;
-    if(sel===id){sel=null;}else{sel=id;}draw();}else if(sel){sel=null;draw();}};
+    sel=id;toggle(id);draw();}else if(sel){sel=null;draw();}};
   if($('#tpx'))$('#tpx').onclick=e=>{e.stopPropagation();sel=null;draw();};
-  if($('#tpick'))$('#tpick').onclick=e=>{e.stopPropagation();toggle(sel);draw();};
   if($('#pclr'))$('#pclr').onclick=()=>{SE('click');pick=[];draw();};
   if($('#learnall'))$('#learnall').onclick=()=>{let caps=0,cnt=0;const ord=[],rest=[...pick];while(rest.length){const i=rest.findIndex(id=>G.adj[id].some(x=>own(x)||ord.includes(x)));if(i<0)break;ord.push(rest.splice(i,1)[0]);}for(const id of ord){const nd=G.by[id];if(P.sp<nd.cost)break;TL().push(id);P.sp-=nd.cost;cnt++;if(nd.kind==='cap'&&pg!=='F')caps++;}
     pick=[];sel=null;if(caps){msg=`★ ${pg+1}枚目のスキルツリーが 開いた！`;SE('jackpot');}else{msg=`${cnt}個のノードを 習得した！`;SE('chime');}draw();};
@@ -3909,6 +3911,13 @@ function lvGrowth(){const h=GS&&GS.lvh||{},ks=Object.keys(h).map(Number).sort((a
  if(ks.length<2)return 1.6;const a=ks[0],b=ks[ks.length-1];return Math.max(.5,Math.min(3,(h[b]-h[a])/Math.max(1,b-a)));}
 function predLv(L){const h=GS&&GS.lvh||{},ks=Object.keys(h).map(Number).filter(k=>k<L).sort((a,b)=>a-b);
  if(!ks.length)return null;const lb=ks[ks.length-1];return h[lb]+lvGrowth()*Math.max(0,L-1-lb);}
+/* 次の階層が自分にとって強いかの目安：その階層が「何レベルの人向けに作られたか」と自分をくらべる */
+function layerRate(L){const al=avgLv(),pk=powK(),gs=GLAY.spec[L];let need;
+ if(gs&&GLAY.start!=null&&L>=GLAY.start)need=gs.lv*gs.pk*(1+(gs.ad-.35)*.5)/pk;
+ else{GS.lpred=GS.lpred||{};if(GS.lpred[L]==null){const p=predLv(L);GS.lpred[L]=p==null?0:+p.toFixed(1);}need=Math.max(expLv(L),GS.lpred[L]||0);}
+ const boss=layerInfo(L).bossL,r=al/Math.max(1,need)*(boss?.93:1);
+ const lab=r>=1.15?['余裕','#81c784']:r>=1?['ちょうどいい','#fff']:r>=.9?['やや強い','#ffd54a']:r>=.8?['強い','#ffb74d']:['かなり危険','#ef5350'];
+ return {need:Math.max(1,Math.round(need)),al,boss,r,lab};}
 const lvAdj=L=>{if(D&&D.gs){const d=D.gs.lv-expLv(L);return d>0?d*.6:0;}
  GS.lpred=GS.lpred||{};if(GS.lpred[L]==null){const p=predLv(L);GS.lpred[L]=p==null?0:+p.toFixed(1);}
  const t=GS.lpred[L];if(!t)return 0;const d=t-expLv(L);return d>0?d*.6:0;};
@@ -4066,6 +4075,7 @@ function tabDungeon(n){
  const segs=[['normal','ノーマル'],['special','スペシャル']],max=GS.lay.max,top=Math.max(FRONT,max)+5;
  if(Date.now()-FRONT_AT>60000){FRONT_AT=Date.now();frontierSync().then(()=>{if(TAB==='dungeon'&&NET.screen!=='match'&&document.querySelector('.lays')&&Math.max(FRONT,max)+5!==top)tabDungeon(n);});}
  let body='';
+ if(DTAB==='normal'&&gOn()&&!GLAY.spec[max]&&!window._lrq){window._lrq=1;gStart().then(st=>max>=st?gSpecT(max):null).then(v=>{window._lrq=0;if(v&&TAB==='dungeon'&&DTAB==='normal'&&document.querySelector('.lays'))tabDungeon(n);}).catch(()=>{window._lrq=0;});}
  if(DTAB==='normal'){
   const card=L=>{const I=layerInfo(L),lock=L>max,done=layerDone(L);
    return `<button class="stn ${lock?'lock':''} ${done?'done':''} ${L===max&&!done?'cur':''} ${I.bossL?'bossl':''}" data-l="${L}" ${lock?'disabled':''} style="--d1:${I.bg[0]};--d2:${I.bg[1]}">
@@ -4074,9 +4084,8 @@ function tabDungeon(n){
     <span class="sname2">${lock?'？？？':esc(I.name)}</span>
     <span class="corr">${lock?'':I.bossL?`<i class="bsil">${monSprite(SPECIES[I.boss],false)}</i>`:famIcons(I.fams)}</span></button>`;};
   const open=[],clr=[];for(let L=max;L>=1;L--)(layerDone(L)?clr:open).push(L);
-  const nb=[];for(let L=max+1;L<=top;L++)if(layerInfo(L).bossL)nb.push(L);
-  body=`<div class="lockrow">🔒 第${max+1}〜${top}層：まだ行けない${nb.length?`<small>（ボス階層：第${nb.join('・')}層）</small>`:''}${FRONT>max?`<small>ほかの冒険者は第${FRONT}層まで到達</small>`:''}</div>`
-   +open.map(card).join('')
+  const lk=[];for(let L=max+4;L>max;L--)lk.push(L);
+  body=lk.map(card).join('')+open.map(card).join('')
    +(clr.length?`<button class="clrtog ${DCLR?'on':''}" id="clrtog">✅ クリア済み（${clr.length}層）<span>${DCLR?'閉じる ▲':'ひらく ▼'}</span></button>${DCLR?clr.map(card).join(''):''}`:'');
  }else{
   const id=hourId(),open=kiraOpen(id),done=GS.spx.kira===id;let nx=1;while(!kiraOpen(id+nx)&&nx<48)nx++;
@@ -4107,9 +4116,10 @@ function tabDungeon(n){
  }
  $('#app').innerHTML=`${header('ダンジョン')}${n?`<div class="win">${n}</div>`:''}
  <div class="seg two">${segs.map(([k,t])=>`<button data-s="${k}" class="${DTAB===k?'on':''}">${t}</button>`).join('')}</div>
- ${DTAB==='normal'?`<div class="win rest"><span>到達：<b class="gold">第${max}層</b><small style="display:block">敵の強さ：<b style="color:${adaptLabel()[1]}">${adaptLabel()[0]}</b>（戦いぶりで自動調整）</small>${FRONT>max?`<small>　全体の最前線：第${FRONT}層</small>`:''}</span><span class="rbtns"><button id="recb">みんなの<br>記録</button><button id="inn" ${GS.gold<innCost()||!needsRest()?'disabled':''}>宿屋で休む<small>${innCost()}G</small></button></span></div>`:''}
+ ${DTAB==='normal'?`<div class="win rest"><span>到達：<b class="gold">第${max}層</b>${FRONT>max?`<small>　全体の最前線：第${FRONT}層</small>`:''}</span><span class="rbtns"><button id="recb">みんなの<br>記録</button><button id="inn" ${GS.gold<innCost()||!needsRest()?'disabled':''}>宿屋で休む<small>${innCost()}G</small></button></span>${(()=>{const x=layerRate(max);return `<div class="lrate">次の第${max}層${x.boss?'（ボス）':''}：<b style="color:${x.lab[1]}">${x.lab[0]}</b>　推奨Lv${x.need}<span class="sub">（あなた Lv${x.al}）</span></div>`;})()}</div>`:''}
  <div class="lays">${body}</div>`;
  document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{SE('click');DTAB=b.dataset.s;tabDungeon('');if(DTAB!=='normal')window.scrollTo(0,0);});
+ if(DTAB==='normal'){const c=document.querySelector('.stn.cur');if(c)requestAnimationFrame(()=>c.scrollIntoView({block:'nearest'}));}
  if($('#clrtog'))$('#clrtog').onclick=()=>{SE('click');DCLR=!DCLR;const y=window.scrollY;tabDungeon('');window.scrollTo(0,y);};
  if($('#recb'))$('#recb').onclick=()=>{SE('click');renderRecords();};
  if($('#inn'))$('#inn').onclick=()=>{rest();SE('heal');renderMain('dungeon',['宿屋で ぐっすり休んだ。全員のHP・MPが回復した！']);};
