@@ -1,11 +1,8 @@
-/* Firebase の設定（Firebaseコンソール →「プロジェクトの設定」→「マイアプリ」→ ウェブアプリの「SDK の設定と構成」→「構成」からコピー）
-   下の { } の中身を、コピーしたものに置きかえてください。 */
 window.FIREBASE_CONFIG = {
-  apiKey: "ここに貼りつけ",
-  authDomain: "",
-  databaseURL: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyBAM3d9xbD9FNIZof56HTBUINwPL1wHnd4",
+  authDomain: "bokudun-fa7fe.firebaseapp.com",
+  projectId: "bokudun-fa7fe",
+  storageBucket: "bokudun-fa7fe.firebasestorage.app",
+  messagingSenderId: "1040666597249",
+  appId: "1:1040666597249:web:7ae99a2dd70bb6e206fa80"
 };
