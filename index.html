@@ -130,7 +130,7 @@ button:disabled::before,.pm::before,.pm:hover::before{content:none!important}
 .mhead{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center}
 .mhead svg{width:72px;height:72px}
 .star{color:var(--acc);font-size:14px}
-.gst{color:#7fe3ff}.sigt{color:#ffb347;font-weight:bold}.godsh{margin:14px 4px 4px;color:#ffd54a;text-shadow:0 2px 0 #000}.tiers{display:flex;flex-wrap:wrap;gap:4px;margin:0 4px 8px}.tier{flex:1 0 18%;text-align:center;padding:6px 0;font-size:12px;border-radius:8px;background:#3e2723;color:#fff;border:1px solid #c8a96a66}.tier.on{background:#ffd54a;color:#3e2723;font-weight:bold}details.rates summary{cursor:pointer;margin-top:6px}.rtab{width:100%;border-collapse:collapse;margin:6px 0;font-size:14px}.rtab th,.rtab td{padding:4px 8px;border-bottom:1px solid #ffffff22;text-align:left}.rtab td:last-child,.rtab th:last-child{text-align:right}.rtab small{opacity:.7;font-size:11px;margin-left:4px}.rtab tr.r5 td:first-child{color:#ffd54a}.rtab tr.r6 td:first-child{color:#ff80ab}.rtab tr.r7 td:first-child{color:#b388ff}.rbtns{display:flex;gap:6px;align-items:stretch}#recb{font-size:12px;line-height:1.2;padding:4px 8px}.rcrow{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid #ffffff22}.rcrow.me{background:#ffd54a22;border-radius:8px}.rk{width:26px;text-align:center;font-weight:bold;font-size:16px}.rk.top0{color:#ffd54a}.rk.top1{color:#cfd8dc}.rk.top2{color:#d7a26b}.rav{width:44px;height:44px;flex:none;overflow:hidden}.rav svg{width:44px;height:44px}.rinfo{flex:1;min-width:0;display:flex;flex-direction:column}.rinfo b em{font-style:normal;font-size:10px;margin-left:6px;background:#ffd54a;color:#3e2723;border-radius:6px;padding:1px 5px}.rinfo small,.rlay small{opacity:.75;font-size:11px}.rlay{text-align:right;display:flex;flex-direction:column}.rinfo b em.gst2{background:#4dd0e1}.rcnew{display:flex;align-items:center;justify-content:space-between;gap:8px}.jtt{color:#ffd98a}.sigb{border:1px solid #ffb34766;border-radius:8px;padding:6px 8px;margin-top:6px;background:#ffb34712}
+.gst{color:#7fe3ff}.sigt{color:#ffb347;font-weight:bold}.tpages{display:flex;gap:4px;overflow-x:auto;margin:0 0 6px;padding:0 2px}.tpg{flex:none;width:auto!important;min-width:0;margin:0!important;display:inline-block;padding:6px 10px;border-radius:8px;background:#3e2723;color:#fff;border:1px solid #c8a96a66;font-size:13px}.tpg.on{background:#ffd54a;color:#3e2723;font-weight:bold}.tpg.lock{opacity:.6}.tpg small{display:block;font-size:9px}.godsh{margin:14px 4px 4px;color:#ffd54a;text-shadow:0 2px 0 #000}.tiers{display:flex;flex-wrap:wrap;gap:4px;margin:0 4px 8px}.tier{flex:1 0 18%;text-align:center;padding:6px 0;font-size:12px;border-radius:8px;background:#3e2723;color:#fff;border:1px solid #c8a96a66}.tier.on{background:#ffd54a;color:#3e2723;font-weight:bold}details.rates summary{cursor:pointer;margin-top:6px}.rtab{width:100%;border-collapse:collapse;margin:6px 0;font-size:14px}.rtab th,.rtab td{padding:4px 8px;border-bottom:1px solid #ffffff22;text-align:left}.rtab td:last-child,.rtab th:last-child{text-align:right}.rtab small{opacity:.7;font-size:11px;margin-left:4px}.rtab tr.r5 td:first-child{color:#ffd54a}.rtab tr.r6 td:first-child{color:#ff80ab}.rtab tr.r7 td:first-child{color:#b388ff}.rbtns{display:flex;gap:6px;align-items:stretch}#recb{font-size:12px;line-height:1.2;padding:4px 8px}.rcrow{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid #ffffff22}.rcrow.me{background:#ffd54a22;border-radius:8px}.rk{width:26px;text-align:center;font-weight:bold;font-size:16px}.rk.top0{color:#ffd54a}.rk.top1{color:#cfd8dc}.rk.top2{color:#d7a26b}.rav{width:44px;height:44px;flex:none;overflow:hidden}.rav svg{width:44px;height:44px}.rinfo{flex:1;min-width:0;display:flex;flex-direction:column}.rinfo b em{font-style:normal;font-size:10px;margin-left:6px;background:#ffd54a;color:#3e2723;border-radius:6px;padding:1px 5px}.rinfo small,.rlay small{opacity:.75;font-size:11px}.rlay{text-align:right;display:flex;flex-direction:column}.rinfo b em.gst2{background:#4dd0e1}.rcnew{display:flex;align-items:center;justify-content:space-between;gap:8px}.jtt{color:#ffd98a}.sigb{border:1px solid #ffb34766;border-radius:8px;padding:6px 8px;margin-top:6px;background:#ffb34712}
 button small{display:block;font-size:13px;opacity:.75}
 .eqb,.gsb{border:2px solid #ffffff22;margin-top:6px}
 .fld{display:flex;gap:10px;align-items:center;margin-top:10px}
@@ -934,7 +934,7 @@ function laneFull(L,li,job){
  const ex1={n:L.name+'の心得',[sa]:6,[sb]:4,hpFlat:20};
  return {pairs,bigs:[b[0]||ex1,ex0,b[1]||ex1,ex1,b[2]||{n:'極意',[sa]:8}],cap:L.cap};
 }
-function buildTree(job){
+function buildTreeRaw(job){
  const nodes=[{id:'root',x:0,y:4,kind:'root',eff:{},cost:0}],edges=[];
  job.lanes.forEach((L,li)=>{
   const F=laneFull(L,li,job),c=[1,4,7][li],id=(col,s)=>`L${li}c${col}${s||''}`;
@@ -955,6 +955,44 @@ function buildTree(job){
  const adj={};nodes.forEach(n=>adj[n.id]=[]);edges.forEach(([a,b])=>{adj[a].push(b);adj[b].push(a);});
  return {nodes,edges,adj,by:Object.fromEntries(nodes.map(n=>[n.id,n]))};
 }
+/* ===== スキルツリーの「枚数」：★（道の終点）を取ると次の1枚が開く。どこまでも続く ===== */
+const PAGE_SUF=['','','・真','・極','・神','・覇','・天','・無双','・終'];
+const pageSuf=p=>PAGE_SUF[p]||`・第${p}式`;
+const pageRoot=p=>p===1?'root':`P${p}root`;
+function scaleSkillP(s,p){
+ if(s.type==='sig'){const q={...s.p};const f=1+.22*(p-1);
+  for(const k of ['k','pay'])if(q[k])q[k]=+(q[k]*f).toFixed(2);if(q.n&&s.kind!=='sleep')q.n=Math.min(q.n+Math.floor((p-1)/2),9);if(q.th)q.th=Math.min(.5,+(q.th+.02*(p-1)).toFixed(2));if(q.v)q.v=Math.min(.6,+(q.v*(1+.1*(p-1))).toFixed(2));if(q.p&&q.p<1)q.p=Math.min(.9,+(q.p*(1+.1*(p-1))).toFixed(2));
+  if(q.x)q.x={...q.x};return q;}
+ return null;}
+function genPageSkill(job,p,slot){
+ const key=Object.keys(JOBS).find(k=>JOBS[k]===job),jt=JT[key];
+ if(!jt){const base=job.skills[slot%job.skills.length];if(!base)return null;const k={...base,name:base.name+pageSuf(p),mp:(base.mp||0)+2*(p-1)};if(k.pow)k.pow=+(k.pow*(1+.3*(p-1))).toFixed(2);k.desc=(skillDesc(k)||'')+`（${p}枚目）`;return k;}
+ const conv=b=>b.type==='heal'?(b.healAll?['healAll',{k:+(b.pow*.7).toFixed(1)}]:['heal1',{k:b.pow}]):b.type==='buff'?['growth',{v:.15}]:b.type==='sanct'?['guardAll',{n:b.turns||2}]:b.type==='multi'?['arrows',{n:b.hits||3,k:+(b.pow*1.2).toFixed(2),one:true}]:['hit',{k:+((b.pow||2)*.8).toFixed(2),mag:b.type==='mag'?1:0}];
+ const pairs=[...Object.entries(jt.t).map(([n,x])=>[n,x[0],x[1],x[2]]),...(job.sig?[[job.sig.name,job.sig.kind,job.sig.p,job.sig.mp]]:[]),...job.skills.filter(b=>!b.sig&&b.type!=='sig').map(b=>{const c=conv(b);return [b.name,c[0],c[1],b.mp];})];
+ const pr=pairs[(p*3+slot*5)%pairs.length],sp=[pr[1],pr[2],pr[3]],nm=pr[0]+pageSuf(p)+(slot>=pairs.length?'弐':'');
+ const s={name:nm,type:'sig',kind:sp[0],p:{...sp[1]},mp:(sp[2]||4)+2*(p-1),jt:true};s.p=scaleSkillP(s,p);s.desc=sigDesc(s)+`（${p}枚目）`;return s;}
+function pageJob(job,p){
+ const vS=p,vP=1+.5*(p-1),sc=(e,v)=>e?scaleEff(e,v):e;let slot=0;
+ return {...job,lanes:job.lanes.map(L=>({...L,name:L.name+pageSuf(p),entry:sc(L.entry,vS),pairs:(L.pairs||[]).map(pr=>pr.map(e=>sc(e,vS))),
+  bigs:(L.bigs||[]).map(b=>{if(!b)return b;if(b.skill){const k=genPageSkill(job,p,slot++);return k?{n:k.name,skill:k}:{...sc(b,vP),n:b.n+pageSuf(p)};}const e=sc(b,vP);return {...e,n:(b.n||'')+pageSuf(p)};}),
+  cap:L.cap?{...sc(L.cap,vP),n:(L.cap.n||'')+pageSuf(p)}:L.cap}))};
+}
+function pageG(job,p){
+ if(p<=1)return job.G||(job.G=buildTree(job));
+ job.GP=job.GP||{};if(job.GP[p])return job.GP[p];
+ const g=buildTreeRaw(pageJob(job,p)),pf=id=>id==='root'?pageRoot(p):`P${p}${id}`;
+ const nodes=g.nodes.map(n=>({...n,id:pf(n.id),page:p})),edges=g.edges.map(([a,b])=>[pf(a),pf(b)]);
+ const adj={};nodes.forEach(n=>adj[n.id]=[]);edges.forEach(([a,b])=>{adj[a].push(b);adj[b].push(a);});
+ return job.GP[p]={nodes,edges,adj,by:Object.fromEntries(nodes.map(n=>[n.id,n])),page:p,job:pageJob(job,p)};
+}
+function buildTree(job){
+ const g=buildTreeRaw(job);
+ g.by=new Proxy(g.by,{get:(t,k)=>{if(k in t)return t[k];if(typeof k==='string'){const m=k.match(/^P(\d+)/);if(m)return pageG(job,+m[1]).by[k];}return undefined;}});
+ return g;
+}
+const pageOpen=(m,p)=>p<=1||pageG(m.job,p-1).nodes.some(n=>n.kind==='cap'&&m.tree.includes(n.id));
+const pagesOpen=m=>{let p=1;while(pageOpen(m,p+1)&&p<999)p++;return p;};
+
 /* 旧ツリー（9列）で使ったSPを計算して返す */
 const oldNodeCost=id=>{const m=String(id).match(/c(\d+)([ab]?)$/);if(!m)return 0;const c=+m[1];return c===9?3:(!m[2]&&c>1&&c%2===1)?2:1;};
 function migrateTree(g){
@@ -1111,15 +1149,16 @@ function renderAlloc(msg,next){
 /* ===== スキルツリー画面 ===== */
 function renderTree(next,msg){
  wide(true);
- const G=P.G,X=x=>40+x*62,Y=y=>30+y*54,W=X(TCOLS)+150,H=Y(8)+34;
+ const maxP=pagesOpen(P);let pg=Math.min(window._tpage||maxP,maxP);
+ let G=pageG(P.job,pg),PJ=pg>1?G.job:P.job;const X=x=>40+x*62,Y=y=>30+y*54,W=X(TCOLS)+150,H=Y(8)+34;
  let sel=null;
- const own=id=>id==='root'||P.tree.includes(id);
+ const own=id=>id===pageRoot(pg)||P.tree.includes(id);
  const avail=n=>!own(n.id)&&G.adj[n.id].some(own);
- const laneCol=n=>n.lane==null?P.job.color:P.job.lanes[n.lane].col;
+ const laneCol=n=>n.lane==null?P.job.color:PJ.lanes[n.lane].col;
  const R={root:24,small:14,big:20,cap:27};
- const title=n=>n.kind==='root'?P.job.name:(n.eff.n||descOf(n.eff));
+ const title=n=>n.kind==='root'?P.job.name+(pg>1?`（${pg}枚目）`:''):(n.eff.n||descOf(n.eff));
  const drawSvg=()=>{
-  const bands=P.job.lanes.map((L,i)=>{const c=[1,4,7][i];return `<rect x="${X(TCOLS-.6)}" y="${Y(c-1.45)}" width="${W-X(TCOLS-.6)}" height="${54*2.9}" rx="10" fill="${L.col}" opacity=".1"/>
+  const bands=PJ.lanes.map((L,i)=>{const c=[1,4,7][i];return `<rect x="${X(TCOLS-.6)}" y="${Y(c-1.45)}" width="${W-X(TCOLS-.6)}" height="${54*2.9}" rx="10" fill="${L.col}" opacity=".1"/>
    <text x="${X(TCOLS)+34}" y="${Y(c)+6}" fill="${L.col}" font-size="18">${L.name}</text>`;}).join('');
   const lns=G.edges.map(([a,b])=>{const A=G.by[a],Bn=G.by[b],on=own(a)&&own(b),half=own(a)||own(b);
    return `<line x1="${X(A.x)}" y1="${Y(A.y)}" x2="${X(Bn.x)}" y2="${Y(Bn.y)}" stroke="${on?'#ffd54a':half?'#ffd54a88':'#ffffff30'}" stroke-width="${on?3:2}" ${on?'':'stroke-dasharray="4 4"'}/>`;}).join('');
@@ -1133,24 +1172,26 @@ function renderTree(next,msg){
   return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${bands}${lns}${nds}</svg>`;
  };
  const draw=()=>{
-  const n=sel&&G.by[sel],refund=P.tree.reduce((s,id)=>s+G.by[id].cost,0);
+  const n=sel&&G.by[sel],refund=P.tree.reduce((s,id)=>s+((P.G.by[id]||{}).cost||0),0);
   let det='<p class="sub">ノードをタップすると詳細が見られます。習得済みのノードにつながっているノード（金枠）を覚えられます。道は途中で隣の道ともつながっています。</p>';
   if(n){const o=own(n.id),av=avail(n);
-   det=`<b>${n.kind==='cap'?'★ ':''}${title(n)}</b>${n.lane!=null?` <span class="sub">— ${P.job.lanes[n.lane].name}の道</span>`:''}
+   det=`<b>${n.kind==='cap'?'★ ':''}${title(n)}</b>${n.lane!=null?` <span class="sub">— ${PJ.lanes[n.lane].name}の道</span>`:''}
    <p style="margin:4px 0">${n.kind==='root'?'ここから全ての道が始まります。':n.eff.n?descOf(n.eff):(n.kind==='small'?'ステータス強化ノード':'')}</p>
    ${n.kind!=='root'?`<p class="sub">必要スキルポイント <span class="cost">${n.cost}</span>　${o?'習得済み':av?'習得できます':'まだつながっていません'}</p>
    ${!o?`<button class="cta" id="learn" ${av&&P.sp>=n.cost?'':'disabled'}>${av&&P.sp<n.cost?'スキルポイントが足りません':'習得する'}</button>`:''}`:''}`;}
   $('#app').innerHTML=`<div class="win treebar"><div><h2 style="margin:0">${esc(P.name)}のスキルツリー</h2><p class="sub">${msg||'どの道をどう進むかは自由です'}</p></div>
    <div>スキルポイント <span class="pts">${P.sp}</span></div></div>
+  <div class="tpages">${Array.from({length:maxP},(_,i)=>`<button class="tpg ${i+1===pg?'on':''}" data-p="${i+1}">${i+1}枚目</button>`).join('')}<button class="tpg lock" disabled>${maxP+1}枚目 🔒<small>★を取ると解放</small></button></div>
   <div class="board" id="board">${drawSvg()}</div>
   <div class="win detail">${det}</div>
   <div class="win treebar"><button id="reset" ${refund?'':'disabled'}>ツリーをリセット（${refund}pt返却）</button><button class="cta" id="done" style="margin:0;width:auto">${P.sp>0?'とじる（ポイントは貯めておく）':'とじる'}</button></div>`;
   const bd=$('#board');bd.scrollLeft=window._treeScroll||0;bd.onscroll=()=>window._treeScroll=bd.scrollLeft;
   bd.onclick=e=>{const g=e.target.closest('[data-id]');if(g){sel=g.dataset.id;draw();}};
   bd.onkeydown=e=>{if(e.key==='Enter'){const g=e.target.closest('[data-id]');if(g){sel=g.dataset.id;draw();}}};
-  const l=$('#learn');if(l)l.onclick=()=>{P.tree.push(n.id);P.sp-=n.cost;draw();};
-  $('#reset').onclick=()=>{P.sp+=refund;P.tree=[];if(P.trees)P.trees[P.jobKey]=P.tree;sel=null;draw();};
-  $('#done').onclick=()=>{window._treeScroll=0;next();};
+  document.querySelectorAll('.tpg[data-p]').forEach(b=>b.onclick=()=>{SE('click');pg=+b.dataset.p;window._tpage=pg;G=pageG(P.job,pg);PJ=pg>1?G.job:P.job;sel=null;window._treeScroll=0;draw();});
+  const l=$('#learn');if(l)l.onclick=()=>{P.tree.push(n.id);P.sp-=n.cost;const was=pagesOpen(P);if(n.kind==='cap'){msg=`★ ${pg+1}枚目のスキルツリーが 開いた！`;SE('jackpot');}draw();};
+  $('#reset').onclick=()=>{P.sp+=refund;P.tree=[];if(P.trees)P.trees[P.jobKey]=P.tree;sel=null;pg=1;window._tpage=1;G=pageG(P.job,1);PJ=P.job;draw();};
+  $('#done').onclick=()=>{window._treeScroll=0;window._tpage=0;next();};
  };
  draw();
 }
@@ -2447,6 +2488,8 @@ const wide=on=>$('#app').classList.toggle('wide',on);
 const party=()=>GS.party.map(id=>GS.roster.find(m=>m.id===id)).filter(Boolean);
 const alive=()=>party().filter(m=>m.hp>0);
 const ratio=m=>m.hp/as(m,maxHP);
+const expF=lv=>lv<=200?1:Math.pow(2,Math.floor((lv-200)/50)/6);
+const expNeed=lv=>Math.round(lv*15*expF(lv));
 const lvBonus=m=>m.hero?1:m.mon?Math.max(0,SPECIES[m.sid].rank-2)+Math.floor(m.plus/5):Math.max(0,m.rarity-3);
 const tabbar=on=>{$('#tabs').hidden=!on;$('#app').classList.toggle('tabbed',on);};
 
@@ -2786,7 +2829,7 @@ function renderBox(){
 function renderMember(id,msg){
  const m=GS.roster.find(x=>x.id===id);P=m;tabbar(false);wide(false);
  const inP=GS.party.includes(m.id),back=()=>renderMember(id);
- $('#app').innerHTML=as(m,()=>`<div class="win mhead">${avatar(m)}<div><h2 style="margin:0">${esc(m.name)}</h2><span class="star">${badge(m)}</span><p class="sub">${jobN(m)} Lv${m.lv}　EXP ${m.exp}/${m.lv*15}${m.mon?`　${STYLE[SPECIES[m.sid].style]}`:''}</p></div></div>
+ $('#app').innerHTML=as(m,()=>`<div class="win mhead">${avatar(m)}<div><h2 style="margin:0">${esc(m.name)}</h2><span class="star">${badge(m)}</span><p class="sub">${jobN(m)} Lv${m.lv}　EXP ${m.exp}/${expNeed(m.lv)}${m.mon?`　${STYLE[SPECIES[m.sid].style]}`:''}</p></div></div>
  ${!m.mon&&m.job&&m.job.sig?`<div class="win sigb"><b class="sigt">◎ 職業固有技「${m.job.sig.name}」</b> <small>MP${m.job.sig.mp}</small><p class="sub" style="margin:4px 0 0">${m.job.sig.desc.replace('【固有】','')}</p></div>`:''}
  ${m.mon?`<div class="win"><p class="sub">種族のとくぎ・引き継いだスキル：${m.mskills.map(x=>x.name).join('・')}</p></div>`:''}
  ${msg?`<div class="win"><p class="note">${msg}</p></div>`:''}
@@ -3853,6 +3896,7 @@ async function renderRecords(){
 }
 
 function tabDungeon(n){
+ if(DTAB!=='normal'&&store.db&&Date.now()-RAIDLV_AT>60000){const b0=RAIDLV;raidLvSync().then(()=>{if(RAIDLV!==b0&&TAB==='dungeon'&&DTAB!=='normal'&&document.querySelector('#sp-raid'))tabDungeon(n);});}
  const segs=[['normal','ノーマル'],['special','スペシャル']],max=GS.lay.max,top=Math.max(FRONT,max)+5;
  if(Date.now()-FRONT_AT>60000){FRONT_AT=Date.now();frontierSync().then(()=>{if(TAB==='dungeon'&&NET.screen!=='match'&&document.querySelector('.lays')&&Math.max(FRONT,max)+5!==top)tabDungeon(n);});}
  let body='';
@@ -3873,7 +3917,7 @@ function tabDungeon(n){
    <p class="note">${open?(done?'今回の出現では挑戦済み。':`あと${left}分で消える！`):''}${!open||done?`　次の出現：${nextH}時ごろ`:''}</p>
    <button class="cta" id="sp-kira" ${open&&!done?'':'disabled'}>挑戦する</button></div>
   <div class="win dcard sp" style="--d1:#5a1a1a;--d2:#140606"><h2>強敵討伐：本日の魔獣</h2>
-   <div class="raid">${monSprite(rs,false)}<p class="sub">ボス1体だけと戦う。1日1回。1ターンに2回行動する強敵。クリア報酬：ジェム◆100・スカウト玉3個。<br>今日の魔獣：<b>${rs.name}</b>（${FAMS[rs.fam].name}）　推奨Lv${avgLv()+8}</p></div>
+   <div class="raid">${monSprite(rs,false)}<p class="sub">ボス1体だけと戦う。1日1回。1ターンに2回行動する強敵。クリア報酬：ジェム◆100・スカウト玉3個。<br>今日の魔獣：<b>${rs.name}</b>（${FAMS[rs.fam].name}）　推奨Lv${raidRec()}（いちばん強いプレイヤー基準）</p></div>
    <button class="cta" id="sp-raid" ${rdone?'disabled':''}>${rdone?'今日は挑戦済み':'挑戦する'}</button></div>`;
   const ph=GS.phantom&&GS.phantom.until>Date.now()?GS.phantom:null;
   body+=ph?`<div class="win dcard sp phant live" style="--d1:#4a2a6a;--d2:#0e0620"><h2>幻の泉 <span class="live-b">出現中</span></h2>
@@ -3993,15 +4037,20 @@ const SPD=[];
  [500,1000,1500,2000].forEach((R,t)=>[0,1,2].forEach(n=>add('chaos',t*3+n,SP_CHAOS[t*3+n],R,[{k:'a',n:0,f:3,a:2,m:[.8,.85,.8,.82]},{k:'b',n:1,f:3,a:3,m:[.8,.85,.72,.62]},{k:'c',n:2,f:1,a:3,m:[1,1,.78,.66]}][n])));
 })();
 const spdOf=k=>SPD.find(x=>x.key===k);
+/* 本日の魔獣：推奨レベル＝いちばん強いプレイヤーのレベル */
+let RAIDLV=null,RAIDLV_AT=0;
+async function raidLvSync(){if(!store.db||Date.now()-RAIDLV_AT<60000)return;RAIDLV_AT=Date.now();
+ try{const q=await store.db.collection('rec').orderBy('alv','desc').limit(1).get();const d=q.docs[0]?q.docs[0].data():null;if(d&&+d.alv)RAIDLV=Math.round(+d.alv);}catch(e){}}
+const raidRec=()=>Math.max(5,RAIDLV||0,avgLv());
 const spRF=r=>1+1.4*Math.min(1,Math.max(0,(r-100)/200));
 
 function spdFoe(sd){
  const lv=Math.round((sd.rec-1)*1.25),boss=D.floor===D.total;
  const k=1+Math.max(0,powK()-1)*.5,hard=1;
- const LF={demon:[1.15,1.08],god:[1.75,1.55],chaos:[1,1]}[sd.line]||[1,1];
+ const LF=[...({demon:[1.15,1.08],god:[1.75,1.55],chaos:[1,1],raid:[3+1.5*Math.min(1,sd.rec/100),2.4+1.1*Math.min(1,sd.rec/100)]}[sd.line]||[1,1])];
  const RF=window.__SPF||spRF(sd.rec);LF[0]*=RF;LF[1]*=Math.sqrt(RF);
  const mk=(sid,l,kind)=>{const e=foeFrom(sid,l,kind);e.def=Math.round(e.def*.7);e.hp=Math.round(e.hp*LF[0]);e.atk=Math.round(e.atk*LF[1]);e.int=Math.round(e.int*LF[1]);e.hp=e.max=Math.round(e.hp*k*hard);e.atk=Math.round(e.atk*(1+(k-1)*.8)*hard);e.int=Math.round(e.int*(1+(k-1)*.8)*hard);e.def=Math.round(e.def*(1+(k-1)*.5));return e;};
- if(boss){const e=mk(sd.boss,lv+4,'raid');e.hp=e.max=Math.round(e.hp*.6*sd.m[2]);e.atk=Math.round(e.atk*.72*sd.m[3]);e.int=Math.round(e.int*.75*sd.m[3]);e.def=Math.round(e.def*.5);e.name=SPECIES[sd.boss].name;e.moves=sd.moves;e.acts=sd.acts;e.spRate=.55;return e;}
+ if(boss||sd.line==='raid'){const e=mk(sd.boss,lv+4,'raid');e.hp=e.max=Math.round(e.hp*.6*sd.m[2]);e.atk=Math.round(e.atk*.72*sd.m[3]);e.int=Math.round(e.int*.75*sd.m[3]);e.def=Math.round(e.def*.5);e.name=(sd.line==='raid'?'魔獣 ':'')+SPECIES[sd.boss].name;if(sd.moves)e.moves=sd.moves;e.acts=sd.acts;e.spRate=.55;return e;}
  const n=Math.random()<.5?2:3,g=[];
  for(let i=0;i<n;i++){const e=mk(pick(sd.pool),lv,'elite');e.hp=e.max=Math.round(e.hp*(1/n)*1.3*sd.m[0]);e.atk=Math.round(e.atk*(.5+.5/n)*sd.m[1]);e.int=Math.round(e.int*(.5+.5/n)*sd.m[1]);e.moves=sd.moves.slice(0,2);g.push(e);}
  return g;
@@ -4027,7 +4076,7 @@ function enterDungeon(dn,o){
 }
 function nextFoe(){
  if(D.special==='kira')return foeFrom(D.floor===D.total?'metalK':'metal',avgLv(),D.floor===D.total?'boss':'normal');
- if(D.special==='raid')return foeFrom(raidSpecies().id,avgLv()+8,'raid');
+ if(D.special==='raid')return spdFoe({line:'raid',rec:raidRec(),boss:raidSpecies().id,acts:2,m:[1,1,.74,.7],floors:1});
  if(D.special==='casino'){const e=foeFrom('x_casino',avgLv()+10,'raid');e.name='カジノ魔王ジャックポット';e.casino=true;return e;}
  if(spdOf(D.special))return spdFoe(spdOf(D.special));
  if(D.special==='phantom'){const e=foeFrom(D.phSid,avgLv()+6,'boss');e.phantom=true;e.hp=Math.round(e.hp*1.3);e.max=e.hp;return e;}
@@ -4620,7 +4669,7 @@ function clientRes(d){
      if(owner===NET.me&&typeof sid==='string'&&SPECIES[sid]){const nmn=newMonster(sid,!!sh,clampN(plus,0,99));GS.roster.push(nmn);M.notes.push(`★ ${nmn.name}を スカウトして 仲間にした！`);saveGame();}}
     else await say(`しかし 失敗した…`,400);}
    else if(k==='X'){const exp=clampN(a,0,1e6),gold=clampN(b,0,1e6);M.gold+=gold;M.exp+=exp;SE('win');
-    Object.values(M.mem).forEach(id=>{const m=GS.roster.find(x=>x.id===id);if(!m)return;m.exp+=exp;let up=0;while(m.exp>=m.lv*15){m.exp-=m.lv*15;m.lv++;up++;}if(up){m.pend+=up;const lb=lvBonus(m)*up;if(lb)m.pts+=lb;M.notes.push(`${m.name}は レベル${m.lv}に あがった！`);}});
+    Object.values(M.mem).forEach(id=>{const m=GS.roster.find(x=>x.id===id);if(!m)return;m.exp+=exp;let up=0;while(m.exp>=expNeed(m.lv)){m.exp-=expNeed(m.lv);m.lv++;up++;}if(up){m.pend+=up;const lb=lvBonus(m)*up;if(lb)m.pts+=lb;M.notes.push(`${m.name}は レベル${m.lv}に あがった！`);}});
     GS.gold+=gold;if(Math.random()<.5+(+c||1)*.04){const it=pick(['herb','water','ball','gem','seed']);M.bag[it]=(M.bag[it]||0)+(it==='gem'?5+(+c||1)*2:1);}
     await say(`${exp} の けいけんちと ${gold}G を手に入れた！`,500);}
   }
@@ -5057,7 +5106,7 @@ async function win(){
  for(const m of party()){P=m;const md=mods();
   ES.forEach(e=>hab('slay_'+e.fam));if(B.turn===1)hab('quick');if(m.hp>0&&!m.bs.took)hab('nodmg');if(m.hp>0&&m.bs.minR<=.15)hab('comeback');
   if(m.hp>0&&md.postHeal&&m.hp<maxHP()){m.hp=Math.min(maxHP(),m.hp+Math.round(maxHP()*md.postHeal));}
-  m.exp+=TX;let up=0;while(m.exp>=m.lv*15){m.exp-=m.lv*15;m.lv++;up++;}
+  m.exp+=TX;let up=0;while(m.exp>=expNeed(m.lv)){m.exp-=expNeed(m.lv);m.lv++;up++;}
   if(up){m.pend+=up;const lb=lvBonus(m)*up;if(lb)m.pts+=lb;SE('levelup');notes.push(`${m.name}は レベル${m.lv}に あがった！${lb?`（素質ボーナス ステ+${lb}）`:''}`);}
   if(Math.random()<(md.dropPct||0)/2){const k=pick(Object.keys(ITEMS));GS.items[k]=(GS.items[k]||0)+1;notes.push(`${m.name}が ${ITEMS[k].name}を 見つけた`);}
   awaken().forEach(u=>notes.push(u.evo?`<span class="uqt">★ ${m.name}の固有スキルが「${u.name}」に進化した！（${u.desc}）</span>`:`<span class="uqt">★ ${m.name}は 「${u.cat}」のクセから 固有スキル「${u.name}」に目覚めた！（${u.desc}）</span>`));
