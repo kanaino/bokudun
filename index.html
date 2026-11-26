@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ぼくらのダンジョン</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
@@ -837,6 +837,72 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;op
 .syres.sec{border-color:#ff80ab;box-shadow:0 0 24px #ff4081}
 .symagic{position:relative;height:90px}.symagic i{position:absolute;left:50%;top:50%;width:80px;height:80px;margin:-40px;border:3px solid #ce93d8;border-radius:50%;animation:fxring 1.2s ease-out infinite}
 .symagic i:nth-child(2){animation-delay:.4s;border-color:#ffd54a}.symagic i:nth-child(3){animation-delay:.8s;border-color:#80deea}
+
+/* ===== 縦コンパクト化 ===== */
+#app{gap:7px;padding:max(8px,env(safe-area-inset-top)) 8px 24px}
+body{line-height:1.4}
+.win{padding:8px 10px}
+.win h2{font-size:15px;margin:0 0 4px}
+.cta{margin-top:6px;min-height:44px;padding:6px 10px}
+.sub{font-size:13px}
+.rest{padding:6px 10px}
+.seg button{min-height:38px}
+.lays{gap:14px;padding-top:4px}
+.stn{min-height:0;padding:22px 10px 6px;margin-top:6px}
+.stn .plate{font-size:17px;top:-11px;padding:1px 10px}
+.stn .bub{top:-12px;font-size:11px;padding:2px 8px}
+.stn .sname2{font-size:18px;margin:0 4px 4px;-webkit-text-stroke-width:4px}
+.stn .corr{height:34px}
+.stn .bsil{width:32px;height:32px}
+.stn .clr{bottom:6px;font-size:14px}
+.lockrow{display:flex;flex-direction:column;gap:2px;padding:8px 12px;border:2px dashed #8d6e4588;border-radius:10px;color:#cdb89a;font-size:14px;background:#00000033}
+.lockrow small{font-size:11px;opacity:.85}
+.clrtog{display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:8px 14px;border:2px solid #7cb342;border-radius:10px;background:linear-gradient(#33691e,#1b3a0b);color:#e8f5e9;font-size:15px}
+.clrtog span{font-size:12px;opacity:.9}
+.clrtog.on{border-color:#c5e1a5}
+.mhead{grid-template-columns:60px 1fr;gap:10px}
+.mhead svg{width:60px;height:60px}
+.minib{width:auto;min-height:32px;padding:3px 10px;margin-top:4px;font-size:12px;border:2px solid #ffd54a;border-radius:8px;color:#ffd54a;background:#00000044}
+.eqg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.gsg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.eqg .eqb,.gsg .gsb{margin:0;padding:6px 7px;font-size:13px;line-height:1.3;min-height:52px}
+.eqg small,.gsg small{display:block;font-size:10px;opacity:.75;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.mgrid2{grid-template-columns:1fr 1fr;gap:5px}
+.mgrid2 button{padding:6px 8px;font-size:14px;line-height:1.3}
+.mgrid2 small{font-size:10px!important}
+.mgrid2 .cta,.mgrid2 #swap{grid-column:1/-1}
+.st{gap:2px 12px;font-size:14px}
+.mis{padding:6px 9px;margin-bottom:5px}
+.mis .mrow{margin-top:2px}
+.mis .mget{min-height:30px}
+.mis .barw{margin-top:3px;height:5px}
+.mis .mtop b{font-size:13px}
+
+.raid{grid-template-columns:64px 1fr;gap:8px}
+.raid svg{width:64px;height:64px}
+.dcard .sub{font-size:12px;line-height:1.35}
+.dcard .cta{min-height:38px;margin-top:4px;font-size:15px;padding:4px 10px}
+.dcard h2{margin-bottom:2px}
+.godsh{margin:8px 4px 2px}
+.tiers{margin:0 4px 4px}
+.tier{padding:4px 0}
+
+.bwrap{position:relative}
+.bwrap svg{display:block}
+.tpop{position:absolute;width:210px;z-index:3;background:#1b1430f2;border:2px solid #ffd54a;border-radius:10px;padding:8px 10px 8px;box-shadow:0 6px 16px #000c;font-size:13px;line-height:1.35}
+.tpop b{display:block;padding-right:22px;color:#ffe9b0}
+.tpop small{display:block;font-size:11px}
+.tpop p{margin:3px 0}
+.tpop .tst{margin-top:4px}
+.tpx{position:absolute;right:2px;top:2px;width:28px;min-height:28px;padding:0;text-align:center;font-size:18px;color:#fff}
+.tpb{margin-top:6px;min-height:40px;text-align:center;border-radius:8px;background:linear-gradient(#4fc3f7,#0277bd);color:#fff;border:2px solid #e1f5fe;font-weight:bold}
+.tpb.off{background:#37474f;border-color:#90a4ae}
+.detail{min-height:0}
+.detail.on{position:sticky;bottom:6px;z-index:5;border-color:#4fc3f7}
+.tsel small{display:block}
+.tselb{display:grid;grid-template-columns:1fr 1.4fr;gap:6px;margin-top:6px}
+.tselb button{text-align:center;border:2px solid #ffffff44;border-radius:10px;min-height:44px}
+.tselb .cta{margin:0}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2a2018">
@@ -1169,46 +1235,61 @@ function renderTree(next,msg){
  const maxP=pagesOpen(P);let pg=window._tpage==='F'&&P.fused?'F':Math.min(+window._tpage||maxP,maxP);
  const GOF=p=>p==='F'?fusionG(P):pageG(P.job,p);let G=GOF(pg),PJ=pg==='F'||pg>1?G.job:P.job;
  const TL=()=>pg==='F'?(P.ftree=P.ftree||[]):P.tree;const X=x=>40+x*62,Y=y=>30+y*54,W=X(TCOLS)+150,H=Y(8)+34;
- let sel=null;
+ let sel=null,pick=[];
  const own=id=>id===(pg==='F'?'Froot':pageRoot(pg))||TL().includes(id);
- const avail=n=>!own(n.id)&&G.adj[n.id].some(own);
+ const ownP=id=>own(id)||pick.includes(id);
+ const avail=n=>!ownP(n.id)&&G.adj[n.id].some(ownP);
+ const pcost=()=>pick.reduce((t,id)=>t+(G.by[id].cost||0),0),left=()=>P.sp-pcost();
+ const prune=()=>{let ch=true;while(ch){ch=false;const ok=new Set();const st=G.nodes.filter(n=>own(n.id)).map(n=>n.id);st.forEach(i=>ok.add(i));
+   while(st.length){const c=st.pop();for(const nb of G.adj[c]||[])if(!ok.has(nb)&&pick.includes(nb)){ok.add(nb);st.push(nb);}}
+   const np=pick.filter(id=>ok.has(id));if(np.length!==pick.length){pick=np;ch=true;}}};
+ const toggle=id=>{const n=G.by[id];if(pick.includes(id)){pick=pick.filter(x=>x!==id);prune();SE('click');}else if(avail(n)&&left()>=n.cost){pick.push(id);SE('click');}};
  const laneCol=n=>n.lane==null?P.job.color:PJ.lanes[n.lane].col;
  const R={root:24,small:14,big:20,cap:27};
  const title=n=>n.kind==='root'?(pg==='F'?'合体ツリー':P.job.name+(pg>1?`（${pg}枚目）`:'')):(n.eff.n||descOf(n.eff));
  const drawSvg=()=>{
   const bands=PJ.lanes.map((L,i)=>{const c=[1,4,7][i];return `<rect x="${X(TCOLS-.6)}" y="${Y(c-1.45)}" width="${W-X(TCOLS-.6)}" height="${54*2.9}" rx="10" fill="${L.col}" opacity=".1"/>
    <text x="${X(TCOLS)+34}" y="${Y(c)+6}" fill="${L.col}" font-size="18">${L.name}</text>`;}).join('');
-  const lns=G.edges.map(([a,b])=>{const A=G.by[a],Bn=G.by[b],on=own(a)&&own(b),half=own(a)||own(b);
-   return `<line x1="${X(A.x)}" y1="${Y(A.y)}" x2="${X(Bn.x)}" y2="${Y(Bn.y)}" stroke="${on?'#ffd54a':half?'#ffd54a88':'#ffffff30'}" stroke-width="${on?3:2}" ${on?'':'stroke-dasharray="4 4"'}/>`;}).join('');
-  const nds=G.nodes.map(n=>{const o=own(n.id),av=avail(n),r=R[n.kind],col=laneCol(n);
-   const fill=o?col:av?'#1c2246':'#1a1d30',stroke=o?'#fff':av?'#ffd54a':'#555a75',tc=o?'#10132a':av?'#ffd54a':'#6b7090';
+  const lns=G.edges.map(([a,b])=>{const A=G.by[a],Bn=G.by[b],on=own(a)&&own(b),pk=!on&&ownP(a)&&ownP(b),half=ownP(a)||ownP(b);
+   return `<line x1="${X(A.x)}" y1="${Y(A.y)}" x2="${X(Bn.x)}" y2="${Y(Bn.y)}" stroke="${on?'#ffd54a':pk?'#4fc3f7':half?'#ffd54a88':'#ffffff30'}" stroke-width="${on||pk?3:2}" ${on||pk?'':'stroke-dasharray="4 4"'}/>`;}).join('');
+  const nds=G.nodes.map(n=>{const o=own(n.id),pk=pick.includes(n.id),av=avail(n),r=R[n.kind],col=laneCol(n);
+   const fill=o?col:pk?'#0d47a1':av?'#1c2246':'#1a1d30',stroke=o?'#fff':pk?'#4fc3f7':av?'#ffd54a':'#555a75',tc=o?'#10132a':pk?'#e1f5fe':av?'#ffd54a':'#6b7090';
    return `<g data-id="${n.id}" tabindex="0" role="button" aria-label="${title(n)}">
     ${sel===n.id?`<circle cx="${X(n.x)}" cy="${Y(n.y)}" r="${r+7}" fill="none" stroke="#fff" stroke-width="2"/>`:''}
     ${n.kind==='cap'?`<circle cx="${X(n.x)}" cy="${Y(n.y)}" r="${r+4}" fill="none" stroke="${col}" stroke-width="2" opacity=".6"/>`:''}
     <circle class="base" cx="${X(n.x)}" cy="${Y(n.y)}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2.5"/>
-    <text x="${X(n.x)}" y="${Y(n.y)+(r>16?7:5)}" text-anchor="middle" fill="${tc}" font-size="${r>16?18:13}">${n.kind==='root'?P.job.name[0]:n.kind==='cap'?'★':glyph(n.eff)}</text></g>`;}).join('');
+    <text x="${X(n.x)}" y="${Y(n.y)+(r>16?7:5)}" text-anchor="middle" fill="${tc}" font-size="${r>16?18:13}">${n.kind==='root'?P.job.name[0]:n.kind==='cap'?'★':glyph(n.eff)}</text>${pk?`<circle cx="${X(n.x)+r-2}" cy="${Y(n.y)-r+2}" r="8" fill="#4fc3f7" stroke="#fff" stroke-width="1.5"/><text x="${X(n.x)+r-2}" y="${Y(n.y)-r+6}" text-anchor="middle" fill="#0a1a2a" font-size="11" font-weight="bold">${pick.indexOf(n.id)+1}</text>`:''}</g>`;}).join('');
   return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${bands}${lns}${nds}</svg>`;
  };
  const draw=()=>{
   const n=sel&&G.by[sel],refund=P.tree.reduce((s,id)=>s+((P.G.by[id]||{}).cost||0),0)+(P.fused?fzTreeEffs(P).reduce((s,x)=>s+(x.cost||0),0):0);
-  let det='<p class="sub">ノードをタップすると詳細が見られます。習得済みのノードにつながっているノード（金枠）を覚えられます。道は途中で隣の道ともつながっています。</p>';
-  if(n){const o=own(n.id),av=avail(n);
-   det=`<b>${n.kind==='cap'?'★ ':''}${title(n)}</b>${n.lane!=null?` <span class="sub">— ${PJ.lanes[n.lane].name}の道</span>`:''}
-   <p style="margin:4px 0">${n.kind==='root'?'ここから全ての道が始まります。':n.eff.n?descOf(n.eff):(n.kind==='small'?'ステータス強化ノード':'')}</p>
-   ${n.kind!=='root'?`<p class="sub">必要スキルポイント <span class="cost">${n.cost}</span>　${o?'習得済み':av?'習得できます':'まだつながっていません'}</p>
-   ${!o?`<button class="cta" id="learn" ${av&&P.sp>=n.cost?'':'disabled'}>${av&&P.sp<n.cost?'スキルポイントが足りません':'習得する'}</button>`:''}`:''}`;}
+  let pop='';
+  if(n){const o=own(n.id),pk=pick.includes(n.id),av=avail(n),pw=210,left0=Math.max(4,Math.min(W-pw-4,X(n.x)-pw/2)),below=Y(n.y)<H/2,R0=R[n.kind]+10;
+   const btn=n.kind==='root'?'':o?'<p class="sub tst">習得済み</p>':pk?`<button class="tpb off" id="tpick">選択を外す</button>`:av?(left()>=n.cost?`<button class="tpb" id="tpick">選ぶ（${n.cost}pt）</button>`:`<p class="sub tst">ポイントが足りません（あと${n.cost-left()}pt）</p>`):'<p class="sub tst">まだつながっていません</p>';
+   pop=`<div class="tpop ${below?'dn':'up'}" style="left:${left0}px;${below?`top:${Y(n.y)+R0}px`:`bottom:${H-Y(n.y)+R0}px`}"><button class="tpx" id="tpx" aria-label="閉じる">×</button>
+    <b>${n.kind==='cap'?'★ ':''}${title(n)}</b>${n.lane!=null?`<small class="sub">${PJ.lanes[n.lane].name}の道</small>`:''}
+    <p>${n.kind==='root'?'ここから全ての道が始まります。':n.eff.n?descOf(n.eff):(n.kind==='small'?'ステータス強化ノード':'')}</p>
+    ${n.kind!=='root'?`<p class="sub">必要 <span class="cost">${n.cost}</span>pt</p>`:''}${btn}</div>`;}
+  const pc=pcost();
+  const det=pick.length?`<div class="tsel"><div><b>${pick.length}個 選択中</b>　合計 <span class="cost">${pc}</span>pt<small class="sub">（のこり ${P.sp-pc}pt）</small></div><div class="tselb"><button id="pclr">選択を全部外す</button><button class="cta" id="learnall">まとめて習得する</button></div></div>`
+   :'<p class="sub">ノードをタップすると、その近くに詳細が出ます。金枠のノードを「選ぶ」でいくつも選んでから、まとめて習得できます（選んだ先につながるノードも続けて選べます）。</p>';
   $('#app').innerHTML=`<div class="win treebar"><div><h2 style="margin:0">${esc(P.name)}のスキルツリー</h2><p class="sub">${msg||'どの道をどう進むかは自由です'}</p></div>
    <div>スキルポイント <span class="pts">${P.sp}</span></div></div>
   <div class="tpages">${Array.from({length:maxP},(_,i)=>`<button class="tpg ${i+1===pg?'on':''}" data-p="${i+1}">${i+1}枚目</button>`).join('')}<button class="tpg lock" disabled>${maxP+1}枚目 🔒<small>★を取ると解放</small></button>${P.fused?`<button class="tpg fz ${pg==='F'?'on':''}" data-p="F">合体ツリー</button>`:''}</div>
-  <div class="board" id="board">${drawSvg()}</div>
-  <div class="win detail">${det}</div>
+  <div class="board" id="board"><div class="bwrap" style="width:${W}px;height:${H}px">${drawSvg()}${pop}</div></div>
+  <div class="win detail ${pick.length?'on':''}">${det}</div>
   <div class="win treebar"><button id="reset" ${refund?'':'disabled'}>ツリーをリセット（${refund}pt返却）</button><button class="cta" id="done" style="margin:0;width:auto">${P.sp>0?'とじる（ポイントは貯めておく）':'とじる'}</button></div>`;
   const bd=$('#board');bd.scrollLeft=window._treeScroll||0;bd.onscroll=()=>window._treeScroll=bd.scrollLeft;
-  bd.onclick=e=>{const g=e.target.closest('[data-id]');if(g){sel=g.dataset.id;draw();}};
+  bd.onclick=e=>{if(e.target.closest('.tpop'))return;const g=e.target.closest('[data-id]');if(g){const id=g.dataset.id;
+    if(sel===id){sel=null;}else{sel=id;}draw();}else if(sel){sel=null;draw();}};
+  if($('#tpx'))$('#tpx').onclick=e=>{e.stopPropagation();sel=null;draw();};
+  if($('#tpick'))$('#tpick').onclick=e=>{e.stopPropagation();toggle(sel);draw();};
+  if($('#pclr'))$('#pclr').onclick=()=>{SE('click');pick=[];draw();};
+  if($('#learnall'))$('#learnall').onclick=()=>{let caps=0,cnt=0;const ord=[],rest=[...pick];while(rest.length){const i=rest.findIndex(id=>G.adj[id].some(x=>own(x)||ord.includes(x)));if(i<0)break;ord.push(rest.splice(i,1)[0]);}for(const id of ord){const nd=G.by[id];if(P.sp<nd.cost)break;TL().push(id);P.sp-=nd.cost;cnt++;if(nd.kind==='cap'&&pg!=='F')caps++;}
+    pick=[];sel=null;if(caps){msg=`★ ${pg+1}枚目のスキルツリーが 開いた！`;SE('jackpot');}else{msg=`${cnt}個のノードを 習得した！`;SE('chime');}draw();};
   bd.onkeydown=e=>{if(e.key==='Enter'){const g=e.target.closest('[data-id]');if(g){sel=g.dataset.id;draw();}}};
-  document.querySelectorAll('.tpg[data-p]').forEach(b=>b.onclick=()=>{SE('click');pg=b.dataset.p==='F'?'F':+b.dataset.p;window._tpage=pg;G=GOF(pg);PJ=pg==='F'||pg>1?G.job:P.job;sel=null;window._treeScroll=0;draw();});
-  const l=$('#learn');if(l)l.onclick=()=>{TL().push(n.id);P.sp-=n.cost;if(n.kind==='cap'&&pg!=='F'){msg=`★ ${pg+1}枚目のスキルツリーが 開いた！`;SE('jackpot');}draw();};
-  $('#reset').onclick=()=>{P.sp+=refund;P.tree=[];if(P.fused)P.ftree=[];if(P.trees)P.trees[P.jobKey]=P.tree;sel=null;pg=1;window._tpage=1;G=pageG(P.job,1);PJ=P.job;draw();};
+  document.querySelectorAll('.tpg[data-p]').forEach(b=>b.onclick=()=>{SE('click');pg=b.dataset.p==='F'?'F':+b.dataset.p;window._tpage=pg;G=GOF(pg);PJ=pg==='F'||pg>1?G.job:P.job;sel=null;pick=[];window._treeScroll=0;draw();});
+  $('#reset').onclick=()=>{pick=[];P.sp+=refund;P.tree=[];if(P.fused)P.ftree=[];if(P.trees)P.trees[P.jobKey]=P.tree;sel=null;pg=1;window._tpage=1;G=pageG(P.job,1);PJ=P.job;draw();};
   $('#done').onclick=()=>{window._treeScroll=0;window._tpage=0;next();};
  };
  draw();
@@ -2853,16 +2934,15 @@ function renderBox(){
 function renderMember(id,msg){
  const m=GS.roster.find(x=>x.id===id);P=m;tabbar(false);wide(false);
  const inP=GS.party.includes(m.id),back=()=>renderMember(id);
- $('#app').innerHTML=as(m,()=>`<div class="win mhead">${avatar(m)}<div><h2 style="margin:0">${esc(m.name)}</h2><span class="star">${badge(m)}</span><p class="sub">${jobN(m)} Lv${m.lv}　EXP ${m.exp}/${expNeed(m.lv)}${m.mon?`　${STYLE[SPECIES[m.sid].style]}`:''}</p></div></div>
- ${m.hero?`<button class="cta" id="rnbtn" style="margin:0 0 8px">✏️ 名前を変える</button>`:''}
+ $('#app').innerHTML=as(m,()=>`<div class="win mhead">${avatar(m)}<div><h2 style="margin:0">${esc(m.name)}</h2><span class="star">${badge(m)}</span><p class="sub">${jobN(m)} Lv${m.lv}　EXP ${m.exp}/${expNeed(m.lv)}${m.mon?`　${STYLE[SPECIES[m.sid].style]}`:''}</p>${m.hero?`<button class="minib" id="rnbtn">✏️ 名前を変える</button>`:''}</div></div>
  ${!m.mon&&m.job&&m.job.sig?`<div class="win sigb"><b class="sigt">◎ 職業固有技「${m.job.sig.name}」</b> <small>MP${m.job.sig.mp}</small><p class="sub" style="margin:4px 0 0">${m.job.sig.desc.replace('【固有】','')}</p></div>`:''}
  ${m.mon?`<div class="win"><p class="sub">種族のとくぎ・引き継いだスキル：${m.mskills.map(x=>x.name).join('・')}</p></div>`:''}
  ${msg?`<div class="win"><p class="note">${msg}</p></div>`:''}
  <div class="win st">${STATS.map(([k,nm])=>`<div>${nm} ${S(k)}</div>`).join('')}<div>HP ${m.hp}/${maxHP()}</div><div>MP ${m.mp}/${maxMP()}</div></div>
- <div class="win"><h2>装備</h2>${Object.keys(SLOTN).map(sl=>`<button class="eqb" data-sl="${sl}">${SLOTN[sl]}：${m.eq[sl]?EQUIP[m.eq[sl]].name:'なし'}<small>${m.eq[sl]?descOf(EQUIP[m.eq[sl]].eff):'タップして装備'}</small></button>`).join('')}</div>
+ <div class="win"><h2>装備</h2><div class="eqg">${Object.keys(SLOTN).map(sl=>`<button class="eqb" data-sl="${sl}">${SLOTN[sl]}：${m.eq[sl]?EQUIP[m.eq[sl]].name:'なし'}<small>${m.eq[sl]?descOf(EQUIP[m.eq[sl]].eff):'タップして装備'}</small></button>`).join('')}</div></div>
  ${m.uniq.length||canUq(m)?`<div class="win"><h2>固有スキル（装備中 ${m.uqEq.length}/${slots()}）</h2>${m.uniq.length?m.uniq.map(u=>`<p class="uql ${m.uqEq.includes(u.id)?'on':''}"><b class="uqt">★ ${esc(u.name)}</b>${m.uqEq.includes(u.id)?'<em>装備中</em>':''}<small>${u.desc}</small></p>`).join(''):'<p class="sub">まだ目覚めていません。下の「固有スキル」で目覚めそうな力を確認できます。</p>'}</div>`:''}
- <div class="win"><h2>ガチャスキル（${m.gsk.length}/2）</h2>${[0,1].map(i=>{const u=m.gsk[i];return `<button class="gsb" data-i="${i}">${u?`<span class="gst">${'★'.repeat(u.rar)} ${u.name}</span><small>${u.desc}</small>`:'空き<small>タップしてガチャスキルをつける</small>'}</button>`;}).join('')}</div>
- <div class="win menu">
+ <div class="win"><h2>ガチャスキル（${m.gsk.length}/2）</h2><div class="gsg">${[0,1].map(i=>{const u=m.gsk[i];return `<button class="gsb" data-i="${i}">${u?`<span class="gst">${'★'.repeat(u.rar)} ${u.name}</span><small>${u.desc}</small>`:'空き<small>タップしてつける</small>'}</button>`;}).join('')}</div></div>
+ <div class="win menu mgrid2">
   <button id="g-st">ステ振り<small>ステータスポイント ${m.pts}</small></button>
   <button id="g-tr">スキルツリー<small>スキルポイント ${m.sp}</small></button>
   <button id="g-uq">固有スキル<small>${canUq(m)?`${m.uniq.length}個 目覚め・装備 ${m.uqEq.length}/${slots()}`:m.uniq.length?`${m.uniq.length}個（新しくは目覚めない）`:'主人公と★7だけが目覚める'}</small></button>
@@ -3885,7 +3965,7 @@ function giveDrops(bag,notes,half){
   notes.push(`${DROPN[k]} ×${c}`);}
 }
 
-let DTAB='normal',STEPT=null,FRONT=0,FRONT_AT=0;
+let DCLR=false,DTAB='normal',STEPT=null,FRONT=0,FRONT_AT=0;
 async function frontierSync(){
  if(!store.db||!GS)return;try{const ref=store.db.doc('meta/frontier');const r=await ref.get();const v=r&&(typeof r.data==='function'?r.data():(r.data!==undefined?r.data:r));
   FRONT=Math.max(FRONT,clampN(v&&v.max,0,99999));if(GS.lay.max>FRONT){FRONT=GS.lay.max;await ref.set({max:FRONT,at:Date.now()});}FRONT_AT=Date.now();}catch(e){}
@@ -3987,13 +4067,17 @@ function tabDungeon(n){
  if(Date.now()-FRONT_AT>60000){FRONT_AT=Date.now();frontierSync().then(()=>{if(TAB==='dungeon'&&NET.screen!=='match'&&document.querySelector('.lays')&&Math.max(FRONT,max)+5!==top)tabDungeon(n);});}
  let body='';
  if(DTAB==='normal'){
-  const list=[];for(let L=top;L>=1;L--)list.push(L);
-  body=list.map(L=>{const I=layerInfo(L),lock=L>max,done=layerDone(L);
+  const card=L=>{const I=layerInfo(L),lock=L>max,done=layerDone(L);
    return `<button class="stn ${lock?'lock':''} ${done?'done':''} ${L===max&&!done?'cur':''} ${I.bossL?'bossl':''}" data-l="${L}" ${lock?'disabled':''} style="--d1:${I.bg[0]};--d2:${I.bg[1]}">
     <span class="plate">${L}${I.bossL?'<em>BOSS</em>':''}</span>${done?'<span class="clr">CLEAR!</span>':''}
     <span class="bub">${lock?(L<=FRONT?'ほかの冒険者が到達':'未踏の階層'):I.bossL?`ボス：${esc(SPECIES[I.boss].name)}`:`ランク${I.r[0]}〜${I.r[1]}・全${I.dun[0].floors}階`}</span>
     <span class="sname2">${lock?'？？？':esc(I.name)}</span>
-    <span class="corr">${lock?'':I.bossL?`<i class="bsil">${monSprite(SPECIES[I.boss],false)}</i>`:famIcons(I.fams)}</span></button>`;}).join('');
+    <span class="corr">${lock?'':I.bossL?`<i class="bsil">${monSprite(SPECIES[I.boss],false)}</i>`:famIcons(I.fams)}</span></button>`;};
+  const open=[],clr=[];for(let L=max;L>=1;L--)(layerDone(L)?clr:open).push(L);
+  const nb=[];for(let L=max+1;L<=top;L++)if(layerInfo(L).bossL)nb.push(L);
+  body=`<div class="lockrow">🔒 第${max+1}〜${top}層：まだ行けない${nb.length?`<small>（ボス階層：第${nb.join('・')}層）</small>`:''}${FRONT>max?`<small>ほかの冒険者は第${FRONT}層まで到達</small>`:''}</div>`
+   +open.map(card).join('')
+   +(clr.length?`<button class="clrtog ${DCLR?'on':''}" id="clrtog">✅ クリア済み（${clr.length}層）<span>${DCLR?'閉じる ▲':'ひらく ▼'}</span></button>${DCLR?clr.map(card).join(''):''}`:'');
  }else{
   const id=hourId(),open=kiraOpen(id),done=GS.spx.kira===id;let nx=1;while(!kiraOpen(id+nx)&&nx<48)nx++;
   const nextH=new Date((id+nx)*3600000).getHours(),left=60-new Date().getMinutes();
@@ -4026,10 +4110,11 @@ function tabDungeon(n){
  ${DTAB==='normal'?`<div class="win rest"><span>到達：<b class="gold">第${max}層</b><small style="display:block">敵の強さ：<b style="color:${adaptLabel()[1]}">${adaptLabel()[0]}</b>（戦いぶりで自動調整）</small>${FRONT>max?`<small>　全体の最前線：第${FRONT}層</small>`:''}</span><span class="rbtns"><button id="recb">みんなの<br>記録</button><button id="inn" ${GS.gold<innCost()||!needsRest()?'disabled':''}>宿屋で休む<small>${innCost()}G</small></button></span></div>`:''}
  <div class="lays">${body}</div>`;
  document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{SE('click');DTAB=b.dataset.s;tabDungeon('');if(DTAB!=='normal')window.scrollTo(0,0);});
+ if($('#clrtog'))$('#clrtog').onclick=()=>{SE('click');DCLR=!DCLR;const y=window.scrollY;tabDungeon('');window.scrollTo(0,y);};
  if($('#recb'))$('#recb').onclick=()=>{SE('click');renderRecords();};
  if($('#inn'))$('#inn').onclick=()=>{rest();SE('heal');renderMain('dungeon',['宿屋で ぐっすり休んだ。全員のHP・MPが回復した！']);};
  document.querySelectorAll('.stn:not(.lock)').forEach(b=>b.onclick=()=>{SE('click');renderLayer(+b.dataset.l);});
- if(DTAB==='normal'){const c=document.querySelector('.stn.cur')||document.querySelector('.stn:not(.lock)');if(c)requestAnimationFrame(()=>c.scrollIntoView({block:'center'}));}
+
  const ok=()=>{if(!alive().length){renderMain('dungeon',['全員たおれています。宿屋で休んでから出発しましょう。']);return false;}return true;};
  if($('#sp-kira'))$('#sp-kira').onclick=()=>{if(!ok())return;GS.spx.kira=hourId();saveGame();
   enterDungeon({key:'kira',name:'キラキラの洞穴',floors:3,bg:['#5b4a1a','#1a1406'],gold:100},{special:'kira'});};
