@@ -130,7 +130,7 @@ button:disabled::before,.pm::before,.pm:hover::before{content:none!important}
 .mhead{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center}
 .mhead svg{width:72px;height:72px}
 .star{color:var(--acc);font-size:14px}
-.gst{color:#7fe3ff}.sigt{color:#ffb347;font-weight:bold}.rbtns{display:flex;gap:6px;align-items:stretch}#recb{font-size:12px;line-height:1.2;padding:4px 8px}.rcrow{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid #ffffff22}.rcrow.me{background:#ffd54a22;border-radius:8px}.rk{width:26px;text-align:center;font-weight:bold;font-size:16px}.rk.top0{color:#ffd54a}.rk.top1{color:#cfd8dc}.rk.top2{color:#d7a26b}.rav{width:44px;height:44px;flex:none;overflow:hidden}.rav svg{width:44px;height:44px}.rinfo{flex:1;min-width:0;display:flex;flex-direction:column}.rinfo b em{font-style:normal;font-size:10px;margin-left:6px;background:#ffd54a;color:#3e2723;border-radius:6px;padding:1px 5px}.rinfo small,.rlay small{opacity:.75;font-size:11px}.rlay{text-align:right;display:flex;flex-direction:column}.rinfo b em.gst2{background:#4dd0e1}.rcnew{display:flex;align-items:center;justify-content:space-between;gap:8px}.jtt{color:#ffd98a}.sigb{border:1px solid #ffb34766;border-radius:8px;padding:6px 8px;margin-top:6px;background:#ffb34712}
+.gst{color:#7fe3ff}.sigt{color:#ffb347;font-weight:bold}details.rates summary{cursor:pointer;margin-top:6px}.rtab{width:100%;border-collapse:collapse;margin:6px 0;font-size:14px}.rtab th,.rtab td{padding:4px 8px;border-bottom:1px solid #ffffff22;text-align:left}.rtab td:last-child,.rtab th:last-child{text-align:right}.rtab small{opacity:.7;font-size:11px;margin-left:4px}.rtab tr.r5 td:first-child{color:#ffd54a}.rtab tr.r6 td:first-child{color:#ff80ab}.rtab tr.r7 td:first-child{color:#b388ff}.rbtns{display:flex;gap:6px;align-items:stretch}#recb{font-size:12px;line-height:1.2;padding:4px 8px}.rcrow{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid #ffffff22}.rcrow.me{background:#ffd54a22;border-radius:8px}.rk{width:26px;text-align:center;font-weight:bold;font-size:16px}.rk.top0{color:#ffd54a}.rk.top1{color:#cfd8dc}.rk.top2{color:#d7a26b}.rav{width:44px;height:44px;flex:none;overflow:hidden}.rav svg{width:44px;height:44px}.rinfo{flex:1;min-width:0;display:flex;flex-direction:column}.rinfo b em{font-style:normal;font-size:10px;margin-left:6px;background:#ffd54a;color:#3e2723;border-radius:6px;padding:1px 5px}.rinfo small,.rlay small{opacity:.75;font-size:11px}.rlay{text-align:right;display:flex;flex-direction:column}.rinfo b em.gst2{background:#4dd0e1}.rcnew{display:flex;align-items:center;justify-content:space-between;gap:8px}.jtt{color:#ffd98a}.sigb{border:1px solid #ffb34766;border-radius:8px;padding:6px 8px;margin-top:6px;background:#ffb34712}
 button small{display:block;font-size:13px;opacity:.75}
 .eqb,.gsb{border:2px solid #ffffff22;margin-top:6px}
 .fld{display:flex;gap:10px;align-items:center;margin-top:10px}
@@ -2909,7 +2909,7 @@ function renderMissions(msg){
 /* リセマラ：冒険を始めたばかりの間だけ、ガチャ画面からはじめからやり直せる */
 const canReroll=()=>GS.lay.max===1&&!cnt('clr')&&!Object.keys(GS.lay.prog||{}).some(L=>(GS.lay.prog[L]||[]).some(Boolean));
 /* --- ガチャ：石をはじいて祭壇へ。★5以上は雷の確定演出、★6は虹の雷 --- */
-const RATES=[[2,49.99],[3,33],[4,12.4],[5,4.5],[6,.1],[7,.01]];
+const RATES=[[2,49.05],[3,33],[4,12.4],[5,4.5],[6,1],[7,.05]];
 const CN={2:['ポム','ルカ','ミナ','トト','ノア','ピピ','ケン','ユウ','ハナ','ソラ','タロウ','モモ','ジロー','サキ','コウ','リン'],3:['カイ','リリィ','ジン','サラ','ボルド','エマ','レオン','ニナ','ガイ','ミオ','ダン','ルル'],
  4:['アルト','ミレイ','ゼクス','ユーナ','シオン','レイラ','ヴィクター','カグヤ','グレン'],5:['ヴァルド','セレス','クロウ','セラフィナ','ライガ','ロゼッタ','オウガ','ツクヨ'],6:['光の勇者ルミナス','黒竜帝ヴォルグ','時の魔女クロノア','天翔けるアマテラ']};
 function rollRarity(min){let r=Math.random()*100;for(const[k,w] of RATES){if((r-=w)<0)return Math.max(k,min||2);}return Math.max(2,min||2);}
@@ -3020,13 +3020,21 @@ function rerollGacha(){
  GS.dex={};GS.dexOrder=[];fixHp(h);saveGame();
  renderMain('gacha',['ガチャの結果をリセットした！ 無料10連を もう一度引けます。']);
 }
+function rateTable(k){
+ const R=RATES.map(([r,w])=>[r,w]);if(k==='skill'){const w7=R.find(x=>x[0]===7)[1];R.splice(R.findIndex(x=>x[0]===7),1);R.find(x=>x[0]===6)[1]+=w7;}
+ const f=v=>(Math.round(v*1000)/1000).toString()+'%';
+ const per=r=>k!=='comp'?'':r===6?`（1人あたり ${f(RATES.find(x=>x[0]===6)[1]/6)}）`:r===7?`（1人あたり ${f(RATES.find(x=>x[0]===7)[1]/STAR7.length)}）`:'';
+ return `<table class="rtab"><tr><th>レアリティ</th><th>確率</th></tr>${R.map(([r,w])=>`<tr class="r${r}"><td>${'★'.repeat(r)}</td><td>${f(w)}<small>${per(r)}</small></td></tr>`).join('')}</table>
+  <p class="sub">・★4以上の合計：${f(R.filter(x=>x[0]>=4).reduce((a,x)=>a+x[1],0))}<br>・10連は★4以上が1つ確定（最初の9回で★4以上が出なかったときは、10回目の★2・★3が★4になります）${k==='skill'?'<br>・スキルガチャに★7はありません':''}</p>`;
+}
 function tabGacha(n,res){
  $('#app').innerHTML=`${header()}${n?`<div class="win">${n}</div>`:''}
  ${res?`<div class="win"><h2>前回の結果</h2><div class="pulls">${res.map((x,i)=>`<div class="pull r${x.r}" style="animation-delay:${i*.06}s"><span class="star">${'★'.repeat(x.r)}</span>${x.m?avatar(x.m,'full'):`<span class="orb2 r${x.r}"></span>`}<b>${esc(x.name)}</b><small>${esc(x.sub)}</small>${x.r===7?'<em class="s7">LEGEND</em>':x.r===6?'<em>SECRET</em>':''}</div>`).join('')}</div></div>`:''}
  ${[['comp','仲間ガチャ',`いろんな職業の仲間が出る（${GACHA_JOBS.length}職＋？？？）。レアリティが高いほど強く、見た目も豪華`],['skill','スキルガチャ',`誰にでもつけかえられるスキル（${SKDEX.length}種）。レアリティが高いほど強力`]].map(([k,t,d])=>`<div class="win gbox ${k}"><h2>${t}</h2>${gachaFeat(k)}<p class="sub">${d}</p>
   <details class="lup" data-k="${k}"><summary>ラインナップを見る</summary><div class="lubody"></div></details>
+  <details class="rates"><summary>提供割合（確率）を見る</summary>${rateTable(k)}</details>
   <div class="cmd list" style="margin-top:8px"><button class="cta gp" data-k="${k}" data-n="1" ${GS.gems<50?'disabled':''} style="margin:0">1回　◆50</button>${GS.free&&GS.free[k]?`<button class="cta gp free" data-k="${k}" data-n="10" data-free="1" style="margin:0">初回無料！ 10回<small>★4以上 1つ確定</small></button>`:`<button class="cta gp" data-k="${k}" data-n="10" ${GS.gems<450?'disabled':''} style="margin:0">10回　◆450<small>★4以上 1つ確定</small></button>`}</div></div>`).join('')}
- <div class="win"><p class="sub">排出率：★2 49.99%／★3 33%／★4 12.4%／★5 4.5%／？？？ 0.1%／？？？？ 0.01%<br>空に雷が鳴ったら……？　ジェムはダンジョンのクリア報酬・ドロップ・ミッションで手に入ります。</p></div>
+ <div class="win"><p class="sub">空に雷が鳴ったら……？　ジェムはダンジョンのクリア報酬・ドロップ・ミッションで手に入ります。</p></div>
  ${canReroll()?`<div class="win reroll"><h2>引き直し（リセマラ）</h2><p class="sub">冒険を始めたばかりの間だけ、<b>ガチャの結果だけ</b>をリセットして 無料10連を引き直せます。主人公の見た目・職業・ステータス振り分けは そのまま残ります。<br>※ ガチャで出た仲間・スキルは消え、ジェムは500個にもどります。第1層のダンジョンを1つでもクリアすると、この機能は消えます。</p><button id="reroll">ガチャを引き直す</button></div>`:''}`;
  {const rb=$('#reroll');let st=0;if(rb)rb.onclick=()=>{SE('click');if(st===0){st=1;rb.innerHTML='本当に引き直す？<small>ガチャで出た仲間とスキルは消えます。もう一度押すと引き直し</small>';return;}rerollGacha();};}
  document.querySelectorAll('.gp').forEach(b=>b.onclick=async()=>{audio();SE('click');const k=b.dataset.k,num=+b.dataset.n;if(b.dataset.free){GS.free[k]=0;}else GS.gems-=num===10?450:50;bump('pull',num);
