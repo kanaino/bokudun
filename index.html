@@ -130,7 +130,7 @@ button:disabled::before,.pm::before,.pm:hover::before{content:none!important}
 .mhead{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center}
 .mhead svg{width:72px;height:72px}
 .star{color:var(--acc);font-size:14px}
-.gst{color:#7fe3ff}.sigt{color:#ffb347;font-weight:bold}.jtt{color:#ffd98a}.sigb{border:1px solid #ffb34766;border-radius:8px;padding:6px 8px;margin-top:6px;background:#ffb34712}
+.gst{color:#7fe3ff}.sigt{color:#ffb347;font-weight:bold}.rbtns{display:flex;gap:6px;align-items:stretch}#recb{font-size:12px;line-height:1.2;padding:4px 8px}.rcrow{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid #ffffff22}.rcrow.me{background:#ffd54a22;border-radius:8px}.rk{width:26px;text-align:center;font-weight:bold;font-size:16px}.rk.top0{color:#ffd54a}.rk.top1{color:#cfd8dc}.rk.top2{color:#d7a26b}.rav{width:44px;height:44px;flex:none;overflow:hidden}.rav svg{width:44px;height:44px}.rinfo{flex:1;min-width:0;display:flex;flex-direction:column}.rinfo b em{font-style:normal;font-size:10px;margin-left:6px;background:#ffd54a;color:#3e2723;border-radius:6px;padding:1px 5px}.rinfo small,.rlay small{opacity:.75;font-size:11px}.rlay{text-align:right;display:flex;flex-direction:column}.rinfo b em.gst2{background:#4dd0e1}.rcnew{display:flex;align-items:center;justify-content:space-between;gap:8px}.jtt{color:#ffd98a}.sigb{border:1px solid #ffb34766;border-radius:8px;padding:6px 8px;margin-top:6px;background:#ffb34712}
 button small{display:block;font-size:13px;opacity:.75}
 .eqb,.gsb{border:2px solid #ffffff22;margin-top:6px}
 .fld{display:flex;gap:10px;align-items:center;margin-top:10px}
@@ -212,7 +212,7 @@ input:focus{outline:2px solid var(--acc)}
 .pull.r6{border-color:#fff;box-shadow:0 0 18px #e040fb,0 0 8px #40c4ff;background:linear-gradient(135deg,#3a0f5a,#0d1230)}
 .pull em{font-style:normal;font-size:11px;color:#fff;background:linear-gradient(90deg,#ff5252,#e040fb);border-radius:3px;padding:0 4px;margin-top:2px}
 /* バトルUI */
-#tabs{grid-template-columns:repeat(7,minmax(0,1fr))}
+#tabs{grid-template-columns:repeat(5,minmax(0,1fr))}
 #tabs .tl{font-size:9px}
 .pic.vs{gap:4px}.pic.vs span{width:56px;height:56px;display:block}.pic.vs svg{width:100%;height:100%}.pic.vs b{font-family:"Mochiy Pop One",sans-serif;color:#fff;-webkit-text-stroke:3px #1a237e;paint-order:stroke fill;font-size:20px}
 .rcode{text-align:center}.rcode b{display:block;font-size:44px;letter-spacing:.2em;color:var(--acc);font-family:"Mochiy Pop One",monospace;margin:2px 0}.rcode small{display:block;font-size:12px;opacity:.8}
@@ -846,7 +846,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;op
 </head>
 <body>
 <main id="app"></main>
-<nav id="tabs" hidden aria-label="メニュー"><button data-t="dungeon"><i class="ti d"></i>ダンジョン</button><button data-t="party"><i class="ti p"></i>なかま</button><button data-t="gacha"><i class="ti g"></i>ガチャ</button><button data-t="shop"><i class="ti s"></i>ショップ</button><button data-t="friend"><i class="ti f"></i>フレンド</button></nav>
+<nav id="tabs" hidden aria-label="メニュー"><button data-t="dungeon"><i class="ti d"></i>ダンジョン</button><button data-t="party"><i class="ti p"></i>なかま</button><button data-t="gacha"><i class="ti g"></i>ガチャ</button><button data-t="shop"><i class="ti s"></i>ショップ</button></nav>
 <script>
 {
 const $=s=>document.querySelector(s);
@@ -2456,24 +2456,28 @@ function normalize(g){
  migrateTree(g);
  g.spx=g.spx||{};if(g.sound===undefined)g.sound=true;if(g.bgm===undefined)g.bgm=true;g.seenJobs=g.seenJobs||[];
  (g.roster||[]).forEach(m=>{if(!m.mon&&!m.hero&&!g.seenJobs.includes(m.jobKey)&&JOBS[m.jobKey]&&!JOBS[m.jobKey].special)g.seenJobs.push(m.jobKey);if(m.hero){m.trees=m.trees||{[m.jobKey]:m.tree};m.trees[m.jobKey]=m.tree;m.jobsOwned=m.jobsOwned||[m.jobKey];}});if(g.items.ball===undefined)g.items.ball=3;
- g.dg=g.dg||{};g.pvp=g.pvp||{w:0,l:0};g.mclr=g.mclr||{};
+ g.dg=g.dg||{};if(!g.xcode)g.xcode=Array.from({length:12},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('').replace(/^(.{4})(.{4})/,'$1-$2-');if(!g.gid)g.gid=Math.random().toString(36).slice(2,12)+Date.now().toString(36).slice(-4);g.pvp=g.pvp||{w:0,l:0};g.mclr=g.mclr||{};
  if(!g.lay){g.lay={max:1,prog:{},seen:{}};let c=0;['cave','forest','ice','fire','castle'].forEach(k=>{if(g.dg[k]&&g.dg[k].clear)c++;});for(let L=1;L<=c;L++)g.lay.prog[L]=[true,true,true];g.lay.max=c+1;}
 }
 async function saveGame(){
  if(!GS)return;const json=serialize();
  try{localStorage.setItem('cmdrpg_save',json);}catch(e){}
  if(!store.db)return;
+ recPush();
  if(store.busy){store.again=true;return;}
  store.busy=true;
  try{await saveRef().set({json,at:Date.now()});}catch(e){}
+ if(window.__FB_ADAPTER&&GS.xcode){try{await store.db.doc('xfer/'+GS.xcode).set({json,at:Date.now()});}catch(e){}}
  store.busy=false;
  if(store.again){store.again=false;saveGame();}
 }
 async function loadSave(){
- let best=null;
- if(store.db){try{const r=await saveRef().get();const v=r&&(typeof r.data==='function'?r.data():(r.data!==undefined?r.data:r));if(v&&v.json)best=v.json;}catch(e){}}
- if(!best){try{best=localStorage.getItem('cmdrpg_save');}catch(e){}}
- return best;
+ let cloud=null,local=null;
+ if(store.db){try{const r=await saveRef().get();const v=r&&(typeof r.data==='function'?r.data():(r.data!==undefined?r.data:r));if(v&&v.json)cloud=v.json;}catch(e){}}
+ try{local=localStorage.getItem('cmdrpg_save');}catch(e){}
+ const at=j=>{try{return +JSON.parse(j).at||0;}catch(e){return -1;}};
+ if(cloud&&local)return at(local)>at(cloud)?local:cloud;
+ return cloud||local;
 }
 /* ===== タイトル画面「ぼくらのダンジョン」 ===== */
 const TITLE_SONG={bpm:124,ch:[
@@ -2505,8 +2509,18 @@ async function renderTitle(){
   if(json){try{const o=JSON.parse(json);info=o.v===1?`${JOBS[o.jobKey].name} Lv${o.lv}（前のバージョンのデータ）`:`${o.roster[0].name} Lv${o.roster[0].lv}　仲間${o.roster.length-1}人${o.lay?`　第${o.lay.max}層`:''}`;}catch(e){}}
   let armed=false;
   $('#tmenu').innerHTML=`${info?`<button class="startb" id="t-cont">つづきから<small>${esc(info)}</small></button>`:''}<button class="${info?'subb':'startb'}" id="t-new">はじめから${info?'<small>今のセーブは上書きされます</small>':''}</button>
-   <p class="tap">${store.db?'セーブはアカウントに保存されます':'セーブはこの端末に保存されます'}</p>`;
+   ${window.__FB_ADAPTER&&store.db?'<button class="subb" id="t-xfer">引き継ぎコードで再開<small>別のスマホ・ブラウザから続きを遊ぶ</small></button>':''}
+   <p class="tap">${window.__FB_ADAPTER?(store.db?'セーブは自動でサーバーにも保存されます':'サーバーにつながりません。セーブはこの端末に保存されます'):store.db?'セーブはアカウントに保存されます':'セーブはこの端末に保存されます'}</p>`;
   if(info)$('#t-cont').onclick=()=>{SE('click');restore(json);renderMain('dungeon',['おかえりなさい。']);};
+  if($('#t-xfer'))$('#t-xfer').onclick=()=>{SE('click');$('#tmenu').innerHTML=`<form id="xf" class="xform"><p class="tap">引き継ぎコード（12文字）を入れてください</p><input id="xc" maxlength="16" autocomplete="off" autocapitalize="characters" placeholder="XXXX-XXXX-XXXX" aria-label="引き継ぎコード"><button class="startb" style="margin-top:8px">この データで再開</button><p class="note" id="xerr"></p></form><button class="subb" id="xbk">もどる</button>`;
+   $('#xbk').onclick=()=>{SE('click');$('#start').click&&renderTitle();};
+   $('#xf').onsubmit=async ev=>{ev.preventDefault();const raw=$('#xc').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if(!/^[A-Z0-9]{12}$/.test(raw)){$('#xerr').textContent='12文字の英数字を入れてください。';return;}
+    const code=raw.replace(/^(.{4})(.{4})/,'$1-$2-');$('#xerr').textContent='さがしています…';
+    let v=null;try{const r=await store.db.doc('xfer/'+code).get();v=r&&r.exists?r.data():null;}catch(e){}
+    if(!v||typeof v.json!=='string'){$('#xerr').textContent='そのコードのセーブは 見つかりませんでした。';return;}
+    try{restore(v.json);}catch(e){$('#xerr').textContent='セーブを読み込めませんでした。';return;}
+    GS.xcode=code;SE('chime');saveGame();renderMain('dungeon',['引き継ぎコードから 再開しました。おかえりなさい！']);};};
   $('#t-new').onclick=e=>{SE('click');if(info&&!armed){armed=true;e.currentTarget.innerHTML='本当に はじめから？<small>もう一度押すとセーブを上書きします</small>';return;}renderJob();};
  };
 }
@@ -2519,14 +2533,15 @@ const TICON={
  multi:`<svg viewBox="0 0 40 40"><path d="M8 32 L28 8 L32 8 L32 12 L12 34 Z" fill="#dfe7ee" stroke="#263238" stroke-width="2"/><path d="M32 32 L12 8 L8 8 L8 12 L28 34 Z" fill="#ffd54a" stroke="#263238" stroke-width="2"/><circle cx="20" cy="21" r="5" fill="#e53935" stroke="#fff" stroke-width="2"/></svg>`,
  friend:`<svg viewBox="0 0 40 40"><circle cx="14" cy="15" r="7" fill="#ffcc80" stroke="#5d4037" stroke-width="2"/><circle cx="27" cy="17" r="6" fill="#ffe0b2" stroke="#5d4037" stroke-width="2"/><path d="M3 36 Q4 24 14 24 Q24 24 25 36 Z" fill="#42a5f5" stroke="#1a237e" stroke-width="2"/><path d="M20 36 Q22 26 28 26 Q36 26 37 36 Z" fill="#66bb6a" stroke="#1b5e20" stroke-width="2"/></svg>`};
 function setupTabs(){
- const nm={dungeon:'ダンジョン',party:'なかま',multi:'マルチ',gacha:'ガチャ',casino:'ギャンブル',shop:'ショップ',friend:'フレンド'};
+ const nm=window.__FB_ADAPTER?{dungeon:'ダンジョン',party:'なかま',multi:'マルチ',gacha:'ガチャ',casino:'ギャンブル',shop:'ショップ',friend:'フレンド'}:{dungeon:'ダンジョン',party:'なかま',gacha:'ガチャ',casino:'ギャンブル',shop:'ショップ'};
+ $('#tabs').style.gridTemplateColumns=`repeat(${Object.keys(nm).length},minmax(0,1fr))`;
  $('#tabs').innerHTML=Object.keys(nm).map(k=>`<button data-t="${k}"><span class="tic">${TICON[k]}</span><span class="tl">${nm[k]}</span><em class="bdg" id="bd-${k}"></em></button>`).join('');
  document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{if(!GS)return;audio();SE('click');renderMain(b.dataset.t);});
 }
 function updateBadges(){
  const set=(k,v)=>{const e=$('#bd-'+k);if(e){e.textContent=v||'';e.style.display=v?'':'none';}};
  set('party',unusedCnt());set('gacha',GS.gems>=50?(GS.gems>=4950?'99+':Math.floor(GS.gems/50)):'');
- set('dungeon',kiraOpen(hourId())&&GS.spx.kira!==hourId()?'!':'');set('shop','');set('friend',frReqs().length||'');set('multi',NET.R?'●':'');set('casino','');
+ set('dungeon',kiraOpen(hourId())&&GS.spx.kira!==hourId()?'!':'');set('shop','');if(window.__FB_ADAPTER){set('friend',frReqs().length||'');set('multi',NET.R?'●':'');}set('casino','');
 }
 
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2544,7 +2559,7 @@ const innCost=()=>party().reduce((s,m)=>s+5+m.lv*3,0);
 const needsRest=()=>party().some(m=>m.hp<as(m,maxHP)||m.mp<as(m,maxMP));
 const rest=()=>{GS.gold-=innCost();party().forEach(m=>as(m,heal));};
 function renderMain(tab,notes){
- TAB=tab||TAB;wide(false);tabbar(true);saveGame();if(store.db)frStart();if(NET.screen!=='match'||!NET.M)NET.screen='tab';
+ TAB=tab||TAB;if(!window.__FB_ADAPTER&&(TAB==='multi'||TAB==='friend'))TAB='dungeon';wide(false);tabbar(true);saveGame();if(window.__FB_ADAPTER&&store.db)frStart();if(NET.screen!=='match'||!NET.M)NET.screen='tab';
  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===TAB));
  const n=(notes||[]).map(x=>`<p class="note">${x}</p>`).join('');
  window.scrollTo(0,0);
@@ -2857,13 +2872,13 @@ const MISSIONS=[
  {k:'comp',name:'なかまを集める',unit:'人',th:[3,8,15,25,40],v:()=>GS.roster.filter(m=>!m.hero&&!m.mon).length},
  {k:'mon',name:'モンスターを仲間にする',unit:'体',th:[1,3,6,10,20],v:()=>GS.roster.filter(m=>m.mon).length},
  {k:'scout',name:'スカウトを成功させる',unit:'回',th:[1,5,10,20,40],v:()=>cnt('scout')},
+ ...(window.__FB_ADAPTER?[{k:'mplay',name:'マルチで遊ぶ',unit:'回',th:[1,3,5,10,20],v:()=>cnt('mplay')}]:[]),
  {k:'breed',name:'モンスターを配合する',unit:'回',th:[1,3,6,10,20],v:()=>cnt('breed')},
  {k:'tree',name:'スキルツリーを習得する（全員の合計）',unit:'マス',th:[3,10,25,50,100],v:()=>GS.roster.reduce((s,m)=>s+(m.hero&&m.trees?Object.entries(m.trees).reduce((a,[k,t])=>a+(k===m.jobKey?m.tree:t||[]).length,0):(m.tree||[]).length),0)},
  {k:'alloc',name:'ステータスを振り分ける',unit:'ポイント',th:[5,20,50,100,200],v:()=>cnt('alloc')},
  {k:'pull',name:'ガチャを回す',unit:'回',th:[1,10,30,60,100],v:()=>cnt('pull')},
  {k:'lv',name:'主人公のレベルを上げる',unit:'',pre:'Lv',th:[5,10,20,30,50],v:()=>(GS.roster.find(m=>m.hero)||{lv:1}).lv},
  {k:'uniq',name:'固有スキルに目覚める（全員の合計）',unit:'個',th:[1,3,6,10,20],v:()=>GS.roster.reduce((s,m)=>s+(m.uniq||[]).length,0)},
- {k:'mplay',name:'マルチで遊ぶ',unit:'回',th:[1,3,5,10,20],v:()=>cnt('mplay')},
  {k:'rhit',name:'モンスターレースで的中させる',unit:'回',th:[1,5,15,30,60],v:()=>cnt('rhit')},
  {k:'sbon',name:'スロットでボーナスを当てる',unit:'回',th:[1,5,15,30,60],v:()=>cnt('sbon')},
  {k:'gwin',name:'ギャンブルで勝つ（勝ち枚数の合計）',unit:'枚',th:[500,2000,5000,10000,30000],v:()=>cnt('gwin')}];
@@ -3413,10 +3428,10 @@ function renderPrize(msg){
 }
 
 /* ===== モンスター図鑑 =====
-   番号つき図鑑：最初から決まっている種（基本・マルチ限定・特別）
+   番号つき図鑑：最初から決まっている種（基本・特別）
    新種ノート：自動生成でどこまでも増える種や幻種を「見つけた順」に記録 */
 const dexMark=(sid,lv)=>{if(!GS)return;GS.dex=GS.dex||{};if((GS.dex[sid]||0)<lv){GS.dex[sid]=lv;if(!GS.dexOrder)GS.dexOrder=[];if(!GS.dexOrder.includes(sid))GS.dexOrder.push(sid);}};
-const DEX_FIXED=()=>Object.values(SPECIES_BASE).filter(s=>!s.gen&&!s.metal&&!String(s.id).startsWith('ph_')).sort((a,b)=>(a.multi?1:0)-(b.multi?1:0)||Object.keys(FAMS).indexOf(a.fam)-Object.keys(FAMS).indexOf(b.fam)||a.rank-b.rank);
+const DEX_FIXED=()=>Object.values(SPECIES_BASE).filter(s=>!s.gen&&!s.metal&&(window.__FB_ADAPTER||!s.multi)&&!String(s.id).startsWith('ph_')).sort((a,b)=>(a.multi?1:0)-(b.multi?1:0)||Object.keys(FAMS).indexOf(a.fam)-Object.keys(FAMS).indexOf(b.fam)||a.rank-b.rank);
 let DEXT='fixed',DEXF='all';
 function renderDex(sel){
  tabbar(true);const dx=GS.dex||{},fixed=DEX_FIXED();
@@ -3678,6 +3693,43 @@ async function frontierSync(){
   FRONT=Math.max(FRONT,clampN(v&&v.max,0,99999));if(GS.lay.max>FRONT){FRONT=GS.lay.max;await ref.set({max:FRONT,at:Date.now()});}FRONT_AT=Date.now();}catch(e){}
 }
 function famIcons(fams){return fams.map(f=>`<span class="fi2">${FAMS[f].name.replace('系','')}</span>`).join('');}
+/* ===== みんなの記録：招待されたプレイヤーが自分の記録を共有データ rec/<id> に書き、全員の一覧を見られる ===== */
+let REC_LAST='',REC_BUSY=false,REC_NG=false;
+const recId=()=>window.__FB_ADAPTER&&GS&&GS.xcode?'x'+rcHash(GS.xcode)+rcHash(GS.xcode+'#'):store.uid;
+function recBody(){const h=GS.roster[0];return {n:String(h.name||'').slice(0,10),lv:h.lv,job:(JOBS[h.jobKey]||{}).name||'',lay:GS.lay.max,mons:GS.roster.filter(m=>m.mon).length,mem:GS.roster.filter(m=>!m.mon).length,lk:lookOf(h)};}
+async function recPush(){
+ if(!store.db||!store.uid||!GS||REC_BUSY||REC_NG)return;
+ const b=recBody(),key=JSON.stringify(b);if(key===REC_LAST)return;
+ REC_BUSY=true;
+ try{await store.db.doc('rec/'+recId()).set({...b,at:Date.now()});REC_LAST=key;}
+ catch(e){if(e&&e.code==='invalid_argument')REC_NG=true;}
+ REC_BUSY=false;
+}
+/* --- 記録コード：アカウントなし（リンク）で遊ぶ人の記録を、LINEなどで送ってランキングに登録する --- */
+const RC_SALT='bokudun-rec-v1';
+const rcHash=s=>{let h=2166136261;for(const c of RC_SALT+s){h^=c.codePointAt(0);h=Math.imul(h,16777619);}return (h>>>0).toString(36);};
+async function renderRecords(){
+ wide(false);tabbar(true);
+ const shell=inner=>{$('#app').innerHTML=`${header('みんなの記録')}${inner}<button class="cta" id="rcbk">もどる</button>`;bindToggles();$('#rcbk').onclick=()=>{SE('click');renderMain('dungeon');};};
+ if(!store.db){shell(`<div class="win"><p class="note">みんなの記録は、サーバーにつながっているときだけ見られます。</p><p class="sub">通信状態を確認して、もう一度開いてください。</p></div>`);return;}
+ shell(`<div class="win"><p class="sub">読み込み中…</p></div>`);
+ await recPush();
+ let docs=null;
+ try{const q=await Promise.race([store.db.collection('rec').orderBy('lay','desc').limit(200).get(),new Promise((_,ng)=>setTimeout(()=>ng(new Error('timeout')),10000))]);docs=q.docs.map(d=>({id:d.id,...(d.data()||{})}));}catch(e){}
+ if(!$('#rcbk'))return;
+ if(!docs){shell(`<div class="win"><p class="note">記録を読み込めませんでした。通信状態を確認して、もう一度開いてください。</p></div>`);return;}
+ const num=(v,lo,hi)=>Math.max(lo,Math.min(hi,Math.floor(+v||0)));
+ docs=docs.filter(d=>d&&typeof d.n==='string').sort((a,b)=>num(b.lay,0,1e6)-num(a.lay,0,1e6)||num(b.lv,0,1e6)-num(a.lv,0,1e6));
+ const ago=t=>{const m=Math.floor((Date.now()-(+t||0))/60000);return m<1?'たった今':m<60?`${m}分前`:m<1440?`${Math.floor(m/60)}時間前`:`${Math.floor(m/1440)}日前`;};
+ const mine=docs.findIndex(d=>d.id===recId());
+ const rows=docs.map((d,i)=>`<div class="rcrow ${d.id===recId()?'me':''}"><span class="rk ${i<3?'top'+i:''}">${i+1}</span><span class="rav">${lookSprite(Array.isArray(d.lk)?d.lk:null,'bust')}</span>
+  <span class="rinfo"><b>${esc(d.n)}${d.id===recId()?'<em>あなた</em>':''}</b><small>${esc(String(d.job||'').slice(0,12))}　Lv${num(d.lv,1,9999)}　なかま${num(d.mem,0,9999)}人・魔物${num(d.mons,0,9999)}体</small></span>
+  <span class="rlay"><b>第${num(d.lay,0,999999)}層</b><small>${ago(d.at)}</small></span></div>`).join('');
+ shell(`<div class="win"><p class="sub" style="margin:0">${window.__FB_ADAPTER?'遊んでいるみんなの':'招待されたプレイヤー全員の'}到達階層ランキング。冒険するたびに自動で更新されます。${mine>=0?`<br>あなたは <b class="gold">${mine+1}位</b>（${docs.length}人中）`:''}</p></div>
+  <div class="win rclist">${rows||'<p class="sub">まだ記録がありません。</p>'}</div>
+  ${window.__FB_ADAPTER&&GS.xcode?`<div class="win"><h2>あなたの引き継ぎコード</h2><p class="fcode">${GS.xcode}</p><p class="sub">機種変更や別のブラウザで遊ぶときは、タイトル画面の「引き継ぎコードで再開」にこのコードを入れると続きから遊べます。<b>人には教えないでください</b>（教えると、その人もあなたのデータで遊べてしまいます）。スクリーンショットで保管しておくと安心です。</p></div>`:''}`);
+}
+
 function tabDungeon(n){
  const segs=[['normal','ノーマル'],['special','スペシャル']],max=GS.lay.max,top=Math.max(FRONT,max)+5;
  if(Date.now()-FRONT_AT>60000){FRONT_AT=Date.now();frontierSync().then(()=>{if(TAB==='dungeon'&&NET.screen!=='match'&&document.querySelector('.lays')&&Math.max(FRONT,max)+5!==top)tabDungeon(n);});}
@@ -3715,9 +3767,10 @@ function tabDungeon(n){
  }
  $('#app').innerHTML=`${header('ダンジョン')}${n?`<div class="win">${n}</div>`:''}
  <div class="seg two">${segs.map(([k,t])=>`<button data-s="${k}" class="${DTAB===k?'on':''}">${t}</button>`).join('')}</div>
- ${DTAB==='normal'?`<div class="win rest"><span>到達：<b class="gold">第${max}層</b>${FRONT>max?`<small>　全体の最前線：第${FRONT}層</small>`:''}</span><button id="inn" ${GS.gold<innCost()||!needsRest()?'disabled':''}>宿屋で休む<small>${innCost()}G</small></button></div>`:''}
+ ${DTAB==='normal'?`<div class="win rest"><span>到達：<b class="gold">第${max}層</b>${FRONT>max?`<small>　全体の最前線：第${FRONT}層</small>`:''}</span><span class="rbtns"><button id="recb">みんなの<br>記録</button><button id="inn" ${GS.gold<innCost()||!needsRest()?'disabled':''}>宿屋で休む<small>${innCost()}G</small></button></span></div>`:''}
  <div class="lays">${body}</div>`;
  document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{SE('click');DTAB=b.dataset.s;tabDungeon('');if(DTAB!=='normal')window.scrollTo(0,0);});
+ if($('#recb'))$('#recb').onclick=()=>{SE('click');renderRecords();};
  if($('#inn'))$('#inn').onclick=()=>{rest();SE('heal');renderMain('dungeon',['宿屋で ぐっすり休んだ。全員のHP・MPが回復した！']);};
  document.querySelectorAll('.stn:not(.lock)').forEach(b=>b.onclick=()=>{SE('click');renderLayer(+b.dataset.l);});
  if(DTAB==='normal'){const c=document.querySelector('.stn.cur')||document.querySelector('.stn:not(.lock)');if(c)requestAnimationFrame(()=>c.scrollIntoView({block:'center'}));}

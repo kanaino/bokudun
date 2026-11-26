@@ -1,5 +1,5 @@
 /* オフライン用：通信できるときは常に最新を取りにいき、できないときだけ保存済みを使う */
-const CACHE='bokudun-v1';
+const CACHE='bokudun-v3';
 const CORE=['./','./index.html','./manifest.webmanifest','./firebase-config.js','./fb-adapter.js','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}));});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{for(const k of await caches.keys())if(k!==CACHE)await caches.delete(k);await self.clients.claim();})());});

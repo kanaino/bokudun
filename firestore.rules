@@ -1,12 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // セーブデータ：本人だけが読み書きできる
+    // 自分のセーブ（本人だけ）
     match /data/users/{uid}/{doc} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if request.auth != null && request.auth.uid == uid && request.resource.data.j.size() < 900000;
     }
-    // フレンドのプロフィール・受信箱・全体の到達階層：ログイン中のプレイヤーなら読み書きできる
+    // 引き継ぎ用セーブ：コードを知っている人だけが読み書きできる（一覧は取れない）
+    match /xfer/{code} {
+      allow get: if request.auth != null;
+      allow write: if request.auth != null && code.size() == 14 && request.resource.data.j.size() < 900000;
+    }
+    // みんなの記録：だれでも読める（記録の名前は引き継ぎコードから作るので、機種変更しても同じ行が更新される）
+    match /rec/{rid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && rid.size() < 30 && request.resource.data.j.size() < 4000
+                   && request.resource.data.lay is int && request.resource.data.lay >= 0 && request.resource.data.lay < 100000;
+    }
+    // フレンド：プロフィールと受信箱（申請・承認・招待）
     match /prof/{code} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.resource.data.j.size() < 5000;
@@ -15,6 +26,16 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.resource.data.j.size() < 60000;
     }
+    // マルチの部屋：参加者とメッセージ
+    match /rooms/{room}/peers/{pid} {
+      allow read, delete: if request.auth != null;
+      allow create, update: if request.auth != null && request.resource.data.p.size() < 4000;
+    }
+    match /rooms/{room}/msgs/{mid} {
+      allow read, delete: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.d.size() < 20000;
+    }
+    // 全体の最前線（到達階層の最大）
     match /meta/frontier {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.resource.data.j.size() < 500;

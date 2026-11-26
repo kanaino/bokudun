@@ -1,3 +1,4 @@
+/* Firebase の設定（設定済み） */
 window.FIREBASE_CONFIG = {
   apiKey: "AIzaSyBAM3d9xbD9FNIZof56HTBUINwPL1wHnd4",
   authDomain: "bokudun-fa7fe.firebaseapp.com",
