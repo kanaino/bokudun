@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // セーブデータ：本人だけが読み書きできる
+    match /data/users/{uid}/{doc} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && request.auth.uid == uid && request.resource.data.j.size() < 900000;
+    }
+    // フレンドのプロフィール・受信箱・全体の到達階層：ログイン中のプレイヤーなら読み書きできる
+    match /prof/{code} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.resource.data.j.size() < 5000;
+    }
+    match /inbox/{code} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.resource.data.j.size() < 60000;
+    }
+    match /meta/frontier {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.resource.data.j.size() < 500;
+    }
+  }
+}

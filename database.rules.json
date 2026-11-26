@@ -1,0 +1,23 @@
+{
+  "rules": {
+    "rooms": {
+      "$room": {
+        ".read": "auth != null",
+        ".write": "auth != null && !newData.exists()",
+        "peers": {
+          "$peer": {
+            ".write": "auth != null",
+            ".validate": "!newData.exists() || (newData.child('p').isString() && newData.child('p').val().length < 4000)"
+          }
+        },
+        "m": {
+          ".write": "auth != null && !newData.exists()",
+          "$msg": {
+            ".write": "auth != null",
+            ".validate": "!newData.exists() || (newData.child('d').isString() && newData.child('d').val().length < 8000)"
+          }
+        }
+      }
+    }
+  }
+}
