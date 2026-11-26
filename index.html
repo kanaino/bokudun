@@ -3850,8 +3850,7 @@ function runFloor(notes,first){
  SE('step');
  const go=()=>{clearTimeout(STEPT);const f=nextFoe();if(boss)bossAlert(f.name,()=>battleIn(f));else battleIn(f);};
  $('#go').onclick=go;
- $('#ret').onclick=()=>{clearTimeout(STEPT);const nt=[];giveDrops(D.drops,nt);const L=D.L;D=null;playBGM('main');
-  if(L)renderLayer(L,['撤退して 戻ってきた。',...(nt.length?['持ち帰ったもの：'+nt.join('、')]:[])].join('<br>'));else renderMain('dungeon',['撤退した。']);};
+ $('#ret').onclick=()=>{clearTimeout(STEPT);retreatDungeon('撤退して 戻ってきた。');};
  STEPT=setTimeout(go,notes.length?3200:2200);
 }
 function bossFear(){if(D.special==='raid'||D.special==='casino')return 6;if(D.special==='phantom')return 3;if(D.special==='kira')return 0;return Math.min(6,Math.floor((D.L||1)/2)+(D.boss?2:0));}
@@ -3862,6 +3861,10 @@ function bossAlert(name,next){
  let done=false;const fin=()=>{if(done)return;done=true;el.remove();next();};
  el.onclick=fin;setTimeout(fin,2600);
 }
+function retreatDungeon(msg){
+ const nt=[];giveDrops(D.drops,nt);const L=D.L;D=null;playBGM('main');
+ if(L)renderLayer(L,[msg,...(nt.length?['持ち帰ったもの：'+nt.join('、')]:[])].join('<br>'));else renderMain('dungeon',[msg.replace('戻ってきた','撤退した')]);
+}
 function battleIn(foe){
  startBattle(foe,{label:`${D.floor}/${D.total}`,bg:D.dun.bg,
   drop:e=>{if(e.metal&&e.kind!=='boss')return [];const l=rollDrops(e);addDrops(D.drops,l);return l.map(([k,c])=>`${e.name}は ${DROPN[k]}${k==='gem'?`◆${c}`:''}を 落とした！`);},
@@ -3869,7 +3872,7 @@ function battleIn(foe){
   onLose:()=>{const nt=[];giveDrops(D.drops,nt,true);const L=D.L;if(L&&!D.special)adaptAfter('wipe');D=null;party().forEach(m=>as(m,heal));playBGM('main');
    const msg=['全滅して 町へ運ばれた…','拾ったアイテムの半分だけ 持ち帰った。経験・成長はそのまま。',...(nt.length?['持ち帰ったもの：'+nt.join('、')]:[])];
    if(L)renderLayer(L,msg.join('<br>'));else renderMain('dungeon',msg);},
-  onRun:()=>{if(D.floor>=D.total)return clearDungeon([]);D.floor++;runFloor(['うまく逃げて 先へ進んだ。']);},
+  onRun:()=>retreatDungeon('戦いから逃げて、ダンジョンを脱出した。'),
   onFlee:()=>{if(D.floor>=D.total)return clearDungeon([`${foe.name}は 逃げてしまった…`]);D.floor++;runFloor([`${foe.name}は 逃げてしまった…`]);}});
 }
 function clearDungeon(notes){
