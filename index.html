@@ -2,11 +2,17 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>ぼくらのダンジョン</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
 <style>
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
+*{-webkit-tap-highlight-color:transparent}
+button,.rcrow,.rpmh,.tpg,.tier,img,svg{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{-webkit-user-select:none;user-select:none}
+input,textarea,select{-webkit-user-select:text;user-select:text;font-size:16px}
+
 /* VOICE: 懐かしいコマンドRPGの手触り。短い文、はっきりした反応
    IDEA: 白枠の黒いウィンドウが重なる、レトロRPGの画面そのもの
    PICTURE: 戦闘は夜明けの草原と魔物、スキルツリーは星座のように広がる網
@@ -847,6 +853,17 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;op
 <body>
 <main id="app"></main>
 <nav id="tabs" hidden aria-label="メニュー"><button data-t="dungeon"><i class="ti d"></i>ダンジョン</button><button data-t="party"><i class="ti p"></i>なかま</button><button data-t="gacha"><i class="ti g"></i>ガチャ</button><button data-t="shop"><i class="ti s"></i>ショップ</button></nav>
+<script>
+(function(){
+ // ピンチ・ダブルタップでの拡大を止める（iOS Safariは viewport 指定を無視するため）
+ ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+ document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});
+ let last=0;
+ document.addEventListener('touchend',e=>{const now=Date.now();if(now-last<350){const t=e.target;if(!(t&&t.closest&&t.closest('input,textarea,select'))){e.preventDefault();if(t&&t.click)t.click();}}last=now;},{passive:false});
+ document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+ document.addEventListener('contextmenu',e=>{if(!(e.target.closest&&e.target.closest('input,textarea')))e.preventDefault();});
+})();
+</script>
 <script>
 {
 const $=s=>document.querySelector(s);
@@ -3807,7 +3824,14 @@ function layerPool(I,fam,rank){
    ・その階層の「想定レベル」より仲間が強ければ、敵のレベルも一部だけ追いつく（育てた分の有利は4割残る）
    ・ダンジョンの結果（楽勝／ギリギリ／全滅）で GS.adapt を少しずつ上下させ、敵の強さに反映する */
 const expLv=L=>1+(L-1)*1.6;
-const lvAdj=L=>{if(D&&D.gs){const d=D.gs.lv-expLv(L);return d>0?d*.6:0;}const d=avgLv()-expLv(L);return d>0?d*.6:d*.3;};
+/* 敵の強さは「その階層に来るころのレベル予測」で階層ごとに固定。今のレベルに合わせて敵が上下することはない */
+function lvGrowth(){const h=GS&&GS.lvh||{},ks=Object.keys(h).map(Number).sort((a,b)=>a-b).slice(-6);
+ if(ks.length<2)return 1.6;const a=ks[0],b=ks[ks.length-1];return Math.max(.5,Math.min(3,(h[b]-h[a])/Math.max(1,b-a)));}
+function predLv(L){const h=GS&&GS.lvh||{},ks=Object.keys(h).map(Number).filter(k=>k<L).sort((a,b)=>a-b);
+ if(!ks.length)return null;const lb=ks[ks.length-1];return h[lb]+lvGrowth()*Math.max(0,L-1-lb);}
+const lvAdj=L=>{if(D&&D.gs){const d=D.gs.lv-expLv(L);return d>0?d*.6:0;}
+ GS.lpred=GS.lpred||{};if(GS.lpred[L]==null){const p=predLv(L);GS.lpred[L]=p==null?0:+p.toFixed(1);}
+ const t=GS.lpred[L];if(!t)return 0;const d=t-expLv(L);return d>0?d*.6:0;};
 const ADAPT_MIN=-.3,ADAPT_MAX=1.5;
 const adaptLabel=()=>{const a=(GS&&GS.adapt)||0;return a<-.1?['やさしめ','#81c784']:a<.15?['ふつう','#fff']:a<.4?['つよめ','#ffb74d']:['てごわい','#ef5350'];};
 /* 仲間の「実際の強さ」（ステータス合計：装備・ツリー・★7などの差もふくむ）が、同じレベルのふつうの仲間よりどれだけ上か */
@@ -3818,7 +3842,7 @@ function adaptFoe(e){if(e.metal)return e;const gs=D&&D.gs,ramp=gs?1:D&&D.I?Math.
  e.hp=Math.max(1,Math.round(e.hp*(1+a)*k));e.max=e.hp;e.atk=Math.round(e.atk*(1+a*.75)*(1+(k-1)*.8));e.int=Math.round(e.int*(1+a*.75)*(1+(k-1)*.8));e.def=Math.round(e.def*(1+(k-1)*.5));return e;}
 function adaptAfter(res,L){if(!GS||(L&&L<4&&res!=='wipe'))return;let a=GS.adapt||0;
  let st=GS.adaptStreak||0;
- if(res==='wipe'){a-=a>.2?.2:.15;st=0;}else{const ps=party(),dead=ps.some(m=>m.hp<=0),r=ps.reduce((s,m)=>s+m.hp/as(m,maxHP),0)/Math.max(1,ps.length);
+ if(res==='wipe'){st=0;}/* 負けても敵は弱くならない */else{const ps=party(),dead=ps.some(m=>m.hp<=0),r=ps.reduce((s,m)=>s+m.hp/as(m,maxHP),0)/Math.max(1,ps.length);
   if(!dead){a+=(r>.5?.1:.06)+.03*Math.min(st,5);st++;}else{a+=.02;st=0;}}
  GS.adaptStreak=st;
  GS.adapt=Math.max(ADAPT_MIN,Math.min(ADAPT_MAX,+a.toFixed(3)));}
@@ -3870,7 +3894,7 @@ function famIcons(fams){return fams.map(f=>`<span class="fi2">${FAMS[f].name.rep
 /* ===== みんなの記録：招待されたプレイヤーが自分の記録を共有データ rec/<id> に書き、全員の一覧を見られる ===== */
 let REC_LAST='',REC_BUSY=false,REC_NG=false;
 const recId=()=>window.__FB_ADAPTER&&GS&&GS.xcode?'x'+rcHash(GS.xcode)+rcHash(GS.xcode+'#'):store.uid;
-function recBody(){const h=GS.roster[0];return {n:String(h.name||'').slice(0,10),lv:h.lv,job:(JOBS[h.jobKey]||{}).name||'',lay:GS.lay.max,mons:GS.roster.filter(m=>m.mon).length,mem:GS.roster.filter(m=>!m.mon).length,lk:lookOf(h),alv:avgLv(),pk:+powK().toFixed(2),pw:+(avgLv()*powK()).toFixed(1),pt:ptySnap()};}
+function recBody(){const h=GS.roster[0];return {n:String(h.name||'').slice(0,10),lv:h.lv,job:(JOBS[h.jobKey]||{}).name||'',lay:GS.lay.max,mons:GS.roster.filter(m=>m.mon).length,mem:GS.roster.filter(m=>!m.mon).length,lk:lookOf(h),alv:avgLv(),pk:+powK().toFixed(2),pw:+(avgLv()*powK()).toFixed(1),gr:+lvGrowth().toFixed(2),pt:ptySnap()};}
 async function recPush(){
  if(!store.db||!store.uid||!GS||REC_BUSY||REC_NG)return;
  const b=recBody(),key=JSON.stringify(b);if(key===REC_LAST)return;
@@ -4063,7 +4087,8 @@ async function gSpec(L,depth){
   const me={...recBody(),n:GS.roster[0].name};
   const c=[top?{...top,alv:top.lvx,pk:top.pkx,pw:top.pwx}:null,me].filter(x=>x&&x.pw).sort((a,b)=>b.pw-a.pw)[0]||me;
   const prev=L>st&&(depth||0)<3?await gSpec(L-1,(depth||0)+1):null;
-  let lv=Math.max(+c.alv||avgLv(),expLv(L)),pk=Math.max(1,+c.pk||1);
+  const gr=Math.max(.5,Math.min(3,+c.gr||1.6)),ahead=Math.max(0,L-(+c.lay||L));
+  let lv=Math.max((+c.alv||avgLv())+gr*ahead,expLv(L)),pk=Math.max(1,+c.pk||1);
   if(prev){lv=Math.max(lv,prev.lv+1.2);pk=Math.max(pk,prev.pk);}
   const spec={L,lv:+lv.toFixed(1),pk:+Math.min(3.5,pk).toFixed(2),ad:+Math.min(.6,.35+.012*(L-st)).toFixed(3),by:String(c.n||'').slice(0,10),at:Date.now()};
   await gMake('layers/'+L,spec);v=await gGet('layers/'+L)||spec;
@@ -4479,7 +4504,7 @@ function clearDungeon(notes){
    rew.push('<span class="uqt">★ 初回撃破ボーナス：★6 ギャンブラー「勝負師ラッキー」が 仲間になった！</span>');}}
  if(L){const p=layerProg(L);first=!p[0];p[0]=true;const bl=layerInfo(L).bossL;
   if(first){gems=bl?100:30;if(bl){GS.items.ball=(GS.items.ball||0)+2;rew.push('スカウト玉 ×2');}}
-  if(L>=GS.lay.max){GS.lay.max=L+1;unlockL=L+1;FRONT_AT=0;frontierSync();}}
+  if(L>=GS.lay.max){GS.lvh=GS.lvh||{};if(GS.lvh[L]==null)GS.lvh[L]=avgLv();GS.lpred=GS.lpred||{};const pn=predLv(L+1);if(pn!=null)GS.lpred[L+1]=+pn.toFixed(1);GS.lay.max=L+1;unlockL=L+1;FRONT_AT=0;frontierSync();}}
  GS.gold+=gold;GS.gems+=gems;rew.unshift(`${gold}G`,`ジェム◆${gems}${first?'（初回クリア）':''}`);
  D=null;saveGame();playBGM('clear');
  wide(false);tabbar(false);
