@@ -3211,7 +3211,28 @@ function partyBox(){
 const innCost=()=>party().reduce((s,m)=>s+5+m.lv*3,0);
 const needsRest=()=>party().some(m=>m.hp<as(m,maxHP)||m.mp<as(m,maxMP));
 const rest=()=>{GS.gold-=innCost();party().forEach(m=>as(m,heal));};
+/* ===== 運営からの贈り物（アプリ版のみ）：Firestore の gift/{引き継ぎコード} に置いた贈り物を受け取る ===== */
+async function checkGifts(){
+ if(!window.__FB_ADAPTER||!GS||!GS.xcode||!store.db)return;
+ let v=null;try{const r=await store.db.doc('gift/'+GS.xcode).get();v=r&&r.exists?r.data():null;}catch(e){return;}
+ if(!v||!Array.isArray(v.g))return;GS.gotGift=GS.gotGift||{};
+ const got=[];
+ for(const x of v.g.slice(0,30)){if(!x||x.id==null)continue;const id=String(x.id).slice(0,40);if(GS.gotGift[id])continue;
+  if(x.star7){const s7=STAR7.find(q=>q.job===x.star7);if(!s7)continue;let name=s7.name;if(GS.roster.some(m=>m.name===name))name+=pick(['Ⅱ','Ⅲ','ジュニア','2号']);
+   const m=newMember({name,jobKey:s7.job,rarity:7});GS.roster.push(m);if(GS.party.length<4)GS.party.push(m.id);got.push(`★7「${esc(m.name)}」が 仲間になった！`);}
+  else if(x.job&&JOBS[x.job]&&!JOBS[x.job].monJob){const r=Math.max(1,Math.min(7,+x.r||5));const m=newMember({name:String(x.name||JOBS[x.job].name).slice(0,12),jobKey:x.job,rarity:r});GS.roster.push(m);if(GS.party.length<4)GS.party.push(m.id);got.push(`★${r}「${esc(m.name)}」が 仲間になった！`);}
+  else if(x.mon&&typeof x.mon==='string'&&x.mon.length<80&&SPECIES[x.mon]){const m=newMonster(x.mon,!!x.shiny,Math.max(0,Math.min(99,+x.plus||0)));GS.roster.push(m);if(GS.party.length<4)GS.party.push(m.id);got.push(`モンスター「${esc(m.name)}」が 仲間になった！`);}
+  else if(x.gems){const n=Math.max(0,Math.min(100000,+x.gems||0));GS.gems+=n;got.push(`ジェム ◆${n.toLocaleString()} を受け取った！`);}
+  else if(x.coin){const n=Math.max(0,Math.min(10000000,+x.coin||0));GS.coin=(GS.coin||0)+n;got.push(`コイン ${n.toLocaleString()}枚 を受け取った！`);}
+  else if(x.item&&ITEMS[x.item]){const n=Math.max(1,Math.min(999,+x.n||1));GS.items[x.item]=(GS.items[x.item]||0)+n;got.push(`${ITEMS[x.item].name} ×${n} を受け取った！`);}
+  else continue;
+  GS.gotGift[id]=1;}
+ if(!got.length)return;saveGame();SE('jackpot');
+ const msg=v.msg?`<p class="note">${esc(String(v.msg).slice(0,200))}</p>`:'';
+ const el=document.createElement('div');el.className='ovl';el.innerHTML=`<div class="win" style="max-width:420px;margin:auto"><h2>🎁 運営からの贈り物</h2>${msg}${got.map(t=>`<p class="uqt">${t}</p>`).join('')}<button class="cta" id="gfok">受け取った！</button></div>`;
+ document.body.appendChild(el);el.querySelector('#gfok').onclick=()=>{el.remove();renderMain(TAB||'dungeon');};}
 function renderMain(tab,notes){
+ if(window.__FB_ADAPTER&&(!window._giftT||Date.now()-window._giftT>60000)){window._giftT=Date.now();setTimeout(checkGifts,800);}
  TAB=tab||TAB;if(!window.__FB_ADAPTER&&(TAB==='multi'||TAB==='friend'))TAB='dungeon';wide(false);tabbar(true);saveGame();if(window.__FB_ADAPTER&&store.db)frStart();if(NET.screen!=='match'||!NET.M)NET.screen='tab';
  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===TAB));
  const n=(notes||[]).map(x=>`<p class="note">${x}</p>`).join('');
@@ -4214,7 +4235,13 @@ function tabFriend(n,quiet){
  <div class="win" id="frlist"><h2>フレンド（${ok.length}）</h2>${ok.length?ok.map(row).join(''):'<p class="sub">まだフレンドがいません。</p>'}
   <p class="sub" style="margin-top:6px">招待すると あなたがホストのルームができ、相手に通知が届きます（3分間有効）。対戦はレベル補正なし・おたがいのパーティそのままで戦います。</p></div>
  <div class="win"><h2>フレンド以外と遊ぶ</h2><p class="sub">「マルチ」タブから、ルームコードを伝えあって遊ぶこともできます。</p></div>`;
- $('#addf').onsubmit=async e=>{e.preventDefault();const v=$('#fc').value.trim().toUpperCase().replace(/^([A-Z0-9]{4})([A-Z0-9]{4})$/,'$1-$2');
+ $('#addf').onsubmit=async e=>{e.preventDefault();
+  {/* 隠し：合言葉「星7ください」で1回だけ★7確定ガチャ */const w=$('#fc').value.normalize('NFKC').replace(/\s/g,'');
+   if(/^[星★☆]7ください$/.test(w)){if(GS.secret7){$('#ferr').textContent='その合言葉は もう使ったみたい…';return;}
+    GS.secret7=1;const s7=pick(STAR7);let name=s7.name;if(GS.roster.some(m=>m.name===name))name+=pick(['Ⅱ','Ⅲ','ジュニア','2号']);
+    const m=newMember({name,jobKey:s7.job,rarity:7});GS.roster.push(m);if(GS.party.length<4)GS.party.push(m.id);saveGame();
+    tabbar(false);await gachaShow([{r:7,name:m.name,sub:JOBS[s7.job].name,m}],'comp');return tabFriend(`<p class="note uqt">✨ 合言葉が通じた！ ★7「${esc(m.name)}」が 仲間になった！</p>`);}}
+  const v=$('#fc').value.trim().toUpperCase().replace(/^([A-Z0-9]{4})([A-Z0-9]{4})$/,'$1-$2');
   if(!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(v)){$('#ferr').textContent='「XXXX-XXXX」の形で入力してください。';return;}
   if(v===GS.friendCode){$('#ferr').textContent='自分のコードには申請できません。';return;}
   if(GS.friends.some(f=>f.code===v)){$('#ferr').textContent='すでに申請済みか、フレンドです。';return;}
