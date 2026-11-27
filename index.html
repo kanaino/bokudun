@@ -920,6 +920,8 @@ body{line-height:1.4}
 @keyframes btnx{50%{opacity:.2}}
 #btalk #btskip{position:fixed;top:max(10px,env(safe-area-inset-top));right:10px;width:auto;min-height:36px;padding:4px 12px;font-size:13px;border:2px solid #ffffff55;border-radius:8px;background:#0008;color:#fff}
 #btalk .btpic svg{overflow:visible}.eu>b{margin-top:0}.eu>.bar{margin:2px 0 4px}
+.bsk{margin:6px 0}.bskl{display:grid;grid-template-columns:1fr 1fr;gap:5px}.bskb{padding:5px 7px;font-size:13px;line-height:1.3;min-height:44px;border:2px solid #ffffff33;border-radius:8px;text-align:left}.bskb small{display:block;font-size:10px;opacity:.75;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.bskb.on{border-color:#4fc3f7;background:#0d47a1aa}
+.cxbox{margin-top:6px}.cxrow{display:grid;grid-template-columns:1fr 1fr 1.6fr 1fr 1fr;gap:4px;align-items:center}.cxrow2{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:4px}.cxs{min-height:40px;padding:2px;font-size:13px;text-align:center;border:2px solid #ffffff33;border-radius:8px}.cxv{text-align:center;line-height:1.1}.cxv b{display:block;font-size:20px;color:#ffd54a}.cxv small{font-size:11px}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2a2018">
@@ -1386,6 +1388,7 @@ const FAMS={
  undead:{name:'ゾンビ系',pf:{hp:1.2,atk:.95,def:.9,agi:.75,int:1.1},sp:['呪いの言葉','mag',1.4],sk:[{name:'生気吸い',type:'phys',pow:1.4,drain:.5,mp:4},{name:'のろいの呪文',type:'mag',pow:2.2,mp:5}]},
  dragon:{name:'ドラゴン系',pf:{hp:1.2,atk:1.2,def:1.1,agi:.9,int:1},sp:['炎の息','all',.8],sk:[{name:'ドラゴンブレス',type:'mag',pow:2.6,mp:6},{name:'ドラゴンクロー',type:'phys',pow:2,mp:4}]},
  demon:{name:'悪魔系',pf:{hp:1,atk:1.15,def:.9,agi:1.05,int:1.2},sp:['闇の呪文','mag',1.5],sk:[{name:'闇の呪文',type:'mag',pow:2.6,mp:6},{name:'悪魔の契約',type:'buff',mp:2}]},
+ god:{name:'神系',rare:true,pf:{hp:1.1,atk:1.05,def:1.05,agi:1.05,int:1.35},sp:['神の光','mag',1.6],sk:[{name:'聖なる光',type:'mag',pow:2.6,mp:6},{name:'神の加護',type:'heal',pow:3.6,mp:6}]},
  spirit:{name:'精霊系',pf:{hp:.8,atk:.7,def:.75,agi:1.2,int:1.45},sp:['雷光','mag',1.5],sk:[{name:'雷光',type:'mag',pow:2.4,mp:5},{name:'精霊の加護',type:'heal',pow:3.5,mp:5}]}
 };
 const STYLE={cute:'かわいい',creepy:'キモい',cool:'かっこいい'};
@@ -1425,6 +1428,107 @@ const DP_PAL=[
  {a:'#e0e0e0',b:'#1a0010',c:'#ff1744',g:'#ff80ab',m:'#4a0026',name:'ゴッド・デスピエロ'}];
 const dpPal=t=>DP_PAL[Math.min(t,DP_PAL.length)-1]||DP_PAL[0];
 const dpName=t=>t<=DP_PAL.length?dpPal(t).name:`デスピエロ・第${t}形態`;
+/* ===== 同系統配合の進化形（悪魔・ドラゴン・神）：世代が進むほど細かく・かっこよく ===== */
+const EVO_PAL={
+ demon:[['#2b0f3a','#7b1fa2','#ff1744','#ffd54a'],['#1a0505','#b71c1c','#ff6d00','#ffd54a'],['#0b0b14','#311b92','#00e5ff','#e0e0e0'],['#120000','#4a0000','#ff1744','#ffca28'],['#050505','#263238','#d500f9','#ffd700'],['#0d0014','#6a1b9a','#ff4081','#fff59d']],
+ dragon:[['#1b3a1b','#2e7d32','#ffab00','#cfd8dc'],['#3e0e0e','#c62828','#ffd54a','#ffcc80'],['#0d1b3a','#1565c0','#80d8ff','#e3f2fd'],['#1a1a1a','#37474f','#ff6d00','#ffd700'],['#2a1a00','#ff8f00','#fff176','#ffffff'],['#140024','#4527a0','#ea80fc','#ffd700']],
+ god:[['#fff8e1','#ffe082','#fff59d','#ffffff'],['#e3f2fd','#90caf9','#ffffff','#ffd54a'],['#fff3e0','#ffcc80','#ff7043','#ffd700'],['#f3e5f5','#ce93d8','#fff59d','#ffd700'],['#e0f7fa','#80deea','#ffffff','#ffd700'],['#fffde7','#ffd700','#ffffff','#ff4081']]};
+const EVO_NAME={demon:['デビルナイト','デーモンロード','アークデーモン','魔王ベルゼギア','冥魔帝ルシファリオ'],dragon:['ドラグナイト','ドラゴンロード','エンシェントドラゴン','竜王バハムーン','天竜皇ジークヴァルド'],god:['エンジェル','アークエンジェル','セラフィム','天主神ルクスフィア','創世神アルカディア']};
+const evoName=(f,g)=>g<=5?EVO_NAME[f][g-1]:({demon:'終焉魔神',dragon:'極竜神',god:'至高神'}[f])+'・'+(['','','','','','零','壱','弐','参','肆','伍'][g]||g);
+function evoSprite(f,g,uid,pal){
+ g=Math.max(1,g|0);const P=pal||EVO_PAL[f][(g-1)%EVO_PAL[f].length],[D0,B,C,Au]=P,dk='#08050c',u='ev'+f+g+String(uid||'').replace(/[^a-zA-Z0-9]/g,'');
+ const lv=Math.min(g,8);
+ const defs=`<defs><radialGradient id="a${u}" cx="50%" cy="50%" r="55%"><stop offset="0" stop-color="${C}" stop-opacity="${.35+.05*lv}"/><stop offset=".6" stop-color="${C}" stop-opacity=".12"/><stop offset="1" stop-color="${C}" stop-opacity="0"/></radialGradient>
+  <linearGradient id="m${u}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${shade(B,.35)}"/><stop offset=".45" stop-color="${B}"/><stop offset="1" stop-color="${D0}"/></linearGradient>
+  <linearGradient id="d${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(D0,.25)}"/><stop offset="1" stop-color="${D0}"/></linearGradient>
+  <linearGradient id="g${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffde7"/><stop offset=".45" stop-color="${Au}"/><stop offset="1" stop-color="${shade(Au,-.45)}"/></linearGradient>
+  <linearGradient id="w${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(B,.15)}"/><stop offset="1" stop-color="${D0}" stop-opacity=".95"/></linearGradient>
+  <radialGradient id="e${u}"><stop offset="0" stop-color="#ffffff"/><stop offset=".4" stop-color="${C}"/><stop offset="1" stop-color="${shade(C,-.6)}"/></radialGradient>
+  <filter id="f${u}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${1.6+lv*.25}" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+ const gem=(x,y,r)=>`<g filter="url(#f${u})"><path d="M${x} ${y-r} L${x+r*.8} ${y} L${x} ${y+r} L${x-r*.8} ${y} Z" fill="url(#e${u})" stroke="${dk}" stroke-width="1.2"/></g><path d="M${x-r*.3} ${y-r*.4} L${x} ${y-r*.8}" stroke="#fff" stroke-width="1" opacity=".8"/>`;
+ const trim=(d,w)=>`<path d="${d}" fill="none" stroke="url(#g${u})" stroke-width="${w||2}" stroke-linecap="round"/>`;
+ const sparks=n=>Array.from({length:n},(_,i)=>{const x=12+((i*61)%176),y=10+((i*43)%178),r=.8+(i%3)*.6;return `<circle cx="${x}" cy="${y}" r="${r}" fill="${i%3?C:Au}" opacity="${.5+(i%2)*.3}"/>`;}).join('');
+ const runes=(cx,cy,r,n)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${C}" stroke-width="1.2" opacity=".55"/><circle cx="${cx}" cy="${cy}" r="${r-5}" fill="none" stroke="${C}" stroke-width=".8" opacity=".4" stroke-dasharray="3 3"/>`+Array.from({length:n},(_,i)=>{const a=i*2*Math.PI/n,x=cx+Math.cos(a)*(r-2.5),y=cy+Math.sin(a)*(r-2.5);return `<path d="M${x-2} ${y} L${x} ${y-3} L${x+2} ${y} L${x} ${y+3} Z" fill="${C}" opacity=".8"/>`;}).join('');
+ let s=`<ellipse cx="100" cy="100" rx="98" ry="98" fill="url(#a${u})"/>`;
+ if(lv>=5)s+=runes(100,104,92,12);
+ if(f==='demon'){
+  const wing=(sx,k)=>{const m=x=>100+(x-100)*sx;return `<g stroke="${dk}" stroke-width="2" stroke-linejoin="round"><path d="M${m(84)} ${86-k} Q${m(40)} ${30-k} ${m(4)} ${40-k} Q${m(20)} ${60-k} ${m(10)} ${78-k} Q${m(30)} ${74-k} ${m(26)} ${98-k} Q${m(46)} ${88-k} ${m(46)} ${112-k} Q${m(62)} ${98-k} ${m(76)} ${112-k} Z" fill="url(#w${u})"/>
+    <path d="M${m(84)} ${86-k} L${m(4)} ${40-k} M${m(80)} ${92-k} L${m(10)} ${78-k} M${m(80)} ${98-k} L${m(26)} ${98-k} M${m(80)} ${104-k} L${m(46)} ${112-k}" stroke="${shade(B,.4)}" stroke-width="1.4" fill="none"/>${lv>=5?`<path d="M${m(4)} ${40-k} Q${m(20)} ${60-k} ${m(10)} ${78-k} Q${m(30)} ${74-k} ${m(26)} ${98-k}" stroke="${C}" stroke-width="2.4" fill="none" filter="url(#f${u})"/>`:''}</g>`;};
+  if(lv>=3)s+=`<g transform="translate(0 30) scale(1 .75)" opacity=".9">${wing(1,0)}${wing(-1,0)}</g>`;
+  s+=wing(1,0)+wing(-1,0);
+  s+=`<path d="M72 92 Q58 140 50 192 L64 184 L70 194 L82 186 L100 194 L118 186 L130 194 L136 184 L150 192 Q142 140 128 92 Z" fill="url(#d${u})" stroke="${dk}" stroke-width="2"/>`+(lv>=2?trim('M52 190 L64 182 L70 192 L82 184 L100 192 L118 184 L130 192 L136 182 L148 190',1.6):'');
+  s+=`<path d="M84 150 L80 190 L94 190 L96 152 Z M116 150 L120 190 L106 190 L104 152 Z" fill="url(#m${u})" stroke="${dk}" stroke-width="2"/><path d="M80 168 L72 162 L82 160 Z M120 168 L128 162 L118 160 Z" fill="url(#g${u})" stroke="${dk}" stroke-width="1"/>`;
+  s+=`<path d="M76 96 L124 96 Q134 124 126 156 L74 156 Q66 124 76 96 Z" fill="url(#m${u})" stroke="${dk}" stroke-width="2.4"/><path d="M100 100 L100 154 M80 120 Q100 128 120 120 M82 138 Q100 144 118 138" stroke="${D0}" stroke-width="1.6" fill="none" opacity=".7"/>`;
+  if(lv>=2)s+=trim('M76 96 Q100 108 124 96',2.2)+trim('M74 156 L126 156',2);
+  if(lv>=4)s+=`<path d="M88 112 l4 6 l-4 6 M112 112 l-4 6 l4 6 M96 140 h8" stroke="${C}" stroke-width="1.4" fill="none" filter="url(#f${u})"/>`;
+  s+=gem(100,118,6+lv*.5);
+  const pad=(x,sx)=>`<path d="M${x} 92 Q${x+sx*26} 84 ${x+sx*30} 104 Q${x+sx*18} 110 ${x} 106 Z" fill="url(#m${u})" stroke="${dk}" stroke-width="2"/><path d="M${x+sx*8} 88 L${x+sx*6} 74 L${x+sx*14} 87 M${x+sx*18} 88 L${x+sx*20} 72 L${x+sx*24} 90" fill="url(#g${u})" stroke="${dk}" stroke-width="1.4"/>${lv>=3?`<circle cx="${x+sx*16}" cy="98" r="4" fill="#f5f0e6" stroke="${dk}" stroke-width="1.2"/><circle cx="${x+sx*14.5}" cy="97" r="1" fill="${dk}"/><circle cx="${x+sx*17.5}" cy="97" r="1" fill="${dk}"/>`:''}`;
+  s+=pad(76,-1)+pad(124,1);
+  s+=`<path d="M48 104 Q42 124 50 140 L60 136 Q56 120 62 108 Z M152 104 Q158 124 150 140 L140 136 Q144 120 138 108 Z" fill="url(#m${u})" stroke="${dk}" stroke-width="2"/>`;
+  const sw=lv>=5?`<path d="M152 140 L178 20 L184 24 L160 142 Z" fill="url(#e${u})" stroke="${dk}" stroke-width="1.6" filter="url(#f${u})"/>`:`<path d="M152 140 L176 34 L182 37 L160 142 Z" fill="#cfd8dc" stroke="${dk}" stroke-width="1.6"/><path d="M158 126 L178 38" stroke="#fff" stroke-width="1" opacity=".8"/>`;
+  s+=sw+`<path d="M146 140 L166 146 M156 136 L154 150" stroke="url(#g${u})" stroke-width="4" stroke-linecap="round"/>`+(lv>=3?`<path d="M176 34 Q190 60 172 90 Q186 60 168 40" fill="${C}" opacity=".55" filter="url(#f${u})"/>`:'');
+  s+=`<circle cx="50" cy="142" r="7" fill="${shade(B,-.2)}" stroke="${dk}" stroke-width="1.6"/><circle cx="154" cy="142" r="7" fill="${shade(B,-.2)}" stroke="${dk}" stroke-width="1.6"/>`;
+  if(lv>=2)s+=`<g filter="url(#f${u})"><circle cx="40" cy="132" r="${5+lv}" fill="${C}" opacity=".7"/></g>`;
+  s+=`<path d="M82 60 Q82 90 100 94 Q118 90 118 60 Q100 50 82 60 Z" fill="${shade(D0,.35)}" stroke="${dk}" stroke-width="2.2"/><path d="M82 64 Q100 56 118 64 L118 70 Q100 62 82 70 Z" fill="url(#m${u})" stroke="${dk}" stroke-width="1.4"/>`;
+  s+=`<g filter="url(#f${u})"><path d="M87 72 L96 75 L88 78 Z M113 72 L104 75 L112 78 Z" fill="url(#e${u})"/></g><path d="M92 86 L95 90 L97 86 L100 90 L103 86 L105 90 L108 86" fill="#fff" stroke="${dk}" stroke-width="1"/><path d="M86 82 Q100 92 114 82" stroke="${dk}" stroke-width="1.6" fill="none"/>`;
+  const horn=(sx,len,y0)=>{const m=x=>100+(x-100)*sx;return `<path d="M${m(86)} ${y0} Q${m(62)} ${y0-10} ${m(58-len)} ${y0-28-len} Q${m(70)} ${y0-16} ${m(92)} ${y0+6} Z" fill="#1c1310" stroke="${dk}" stroke-width="1.8"/><path d="M${m(80)} ${y0-4} Q${m(68)} ${y0-12} ${m(62-len*.6)} ${y0-24-len*.6}" stroke="#6d4c41" stroke-width="1.2" fill="none"/>`;};
+  s+=horn(1,lv*2,62)+horn(-1,lv*2,62);if(lv>=3)s+=horn(1,lv,70).replace(/1c1310/g,'2b1d1d')+horn(-1,lv,70).replace(/1c1310/g,'2b1d1d');
+  if(lv>=4)s+=`<g transform="translate(100 48)"><path d="M-18 6 L-20 -10 L-10 -2 L-4 -16 L0 -6 L4 -16 L10 -2 L20 -10 L18 6 Z" fill="url(#g${u})" stroke="${dk}" stroke-width="1.6"/>${gem(0,0,4)}</g>`;
+  if(lv>=6)s+=`<path d="M100 30 L100 6 M86 34 L76 14 M114 34 L124 14" stroke="${C}" stroke-width="2" filter="url(#f${u})"/>`;
+ }else if(f==='dragon'){
+  const wing=(sx)=>{const m=x=>100+(x-100)*sx;return `<g stroke="${dk}" stroke-width="2" stroke-linejoin="round"><path d="M${m(90)} 80 Q${m(70)} 24 ${m(18)} 10 Q${m(26)} 36 ${m(8)} 56 Q${m(30)} 56 ${m(20)} 82 Q${m(42)} 76 ${m(40)} 104 Q${m(58)} 92 ${m(66)} 112 Q${m(76)} 96 ${m(86)} 104 Z" fill="url(#w${u})"/>
+    <path d="M${m(90)} 80 L${m(18)} 10 M${m(86)} 86 L${m(8)} 56 M${m(84)} 94 L${m(20)} 82 M${m(84)} 100 L${m(40)} 104" stroke="${shade(B,.35)}" stroke-width="1.6" fill="none"/>${lv>=5?`<path d="M${m(18)} 10 Q${m(26)} 36 ${m(8)} 56 Q${m(30)} 56 ${m(20)} 82" stroke="${C}" stroke-width="2.6" fill="none" filter="url(#f${u})"/>`:''}</g>`;};
+  if(lv>=3)s+=`<g transform="translate(0 34) scale(1 .7)" opacity=".85">${wing(1)}${wing(-1)}</g>`;
+  s+=wing(1)+wing(-1);
+  s+=`<path d="M120 164 Q170 176 180 140 Q186 118 172 112 Q178 132 166 148 Q150 160 124 152 Z" fill="url(#m${u})" stroke="${dk}" stroke-width="2"/>`+[0,1,2,3].map(i=>`<path d="M${168-i*12} ${142+i*5} l6 -9 l3 10 Z" fill="url(#g${u})" stroke="${dk}" stroke-width="1"/>`).join('');
+  s+=`<path d="M74 150 Q68 176 64 192 L86 192 L90 160 Z M126 150 Q132 176 136 192 L114 192 L110 160 Z" fill="url(#m${u})" stroke="${dk}" stroke-width="2"/><path d="M64 192 l-4 -4 M70 192 l-1 -6 M136 192 l4 -4 M130 192 l1 -6" stroke="#fff" stroke-width="2"/>`;
+  s+=`<path d="M70 96 Q60 130 72 158 Q100 170 128 158 Q140 130 130 96 Q100 84 70 96 Z" fill="url(#m${u})" stroke="${dk}" stroke-width="2.4"/>`;
+  s+=`<path d="M86 102 Q100 98 114 102 L112 156 Q100 162 88 156 Z" fill="${shade(Au,-.1)}" stroke="${dk}" stroke-width="1.6"/>`+[112,122,132,142,150].map(y=>`<path d="M${88+(y-100)*.02} ${y} Q100 ${y+3} ${112-(y-100)*.02} ${y}" stroke="${shade(Au,-.5)}" stroke-width="1.2" fill="none"/>`).join('');
+  s+=Array.from({length:10},(_,i)=>{const x=74+(i%5)*5,y=104+Math.floor(i/5)*14+(i%2)*3;return `<path d="M${x} ${y} q3 -3 6 0" stroke="${shade(B,.45)}" stroke-width="1" fill="none"/><path d="M${200-x} ${y} q-3 -3 -6 0" stroke="${shade(B,.45)}" stroke-width="1" fill="none"/>`;}).join('');
+  if(lv>=2)s+=`<path d="M70 100 Q58 92 56 112 Q64 116 74 110 Z M130 100 Q142 92 144 112 Q136 116 126 110 Z" fill="url(#g${u})" stroke="${dk}" stroke-width="1.6"/>`+gem(100,108,5+lv*.4);
+  s+=`<path d="M62 112 Q48 128 52 146 L62 142 Q60 128 70 120 Z M138 112 Q152 128 148 146 L138 142 Q140 128 130 120 Z" fill="url(#m${u})" stroke="${dk}" stroke-width="2"/><path d="M50 146 l-4 6 M54 148 l-1 7 M58 147 l2 6 M150 146 l4 6 M146 148 l1 7 M142 147 l-2 6" stroke="#fff" stroke-width="2"/>`;
+  s+=`<path d="M84 50 Q100 40 116 50 Q126 62 122 78 Q118 90 108 96 L92 96 Q82 90 78 78 Q74 62 84 50 Z" fill="url(#m${u})" stroke="${dk}" stroke-width="2.2"/>
+   <path d="M88 80 Q100 92 112 80 L110 92 Q100 100 90 92 Z" fill="${shade(Au,-.1)}" stroke="${dk}" stroke-width="1.4"/><path d="M90 86 l3 3 l2 -3 l3 3 l2 -3 l3 3 l2 -3 l3 3" stroke="#fff" stroke-width="1.2" fill="none"/>
+   <g filter="url(#f${u})"><path d="M86 66 L96 68 L88 72 Z M114 66 L104 68 L112 72 Z" fill="url(#e${u})"/></g><circle cx="96" cy="80" r="1.4" fill="${dk}"/><circle cx="104" cy="80" r="1.4" fill="${dk}"/>`;
+  const horn=(sx,l)=>{const m=x=>100+(x-100)*sx;return `<path d="M${m(84)} 54 Q${m(70)} ${40-l} ${m(60-l)} ${26-l} Q${m(76)} ${38-l*.5} ${m(90)} 50 Z" fill="url(#g${u})" stroke="${dk}" stroke-width="1.6"/>`;};
+  s+=horn(1,lv*2)+horn(-1,lv*2);if(lv>=2)s+=`<path d="M80 62 L66 58 L80 68 Z M120 62 L134 58 L120 68 Z" fill="url(#w${u})" stroke="${dk}" stroke-width="1.4"/>`;
+  if(lv>=3)s+=horn(1,lv).replace('M84 54','M88 46')+horn(-1,lv).replace('M116 54','M112 46');
+  if(lv>=4)s+=`<g filter="url(#f${u})"><path d="M100 98 Q90 120 100 130 Q110 120 100 98 Z" fill="${C}" opacity=".8"/></g><g transform="translate(100 40)"><path d="M-14 6 L-16 -8 L-7 -1 L0 -12 L7 -1 L16 -8 L14 6 Z" fill="url(#g${u})" stroke="${dk}" stroke-width="1.4"/>${gem(0,1,3.5)}</g>`;
+  if(lv>=6)s+=`<path d="M100 26 L100 4 M84 30 L72 12 M116 30 L128 12" stroke="${C}" stroke-width="2" filter="url(#f${u})"/>`;
+ }else{
+  // 神：光輪・羽・ローブ
+  s+=Array.from({length:12+lv*2},(_,i)=>{const a=i*2*Math.PI/(12+lv*2);return `<path d="M100 64 L${100+Math.cos(a)*96} ${64+Math.sin(a)*96}" stroke="${Au}" stroke-width="${i%2?1:2}" opacity=".25"/>`;}).join('');
+  const wing=(sx,k,sc)=>{const m=x=>100+(x-100)*sx;const fe=Array.from({length:7},(_,i)=>{const t=i/6,x=m(84-t*76),y=86-k-Math.sin(t*Math.PI)*40*sc+t*20;return `<path d="M${m(86)} ${92-k} Q${(m(86)+x)/2} ${y-6} ${x} ${y} Q${(m(86)+x)/2+sx*4} ${y+8} ${m(86)} ${98-k} Z" fill="${i%2?'#ffffff':shade(B,.55)}" stroke="${shade(B,-.35)}" stroke-width="1.2"/>`;}).join('');return `<g>${fe}</g>`;};
+  if(lv>=4)s+=`<g transform="translate(0 40) scale(1 .8)">${wing(1,0,.7)}${wing(-1,0,.7)}</g>`;
+  if(lv>=2)s+=`<g transform="translate(0 -18)">${wing(1,0,.9)}${wing(-1,0,.9)}</g>`;
+  s+=wing(1,0,1)+wing(-1,0,1);
+  s+=`<g filter="url(#f${u})"><ellipse cx="100" cy="40" rx="${22+lv}" ry="${6+lv*.4}" fill="none" stroke="url(#g${u})" stroke-width="${3+lv*.3}"/></g>`;
+  if(lv>=3)s+=`<ellipse cx="100" cy="40" rx="${30+lv}" ry="${9+lv*.4}" fill="none" stroke="${C}" stroke-width="1.2" stroke-dasharray="4 4" opacity=".8"/>`;
+  s+=`<path d="M78 52 Q60 100 54 130 Q70 118 80 96 Z M122 52 Q140 100 146 130 Q130 118 120 96 Z" fill="${shade(Au,.25)}" stroke="${shade(Au,-.5)}" stroke-width="1.4"/>`+[0,1,2].map(i=>`<path d="M${80-i*6} ${60+i*14} Q${66-i*6} ${96+i*8} ${60-i*2} ${120+i*4} M${120+i*6} ${60+i*14} Q${134+i*6} ${96+i*8} ${140+i*2} ${120+i*4}" stroke="${shade(Au,-.3)}" stroke-width=".9" fill="none"/>`).join('');
+  s+=`<path d="M78 92 Q66 140 58 192 L142 192 Q134 140 122 92 Z" fill="url(#m${u})" stroke="${shade(B,-.5)}" stroke-width="2"/>`+trim('M58 190 L142 190',3)+trim('M100 130 L100 190',2)+(lv>=2?trim('M66 160 Q100 172 134 160',2):'')+(lv>=4?trim('M62 176 Q100 188 138 176',1.6):'');
+  s+=`<path d="M76 94 Q100 88 124 94 L126 128 Q100 140 74 128 Z" fill="url(#g${u})" stroke="${dk}" stroke-width="2"/><path d="M80 104 Q100 112 120 104 M82 118 Q100 126 118 118" stroke="${shade(Au,-.55)}" stroke-width="1.4" fill="none"/>`+gem(100,110,5+lv*.5);
+  const pad=(x,sx)=>`<path d="M${x} 92 Q${x+sx*26} 82 ${x+sx*32} 102 Q${x+sx*20} 110 ${x} 106 Z" fill="url(#g${u})" stroke="${dk}" stroke-width="1.8"/><path d="M${x+sx*6} 96 Q${x+sx*18} 90 ${x+sx*28} 100" stroke="#fff" stroke-width="1" opacity=".7" fill="none"/>${lv>=3?`<path d="M${x+sx*20} 88 L${x+sx*26} 74 L${x+sx*28} 92 Z" fill="#fff" stroke="${dk}" stroke-width="1"/>`:''}`;
+  s+=pad(76,-1)+pad(124,1);
+  s+=`<path d="M48 104 Q42 126 50 144 L60 140 Q56 122 62 108 Z M152 104 Q158 126 150 144 L140 140 Q144 122 138 108 Z" fill="url(#m${u})" stroke="${shade(B,-.5)}" stroke-width="1.6"/><path d="M48 132 L60 128 L62 142 L50 146 Z M152 132 L140 128 L138 142 L150 146 Z" fill="url(#g${u})" stroke="${dk}" stroke-width="1.4"/>`;
+  s+=`<path d="M156 192 L156 30" stroke="url(#g${u})" stroke-width="4.5" stroke-linecap="round"/><path d="M156 8 L164 34 L156 44 L148 34 Z" fill="url(#e${u})" stroke="${dk}" stroke-width="1.6" filter="url(#f${u})"/><path d="M146 46 Q156 40 166 46" stroke="url(#g${u})" stroke-width="3" fill="none"/>`+(lv>=3?Array.from({length:6},(_,i)=>{const a=i*Math.PI/3;return `<path d="M${156+Math.cos(a)*14} ${28+Math.sin(a)*14} L${156+Math.cos(a)*(20+lv)} ${28+Math.sin(a)*(20+lv)}" stroke="${Au}" stroke-width="1.6"/>`;}).join(''):'');
+  s+=`<circle cx="152" cy="140" r="6" fill="#ffe0c2" stroke="${dk}" stroke-width="1.4"/><circle cx="48" cy="146" r="6" fill="#ffe0c2" stroke="${dk}" stroke-width="1.4"/>`;
+  s+=`<path d="M84 58 Q84 86 100 92 Q116 86 116 58 Q100 50 84 58 Z" fill="#ffe7d1" stroke="${dk}" stroke-width="2"/><path d="M84 62 Q88 76 86 84 M116 62 Q112 76 114 84" stroke="#e8c4a8" stroke-width="1.2" fill="none"/>
+   <path d="M82 62 Q90 46 100 50 Q110 46 118 62 Q112 54 100 58 Q88 54 82 62 Z" fill="${shade(Au,.25)}" stroke="${shade(Au,-.5)}" stroke-width="1.2"/>
+   <path d="M88 68 L97 70 M112 68 L103 70" stroke="#3e2723" stroke-width="2" stroke-linecap="round"/><g filter="url(#f${u})"><path d="M89 73 Q93 71 97 73 Q93 75 89 73 Z M103 73 Q107 71 111 73 Q107 75 103 73 Z" fill="url(#e${u})"/></g>
+   <path d="M98 78 L100 82 L102 78" stroke="#c49a80" stroke-width="1" fill="none"/><path d="M95 86 Q100 87 105 86" stroke="#8d4a3a" stroke-width="1.4" fill="none"/>`;
+  if(lv>=3)s+=`<g transform="translate(100 50)"><path d="M-14 4 L-12 -6 L-6 0 L0 -10 L6 0 L12 -6 L14 4 Z" fill="url(#g${u})" stroke="${shade(Au,-.5)}" stroke-width="1.2"/>${gem(0,-1,3)}</g>`;
+  if(lv>=4)s+=[[-62,-20],[62,-24],[-50,40],[50,44]].map(([x,y])=>`<g filter="url(#f${u})"><circle cx="${100+x}" cy="${100+y}" r="${4+lv*.4}" fill="url(#e${u})"/></g>`).join('');
+  if(lv>=6)s+=`<ellipse cx="100" cy="40" rx="48" ry="14" fill="none" stroke="url(#g${u})" stroke-width="2" opacity=".8"/>`;
+ }
+ s+=sparks(6+lv*4);
+ return `<svg viewBox="0 0 200 200" aria-hidden="true">${defs}<ellipse cx="100" cy="194" rx="60" ry="6" fill="#0006"/>${s}</svg>`;}
+/* 同系統配合で進化する系統 */
+const EVO_FAMS=['demon','dragon','god'];
+const evoG=sp=>sp&&sp.evo?(sp.evoGen||(sp.multi?30:sp.evo)):0;
+function evoSpecies(k){const m=k.match(/^ev_(demon|dragon|god)_(\d{1,3})$/);if(!m)return undefined;const f=m[1],g=+m[2];if(g<1)return undefined;
+ const P=EVO_PAL[f][(Math.min(5,Math.ceil(g/6))-1)%EVO_PAL[f].length];
+ const tier=Math.min(5,Math.ceil(g/6))+(g>30?Math.floor((g-30)/10)+1:0);
+ return {id:k,fam:f,name:evoName(f,tier),rank:Math.min(10,2+Math.floor(g/12)),style:'cool',c1:P[1],c2:P[2],var:0,eyes:2,horn:f!=='god',evo:tier,evoGen:g,evoFam:f,gen:true,mul:+(1+.004*g).toFixed(3)};}
 function pierrotSprite(t,uid){
  t=Math.max(1,t|0);const P=dpPal(t),u='dp'+t+String(uid||'').replace(/[^a-zA-Z0-9]/g,''),dk='#0a0610',W='#f4efe8';
  const big=t>=2,wing=t>=3,crown=t>=4,halo=t>=5,horn=t>=3,arms4=t>=6;
@@ -1500,6 +1604,7 @@ function pierrotSprite(t,uid){
  return `<svg viewBox="0 0 200 200" aria-hidden="true">${defs}<ellipse cx="100" cy="194" rx="58" ry="6" fill="#0006"/>${s}</svg>`;}
 function monSprite(sp,shiny){
  if(sp&&sp.pierrot)return pierrotSprite(sp.pierrot,sp.id+(shiny?'s':''));
+ if(sp&&sp.evo)return evoSprite(sp.evoFam,sp.evo,sp.id+(shiny?'s':''),sp.epal);
  const c1=shiny?'#ffd54a':sp.c1,c2=shiny?'#fff8e1':sp.c2,dk='#1a1020',st=sp.style,gid=String(sp.id).replace(/[^a-zA-Z0-9_-]/g,'_')+(shiny?'s':'');
  const B=`url(#b${gid})`,W=`url(#w${gid})`,cl='#f5f0e6';
  let body='',fx=100,fy=110,ex='',gl='';
@@ -1553,7 +1658,7 @@ function monSprite(sp,shiny){
    <path d="M60 150 Q38 150 34 132 M140 150 Q162 150 166 132" stroke="${c1}" stroke-width="8" stroke-linecap="round" fill="none"/>`;
    gl=`<ellipse cx="84" cy="96" rx="8" ry="14" fill="#fff" opacity=".35"/>`;fy=128;}
  };
- F[sp.fam]();
+ (F[sp.dfam||sp.fam]||F.spirit)();
  if(sp.fz){let bk='',fr='';sp.fz.forEach((f,i)=>{const r=fzParts(f,fx,fy,shiny?'#ffe082':(sp.fzc&&sp.fzc[i])||c2,c2,dk);bk+=r.back;fr+=r.front;});body=bk+body;ex+=fr;}
  if(sp.horn&&sp.fam!=='dragon'&&sp.fam!=='demon'){const hy=fy-44;ex+=`<path d="M${fx-24} ${hy+14} Q${fx-40} ${hy-6} ${fx-32} ${hy-18} Q${fx-24} ${hy} ${fx-12} ${hy+8} Z M${fx+24} ${hy+14} Q${fx+40} ${hy-6} ${fx+32} ${hy-18} Q${fx+24} ${hy} ${fx+12} ${hy+8} Z" fill="${st==='cool'?'#eceff1':'#ffcc80'}"/>`;}
  if(st==='cool'&&sp.fam!=='spirit')ex+=`<path d="M${fx-48} ${fy+38} l-10 -12 l14 2 Z M${fx+48} ${fy+38} l10 -12 l-14 2 Z" fill="#eceff1"/>`;
@@ -1991,7 +2096,7 @@ function monTraits(sp){
  sp._t=t;return t;
 }
 function monDeco(sp,shiny,fx,fy,c1,c2,dk){
- const t=monTraits(sp),[cx,cy,rx,ry]=MREG[sp.fam],o=`stroke="${dk}" stroke-width="2.2" stroke-linejoin="round"`;let s='';
+ const t=monTraits(sp),[cx,cy,rx,ry]=MREG[sp.dfam||sp.fam]||MREG.spirit,o=`stroke="${dk}" stroke-width="2.2" stroke-linejoin="round"`;let s='';
  if(t.pat==='spots')s+=[[-.45,-.3,.22],[.35,-.1,.18],[-.1,.35,.2],[.5,.4,.14],[-.6,.25,.12]].map(([a,b,r])=>`<ellipse cx="${cx+a*rx}" cy="${cy+b*ry}" rx="${r*rx}" ry="${r*ry*1.2}" fill="${shade(c1,-.25)}" opacity=".55"/>`).join('');
  if(t.pat==='stripes')s+=[-.4,0,.4].map(a=>`<path d="M${cx+a*rx-6} ${cy-ry*.7} Q${cx+a*rx+8} ${cy} ${cx+a*rx-4} ${cy+ry*.7}" stroke="${shade(c1,-.35)}" stroke-width="6" fill="none" opacity=".55" stroke-linecap="round"/>`).join('');
  const D=t.deco,hy=fy-46;
@@ -2669,9 +2774,9 @@ async function sigAct2(s,me){const p=s.p,st=k=>S(k),x=p.x||{};
 const SPECIAL_BY={phys:'brave',tank:'brave',mag:'sage',heal:'saint',support:'saint',speed:'phantom',trick:'phantom'};
 const JOBBALL_LAYER=20;
 const isMastered=t=>(t||[]).some(id=>new RegExp('c'+TCOLS+'$').test(id));
-const monStats=(sp,shiny,plus)=>{const r=sp.rank,p=FAMS[sp.fam].pf,b=1+(shiny?.3:0)+(plus||0)*.04;
+const monStats=(sp,shiny,plus)=>{const r=sp.rank,p=FAMS[sp.fam].pf,b=(1+(shiny?.3:0)+(plus||0)*.005)*(sp.mul||1);
  return {hp:Math.round((20+r*22)*p.hp*b),atk:Math.round((7+r*5)*p.atk*b),def:Math.round((2+r*3)*p.def*b),agi:Math.round((3+r*2)*p.agi*b),int:Math.round((3+r*3)*p.int*b)};};
-const monSkills=sp=>FAMS[sp.fam].sk.map(s=>{const k={...s,pow:s.pow?+(s.pow*(1+.08*(sp.rank-1))).toFixed(2):undefined};k.desc=skillDesc(k)||({buff:'次の攻撃が2倍',sanct:`${k.turns}ターン被ダメ半減`}[k.type]);return k;});
+const monSkills=sp=>[...FAMS[sp.fam].sk.map(s=>{const k={...s,pow:s.pow?+(s.pow*(1+.08*(sp.rank-1))).toFixed(2):undefined};k.desc=skillDesc(k)||({buff:'次の攻撃が2倍',sanct:`${k.turns}ターン被ダメ半減`}[k.type]);return k;}),...(sp.xsk||[]).map(x=>{const k=mkJT(x[0],[x[1],x[2],x[3]]);k.ms=true;k.desc=sigDesc(k);return k;})];
 
 /* ===== モンスター自動生成：系統×属性×スタイル×ランクで無限に ===== */
 const ELEM=[['炎','#ff7043','#ffeb3b'],['氷','#81d4fa','#e1f5fe'],['雷','#ffd54a','#fff59d'],['闇','#4a148c','#b388ff'],['光','#fff59d','#ffffff'],['毒','#8bc34a','#33691e'],['鋼','#90a4ae','#eceff1'],['風','#a5d6a7','#e8f5e9'],
@@ -2724,10 +2829,10 @@ function fusedSpecies(id){
  const A=SPECIES[m[1]],B=SPECIES[m[2]];if(!A||!B||A.fam===B.fam&&!(B.fz&&B.fz.length))return undefined;
  const parts=[...(A.fz||[]),B.fam,...(B.fz||[])].filter((f,i,r)=>f!==A.fam&&r.indexOf(f)===i&&FZ_FAMS.includes(f)).slice(0,3);if(!parts.length)return undefined;
  const nm=mixName(A.name,B.name).replace(/^キラ/,'');
- return {id,fam:A.fam,name:nm.length>=2?nm:A.name+B.name.slice(-1),rank:Math.min(10,Math.max(A.rank,B.rank)+1),style:A.style,c1:A.c1,c2:B.c1,var:A.var||0,horn:!!(A.horn||B.horn),eyes:A.eyes||2,
+ return {id,fam:A.fam,name:nm.length>=2?nm:A.name+B.name.slice(-1),rank:Math.min(10,Math.max(A.rank,B.rank)),style:A.style,c1:A.c1,c2:B.c1,var:A.var||0,horn:!!(A.horn||B.horn),eyes:A.eyes||2,
   fz:parts,fzc:[B.c1,...(A.fzc||[]).slice(0,2)],gen:true,fused:true,pa:A.id,pb:B.id};}
 const SPECIES_BASE=SPECIES;
-SPECIES=new Proxy(SPECIES_BASE,{get(t,k){if(k in t)return t[k];if(typeof k==='string'&&k.startsWith('ph_')){const b=SPECIES[k.slice(3)];if(!b)return undefined;const s={...b,id:k,name:'幻の'+b.name,rank:Math.min(10,b.rank+2),c1:'#ce93d8',c2:'#80deea',phantom:true,gen:true};t[k]=s;return s;}if(typeof k==='string'&&k[0]==='g'){const s=genSpecies(k);if(s)t[k]=s;return s;}if(typeof k==='string'&&/^dp_\d{1,4}$/.test(k)){const n=+k.slice(3),pl=dpPal(n),s={id:k,fam:'demon',name:dpName(n),rank:10,style:'creepy',c1:pl.a,c2:pl.c,var:0,eyes:2,horn:false,pierrot:n,gen:true};t[k]=s;return s;}if(typeof k==='string'&&k.startsWith('fx(')){const s=fusedSpecies(k);if(s)t[k]=s;return s;}return undefined;}});
+SPECIES=new Proxy(SPECIES_BASE,{get(t,k){if(k in t)return t[k];if(typeof k==='string'&&k.startsWith('ph_')){const b=SPECIES[k.slice(3)];if(!b)return undefined;const s={...b,id:k,name:'幻の'+b.name,rank:Math.min(10,b.rank+2),c1:'#ce93d8',c2:'#80deea',phantom:true,gen:true};t[k]=s;return s;}if(typeof k==='string'&&k[0]==='g'){const s=genSpecies(k);if(s)t[k]=s;return s;}if(typeof k==='string'&&k.startsWith('ev_')){const s=evoSpecies(k);if(s)t[k]=s;return s;}if(typeof k==='string'&&/^dp_\d{1,4}$/.test(k)){const n=+k.slice(3),pl=dpPal(n),s={id:k,fam:'demon',name:dpName(n),rank:10,style:'creepy',c1:pl.a,c2:pl.c,var:0,eyes:2,horn:false,pierrot:n,gen:true};t[k]=s;return s;}if(typeof k==='string'&&k.startsWith('fx(')){const s=fusedSpecies(k);if(s)t[k]=s;return s;}return undefined;}});
 
 /* 仲間モンスターの成長ツリー（職業ツリーと同じ形） */
 JOBS.monster={name:'モンスター',desc:'',color:'#8d6e63',base:{vit:3,str:3,int:3,def:3,agi:3},skills:[],lanes:[
@@ -2780,7 +2885,11 @@ const MFAM={
  spirit:{arch:'mag',base:{vit:2,str:2,int:6,def:2,agi:5},sig:[['時の精霊','timestop',{},12],['精霊の円舞','regenAll',{n:4,p:.1},10],['星の導き','combo',{seq:[['critAll',{n:2}],['mpAll',{v:10}]]},10]],lanes:[
   MLN('雷光','#ffee58','s_int','s_agi',{magPct:.07},[{magCrit:.05},{magPct:.06}],[MSK('雷光','hit',{k:2.4,mag:1,x:{stun:.3}},6),{n:'帯電',echo:.08},MSK('いかずちの雨','aoe',{k:1.6,mag:1,x:{stun:.2}},10)],{n:'雷神',magPct:.3,echo:.12}),
   MLN('加護','#80deea','s_int','s_vit',{healPct:.08},[{mpRegen:1},{healPct:.08}],[MSK('精霊の加護','healAll',{k:2.2},8),{n:'祝福',guardHeal:.08},MSK('聖なる結界','barrier',{k:2.2},8)],{n:'大精霊',healPct:.3,teamRegen:.03}),
-  MLN('霊体','#b39ddb','s_agi','s_def',{evade:.04},[{mpFlat:8},{evade:.03}],[MSK('すりぬけ','dodge',{n:2},5),{n:'霊体',taken:-.08},MSK('マナの奔流','mpDrain',{k:2.2},7)],{n:'精霊王',evade:.12,mpRegen:2})]}
+  MLN('霊体','#b39ddb','s_agi','s_def',{evade:.04},[{mpFlat:8},{evade:.03}],[MSK('すりぬけ','dodge',{n:2},5),{n:'霊体',taken:-.08},MSK('マナの奔流','mpDrain',{k:2.2},7)],{n:'精霊王',evade:.12,mpRegen:2})]},
+ god:{arch:'mag',base:{vit:4,str:3,int:6,def:4,agi:4},sig:[['天地創造','combo',{seq:[['regenAll',{n:4,p:.1}],['critAll',{n:2}]]},12],['神の裁き','execute',{th:.3,k:2.6},10],['時の神','timestop',{},14]],lanes:[
+  MLN('神威','#ffd54a','s_int','s_str',{magPct:.07},[{magCrit:.05},{dmgPct:.06}],[MSK('天の光槍','hit',{k:2.5,mag:1,x:{pierce:1}},7),{n:'神の威光',foeAtk:.06},MSK('神罰の雷','aoe',{k:1.7,mag:1,x:{stun:.25}},11)],{n:'絶対神威',magPct:.3,foeAtk:.08}),
+  MLN('慈愛','#fff59d','s_int','s_vit',{healPct:.08},[{mpRegen:1},{healPct:.1}],[MSK('慈愛の光','heal1',{k:4},6),{n:'女神のまなざし',teamRegen:.03},MSK('天上の恵み','healAll',{k:2.4},10)],{n:'大いなる慈愛',healPct:.35,teamRegen:.04}),
+  MLN('守護','#e1f5fe','s_def','s_vit',{taken:-.05},[{barrier:.06},{hpFlat:25}],[MSK('聖域の盾','barrier',{k:2.4},8),{n:'神の守り',guardHeal:.08},MSK('身代わりの光','sumo',{n:2},7)],{n:'不滅の聖域',taken:-.2,barrier:.12})]},
 };
 const mkMSig=([name,kind,p,mp])=>{const s={name,type:'sig',kind,p:{...p},mp,sig:true};s.desc=sigDesc(s);return s;};
 for(const [f,d] of Object.entries(MFAM)){const F=FAMS[f];if(!F)continue;
@@ -2794,7 +2903,7 @@ const MSIGC={},JKINDS={};
 const sKinds=x=>x&&x.type==='sig'?(x.kind==='combo'?(x.p.seq||[]).map(q=>q[0]):[x.kind]):[];
 function jobKinds(jk){if(JKINDS[jk])return JKINDS[jk];const j=JOBS[jk],o=new Set();if(j){(j.lanes||[]).forEach(L=>(L.bigs||[]).forEach(b=>{if(b&&b.skill)sKinds(b.skill).forEach(k=>o.add(k));}));
  Object.values((JT[jk]||{}).t||{}).forEach(v=>o.add(v[0]));}return JKINDS[jk]=o;}
-function monSig(sp,jk){if(!sp)return null;const key=sp.id+'|'+(jk||'');if(MSIGC[key])return MSIGC[key];const d=MFAM[sp.fam];if(!d)return null;
+function monSig(sp,jk){if(!sp)return null;const key=sp.id+'|'+(jk||'');if(MSIGC[key])return MSIGC[key];if(sp.xsig)return MSIGC[key]=mkMSig(sp.xsig);const d=MFAM[sp.fam];if(!d)return null;
  let h=0;for(const c of String(sp.id))h=(h*31+c.charCodeAt(0))>>>0;const ks=jobKinds(jk||('mon_'+sp.fam));
  let b=null;for(let i=0;i<d.sig.length;i++){const c=d.sig[(h+i)%d.sig.length],cs=c[1]==='combo'?c[2].seq.map(q=>q[0]):[c[1]];if(!cs.some(k=>ks.has(k))){b=c;break;}}
  if(!b)b=d.sig[h%d.sig.length];const f=1+.07*Math.max(0,(sp.rank||1)-1);
@@ -2866,8 +2975,11 @@ function mods(){
  Object.values(P.eq).forEach(k=>{if(k)add(EQUIP[k].eff);});
  P.gsk.forEach(u=>{if(u.eff)add(u.eff);});
  if(P.mon&&GS&&GS.party.includes(P.id)&&party().some(x=>x.jobKey==='mmaster'))add({dmgPct:.2,all:3,taken:-.1});
- return m;
+ return capMods(m);
 }
+/* 上限：回避80%・受けるダメージ−80%まで、会心は基本とあわせて100%まで、確率の効果は100%まで（与ダメージ%などは無限） */
+const MOD_CAP={evade:.8,crit:.92,magCrit:1,echo:1,atkStun:1,atkSteal:1,itemFree:1};
+function capMods(m){for(const [k,v] of Object.entries(MOD_CAP))if(m[k]>v)m[k]=v;if(m.taken<-.8)m.taken=-.8;return m;}
 const S=k=>{const m=mods();return P.st[k]+(m['s_'+k]||0)+(m.all||0);};
 const maxHP=()=>20+S('vit')*6+(mods().hpFlat||0);
 const maxMP=()=>4+S('int')*2+(mods().mpFlat||0);
@@ -3635,19 +3747,25 @@ function tabCasino(n){
  if(CASV==='race')return renderRace(n);
  if(CASV==='slot')return tabSlot();
  if(CASV==='prize')return renderPrize();
- const day=dayId(),resc=GS.coin<10&&GS.coinDay!==day;
+ const day=dayId(),resc=GS.coin<10&&GS.coinDay!==day;if(typeof CXN!=='number')CXN=0;
  $('#app').innerHTML=`${header()}${n?`<div class="win">${n}</div>`:''}
  <div class="win coinbox"><span>所持コイン</span><b class="coin">${coinF(GS.coin)}</b><small>勝ち枚数の合計：${coinF(cnt('gwin'))}枚${cnt('gwin')<GWIN_NEED?`（${GWIN_NEED.toLocaleString()}枚で 何かが起きる…）`:'（カジノ魔王が スペシャルダンジョンに出現中）'}</small>${hasGambler()?'<small class="gold">ギャンブラーがパーティにいる：払い戻し+10%</small>':''}</div>
  <button class="pan casino race" id="g-race"><span class="pt">モンスターレース</span><span class="pic">${['beast2','bird3','dragon1'].map(id=>`<i>${monSprite(SPECIES[id],false)}</i>`).join('')}</span><small>6匹のモンスターが走る！ 単勝・モンスター連・三連単</small></button>
  <button class="pan casino prize" id="g-prize"><span class="pt">景品交換所</span><small>コインで ★5確定チケット・転職玉・強い装備やスキル・限定モンスターと交換</small></button>
  <button class="pan casino slot" id="g-slot"><span class="pt">スロット「${SLN}」</span><span class="pic">${lamp(true).replace('class="tlamp on"','class="tlamp on" style="width:70px;height:56px"')}<span class="reel0">${SL_SYM['7']}</span><span class="reel0">${SL_SYM['7']}</span><span class="reel0">${SL_SYM['7']}</span></span><small>宝箱が開いたらボーナス確定！ 5ライン・3台・毎日設定が変わる</small></button>
  <div class="win"><h2>コイン両替</h2><p class="sub">ゴールドをコインにかえられます（10G＝1コイン）。コインはギャンブルでだけ使えます。</p>
-  <div class="cmd list" style="margin-top:6px">${[[100,1000],[1000,10000]].map(([c,g])=>`<button class="cx" data-c="${c}" data-g="${g}" ${GS.gold<g?'disabled':''}>${c.toLocaleString()}コイン<small>${g.toLocaleString()}G</small></button>`).join('')}</div>
+  ${(()=>{const mx=Math.floor(GS.gold/10);CXN=Math.max(0,Math.min(CXN,mx));return `<div class="cxbox"><div class="cxrow"><button class="cxs" data-d="-1000">−1000</button><button class="cxs" data-d="-100">−100</button><div class="cxv"><b id="cxn">${CXN.toLocaleString()}</b><small>コイン</small></div><button class="cxs" data-d="100">＋100</button><button class="cxs" data-d="1000">＋1000</button></div>
+   <div class="cxrow2"><button class="cxs" data-d="10000">＋1万</button><button class="cxs" data-d="100000">＋10万</button><button class="cxs" data-m="0">0にする</button><button class="cxs" data-m="1">最大</button></div>
+   <p class="sub" style="text-align:center;margin:4px 0">必要なゴールド：<b id="cxg">${(CXN*10).toLocaleString()}</b>G（所持 ${GS.gold.toLocaleString()}G）</p>
+   <button class="cta" id="cxgo" ${CXN>0?'':'disabled'} style="margin-top:2px">両替する</button>${CXMSG?`<p class="note" style="text-align:center;margin:6px 0 0">${CXMSG}</p>`:''}</div>`;})()}
   ${resc?'<button id="resc" style="margin-top:6px">救済コインをもらう（100コイン・1日1回）</button>':''}</div>`;
  $('#g-slot').onclick=()=>{CASV='slot';tabSlot();};
  $('#g-prize').onclick=()=>{CASV='prize';renderPrize();};
  $('#g-race').onclick=()=>{CASV='race';if(!RACE)RACE=genRace();renderRace();};
- document.querySelectorAll('.cx').forEach(b=>b.onclick=()=>{const c=+b.dataset.c,g=+b.dataset.g;GS.gold-=g;GS.coin+=c;SE('chime');saveGame();renderMain('casino',[`${g.toLocaleString()}G を ${c.toLocaleString()}コインに両替した。`]);});
+ const cxUpd=()=>{const mx=Math.floor(GS.gold/10);CXN=Math.max(0,Math.min(CXN,mx));$('#cxn').textContent=CXN.toLocaleString();$('#cxg').textContent=(CXN*10).toLocaleString();$('#cxgo').disabled=CXN<=0;};
+ document.querySelectorAll('.cxs').forEach(b=>b.onclick=()=>{SE('click');if(b.dataset.m!=null)CXN=b.dataset.m==='1'?Math.floor(GS.gold/10):0;else CXN+=+b.dataset.d;cxUpd();});
+ $('#cxgo').onclick=()=>{const c=Math.min(CXN,Math.floor(GS.gold/10));if(c<=0)return;GS.gold-=c*10;GS.coin+=c;SE('chime');saveGame();CXMSG=`${(c*10).toLocaleString()}G を ${c.toLocaleString()}コインに両替した。`;CXN=0;
+  const y=window.scrollY;renderMain('casino');window.scrollTo(0,y);requestAnimationFrame(()=>window.scrollTo(0,y));CXMSG='';};
  if($('#resc'))$('#resc').onclick=()=>{GS.coin+=100;GS.coinDay=day;SE('chime');saveGame();renderMain('casino',['救済コイン 100枚を受け取った。']);};
 }
 function renderRace(n){
@@ -3921,7 +4039,11 @@ function slEnd(){
 
 /* ===== 景品交換所（コインで交換） ===== */
 SPECIES_BASE.x_goldsl={id:'x_goldsl',fam:'slime',name:'ゴールドスライム',rank:6,style:'cute',c1:'#ffd54a',c2:'#fff8e1',var:0,horn:false,eyes:2,multi:true};
-SPECIES_BASE.x_luckyd={id:'x_luckyd',fam:'dragon',name:'ラッキードラゴン',rank:8,style:'cool',c1:'#43a047',c2:'#ffd54a',var:1,horn:true,eyes:2,multi:true};
+SPECIES_BASE.x_maou={id:'x_maou',fam:'demon',name:'魔皇ヴァルグリード',rank:6,style:'cool',c1:'#212121',c2:'#ff1744',var:0,horn:true,eyes:2,multi:true,evo:5,evoFam:'demon',epal:['#050505','#1a1a1a','#ff1744','#ffd700'],mul:.95,
+ xsk:[['魔皇剣ヴァルディス','hit',{k:3.2,x:{armor:.4,crit:1}},10],['冥府の黒炎','burnAll',{k:2.4},14]],xsig:['魔皇降臨','combo',{seq:[['breakDef',{n:2}],['mark',{n:3,v:.45}],['mpAll',{v:12}]]},18]};
+SPECIES_BASE.x_kami={id:'x_kami',fam:'god',name:'光輝神セレスティア',rank:6,style:'cool',c1:'#fffde7',c2:'#ffd700',var:0,horn:false,eyes:2,multi:true,evo:5,evoFam:'god',epal:['#fff8e1','#ffffff','#ffd700','#ffb300'],mul:.92,
+ xsk:[['天光の審判','aoe',{k:2.2,mag:1,x:{stun:.35}},14],['女神の大祝福','fullHeal',{},18]],xsig:['光輝の奇跡','combo',{seq:[['weakAll',{v:.3}],['regenAll',{n:4,p:.12}],['critAll',{n:2}]]},20]};
+SPECIES_BASE.x_luckyd={id:'x_luckyd',fam:'dragon',name:'ラッキードラゴン',rank:5,mul:.8,xsk:[['幸運の七色ブレス','aoe',{k:1.8,mag:1,x:{weaken:1}},10],['ラッキーセブン','arrows',{n:7,k:.55},9]],xsig:['ラッキーフォーチュン','combo',{seq:[['critAll',{n:2}],['dropUp',{}]]},10],style:'cool',c1:'#43a047',c2:'#ffd54a',var:1,horn:true,eyes:2,multi:true};
 Object.assign(EQUIP,{
  p1:{slot:'weapon',name:'勝負師の大剣',prize:12000,eff:{s_str:18,physPct:.2,crit:.1}},
  p2:{slot:'weapon',name:'星くずの杖',prize:12000,eff:{s_int:18,magPct:.2,mpFlat:20}},
@@ -3943,8 +4065,11 @@ const PRIZE={
   {k:'sk_d',name:'景品限定スキル：会心',cat:'crit',c:18000}],
  mon:[
   {sid:'x_goldsl',c:30000,desc:'景品限定のランク6。金ピカでかわいい'},
-  {sid:'x_luckyd',c:80000,desc:'景品限定のランク8。幸運を呼ぶ竜'}]};
+  {sid:'x_luckyd',c:80000,desc:'景品限定・★6級。幸運のブレスと7連撃、固有技ラッキーフォーチュン'},
+  {sid:'x_maou',c:300000,desc:'景品限定・★7級の悪魔系。魔皇剣と冥府の黒炎、固有技「魔皇降臨」'},
+  {sid:'x_kami',c:300000,desc:'景品限定・★7級の神系。天光の審判と全回復、固有技「光輝の奇跡」'}]};
 let PRZT='item';
+var CXN=0,CXMSG='';
 function renderPrize(msg){
  tabbar(true);
  const segs=[['item','どうぐ'],['equip','装備'],['skill','スキル'],['mon','モンスター']],own=GS.prizeOwn||(GS.prizeOwn={});
@@ -4166,7 +4291,7 @@ function layerInfo(L){
  const r0=Math.min(8,1+Math.floor((L-1)/5)),r1=Math.min(9,r0+1),off=(L-1)*2;
  let I;
  if(L<=5){const s=STORY[L-1];I={...s,story:true};}
- else{const fk=Object.keys(FAMS),fams=[];while(fams.length<3+(L%2)){const f=fk[Math.floor(srand()*fk.length)];if(!fams.includes(f))fams.push(f);}
+ else{const fk=Object.keys(FAMS).filter(f=>!FAMS[f].rare),fams=[];while(fams.length<3+(L%2)){const f=fk[Math.floor(srand()*fk.length)];if(!fams.includes(f))fams.push(f);}
   const h=Math.floor(srand()*360);
   I={name:PADJ[Math.floor(srand()*PADJ.length)]+PLACE[Math.floor(srand()*PLACE.length)],fams,bg:[`hsl(${h} 40% 28%)`,`hsl(${h} 50% 8%)`],
    boss:`g${fams[Math.floor(srand()*fams.length)]}_${L*7919}_${Math.min(10,r1+1)}_k`};}
@@ -4506,8 +4631,8 @@ Object.assign(SPECIES_BASE,{
  xs_imp:{id:'xs_imp',fam:'demon',name:'魔界の番兵',rank:9,style:'creepy',c1:'#4a148c',c2:'#ff1744',var:1,horn:true,eyes:2,xsp:true},
  xs_wraith:{id:'xs_wraith',fam:'undead',name:'冥府の亡者',rank:9,style:'creepy',c1:'#37474f',c2:'#80deea',var:0,horn:false,eyes:1,xsp:true},
  xs_demonk:{id:'xs_demonk',fam:'demon',name:'地獄の騎士',rank:10,style:'cool',c1:'#b71c1c',c2:'#212121',var:2,horn:true,eyes:2,xsp:true},
- xs_valk:{id:'xs_valk',fam:'spirit',name:'天空の戦乙女',rank:10,style:'cool',c1:'#e3f2fd',c2:'#ffd54a',var:1,horn:false,eyes:2,xsp:true},
- xs_peg:{id:'xs_peg',fam:'bird',name:'神馬ペガサス',rank:10,style:'cool',c1:'#ffffff',c2:'#90caf9',var:0,horn:true,eyes:2,xsp:true}});
+ xs_valk:{id:'xs_valk',fam:'god',dfam:'spirit',name:'天空の戦乙女',rank:10,style:'cool',c1:'#e3f2fd',c2:'#ffd54a',var:1,horn:false,eyes:2,xsp:true},
+ xs_peg:{id:'xs_peg',fam:'god',dfam:'bird',name:'神馬ペガサス',rank:10,style:'cool',c1:'#ffffff',c2:'#90caf9',var:0,horn:true,eyes:2,xsp:true}});
 /* ===== スペシャル：神と悪魔の試練（推奨Lv100〜1000・100ごとに悪魔2・神2）／極限の試練（推奨Lv500〜2000・各3ステージ） ===== */
 const SP_DEMON=['冥王ハデス','魔王サタン','蝿の王ベルゼブブ','色欲のアスモデウス','強欲のマモン','嫉妬のレヴィアタン','虚偽のベリアル','雷魔バアル','知恵の悪魔アスタロト','夜魔リリス','奈落のアバドン','契約のメフィスト','炎魔アモン','熱風のパズズ','闇宰相ルキフゲ','巨獣ベヘモト','魔獣ザガン','雷鳴のフルフル','夢魔オロバス','堕天使ルシファー'];
 const SP_GOD=['太陽神アポロン','知恵の女神アテナ','戦神アレス','海神ポセイドン','女神ヘラ','月神ツクヨミ','嵐神スサノオ','太陽神アマテラス','太陽神ラー','冥府の番人アヌビス','雷神インドラ','破壊神シヴァ','維持神ヴィシュヌ','知恵神ガネーシャ','大地の母ガイア','時の神クロノス','雷神トール','いたずら神ロキ','主神オーディン','全能神ゼウス'];
@@ -4522,7 +4647,7 @@ const SP_LOOK={demon:{fam:'demon',pool:['xs_imp','xs_wraith','xs_demonk'],bg:['#
 const SPD=[];
 (function(){
  const add=(line,i,name,rec,v)=>{const key=`${line}${rec}${v.k}`,L=SP_LOOK[line],col=L.c[i%L.c.length],sid='xs_'+key;
-  SPECIES_BASE[sid]={id:sid,fam:line==='god'&&i%3===2?'bird':line==='chaos'&&i%2?'beast':L.fam,name,rank:10,style:'cool',c1:col[0],c2:col[1],var:i%3,horn:line!=='god',eyes:line==='chaos'&&i%4===3?3:2,xsp:true};
+  SPECIES_BASE[sid]={id:sid,fam:line==='god'?'god':line==='chaos'&&i%2?'beast':L.fam,dfam:line==='god'?(i%3===2?'bird':'spirit'):undefined,name,rank:10,style:'cool',c1:col[0],c2:col[1],var:i%3,horn:line!=='god',eyes:line==='chaos'&&i%4===3?3:2,xsp:true};
   const short=name.replace(/^.*?(の|・)/,'').replace(/^(冥王|魔王|雷魔|夜魔|炎魔|闇宰相|巨獣|魔獣|夢魔|太陽神|戦神|海神|女神|月神|嵐神|雷神|破壊神|維持神|知恵神|主神|全能神|冥竜|世界蛇|覇竜|魔狼|海魔|怪物王|死竜)/,'')||name;
   const dn=line==='demon'?(v.k==='a'?`${short}の魔城`:`${short}の玉座`):line==='god'?(v.k==='a'?`${short}の神殿`:`${short}の神域`):`${short}の深淵${['','・改','・極'][v.n]||''}`;
   SPD.push({key,line,name:dn,boss:sid,rec,floors:v.f,acts:v.a,m:v.m,pool:L.pool,bg:L.bg,first:Math.round(rec*(line==='chaos'?1.5:1)+200),rep:Math.round(rec/10+20),
@@ -4551,7 +4676,7 @@ function spdFoe(sd){
  const k=1+Math.max(0,powK()-1)*.5,hard=1;
  const LF=[...({demon:[1.15,1.08],god:[1.75,1.55],chaos:[1,1],raid:[3+1.5*Math.min(1,sd.rec/100),2.4+1.1*Math.min(1,sd.rec/100)]}[sd.line]||[1,1])];
  const RF=window.__SPF||spRF(sd.rec);LF[0]*=RF;LF[1]*=Math.sqrt(RF);
- const mk=(sid,l,kind)=>{const e=foeFrom(sid,l,kind);e.def=Math.round(e.def*.7);e.hp=Math.round(e.hp*LF[0]);e.atk=Math.round(e.atk*LF[1]);e.int=Math.round(e.int*LF[1]);e.hp=e.max=Math.round(e.hp*k*hard);e.atk=Math.round(e.atk*(1+(k-1)*.8)*hard);e.int=Math.round(e.int*(1+(k-1)*.8)*hard);e.def=Math.round(e.def*(1+(k-1)*.5));return e;};
+ const clr=!!(GS.spx&&GS.spx.sclr&&GS.spx.sclr[sd.key]);const mk=(sid,l,kind)=>{const e=foeFrom(sid,l,kind);e.spOK=clr;e.noScout=!clr;e.def=Math.round(e.def*.7);e.hp=Math.round(e.hp*LF[0]);e.atk=Math.round(e.atk*LF[1]);e.int=Math.round(e.int*LF[1]);e.hp=e.max=Math.round(e.hp*k*hard);e.atk=Math.round(e.atk*(1+(k-1)*.8)*hard);e.int=Math.round(e.int*(1+(k-1)*.8)*hard);e.def=Math.round(e.def*(1+(k-1)*.5));return e;};
  if(boss||sd.line==='raid'){const e=mk(sd.boss,lv+4,'raid');e.hp=e.max=Math.round(e.hp*.6*sd.m[2]);e.atk=Math.round(e.atk*.72*sd.m[3]);e.int=Math.round(e.int*.75*sd.m[3]);e.def=Math.round(e.def*.5);e.name=(sd.line==='raid'?'魔獣 ':'')+SPECIES[sd.boss].name;if(sd.moves)e.moves=sd.moves;e.acts=sd.acts;e.spRate=.55;return e;}
  const n=Math.random()<.5?2:3,g=[];
  for(let i=0;i<n;i++){const e=mk(pick(sd.pool),lv,'elite');e.hp=e.max=Math.round(e.hp*(1/n)*1.3*sd.m[0]);e.atk=Math.round(e.atk*(.5+.5/n)*sd.m[1]);e.int=Math.round(e.int*(.5+.5/n)*sd.m[1]);e.moves=sd.moves.slice(0,2);g.push(e);}
@@ -4978,13 +5103,15 @@ function newMonster(sid,shiny,plus,extra){
  const s=monStats(sp,shiny,plus);
  const st={vit:Math.max(1,Math.round((s.hp-20)/6)),str:Math.max(1,Math.round(s.atk/2)),int:Math.max(1,Math.round(s.int/2)),def:Math.max(1,Math.round(s.def/1.2)),agi:Math.max(1,s.agi)};
  dexMark(sid,2);
+ const bst={...st};
  const own=monSkills(sp),ex=(extra||[]).filter(x=>!own.some(o=>o.name===x.name));
- const m={id:'m'+(++GS.mseq),name:(shiny?'キラ':'')+sp.name,jobKey:jk,job:j,G:j.G,mon:true,sid,shiny:!!shiny,plus:plus||0,rarity:0,hero:false,lv:1,exp:0,st,pts:0,sp:1,pend:0,
+ const m={id:'m'+(++GS.mseq),name:(shiny?'キラ':'')+sp.name,jobKey:jk,job:j,G:j.G,mon:true,sid,bst,shiny:!!shiny,plus:plus||0,rarity:0,hero:false,lv:1,exp:0,st,pts:0,sp:1,pend:0,
   tree:[],uniq:[],uqEq:[],tier:{},habit:{},eq:{weapon:null,armor:null,acc:null},gsk:[],mskills:[...own,...ex],buff:false,guard:false,hp:0,mp:0};
  as(m,heal);return m;
 }
 const scoutRate=()=>{const md=mods(),hr=E.hp/E.max;
  const ch=1+(E.charm||0)*2;
+ if(E.spOK)return Math.min(.45,(.06+.24*(1-hr))*(E.kind==='raid'?.6:1)*(1+(md.scoutPct||0))*ch);
  if(E.phantom)return Math.min(.7,(.15+.35*(1-hr))*(1+(md.scoutPct||0))*ch);
  return Math.max(.02,Math.min(.95,ch*(0.6-0.1*E.rank)*(1.7-1.2*hr)*(E.shiny?.6:1)*(E.kind==='boss'?.25:E.kind==='elite'?.7:1)*(1+(md.scoutPct||0))));};
 const MIX={'material+slime':['material',0],'beast+dragon':['dragon',0],'bird+spirit':['spirit',0],'bug+undead':['demon',1],'plant+spirit':['spirit',0],
@@ -4992,42 +5119,59 @@ const MIX={'material+slime':['material',0],'beast+dragon':['dragon',0],'bird+spi
 const SECRET={'metal+metal':'metalK','material5+slime2':'slime5','spirit5+undead4':'undead5','beast4+plant4':'demon4','beast5+dragon5':'demon5'};
 function breedPlan(a,b){
  const sa=SPECIES[a.sid],sb=SPECIES[b.sid],key=[a.sid,b.sid].sort().join('+');
- const plus=Math.min(99,Math.floor((a.plus+b.plus)/2)+Math.floor((a.lv+b.lv)/10)+1);
+ const plus=Math.min(99,Math.floor((a.plus+b.plus)/2)+1);
  if(SECRET[key])return {secret:SECRET[key],plus,shinyP:a.shiny||b.shiny?.25:.02};
  const fk=[sa.fam,sb.fam].sort().join('+'),mx=MIX[fk];
  const fam=mx?mx[0]:sa.fam;
- const rank=Math.min(5,Math.max(sa.rank,sb.rank)+(a.sid===b.sid?1:0)+(mx?mx[1]:0));
- let c=famSpecies(fam).filter(s=>s.rank===rank);
- if(!c.length)c=famSpecies(fam).filter(s=>s.rank<=rank).sort((x,y)=>y.rank-x.rank).slice(0,1);
- return {fam,rank,cands:c.map(s=>s.id),plus,mix:!!mx,shinyP:a.shiny||b.shiny?.25:.02};
+ const rank=Math.min(5,Math.max(sa.rank,sb.rank));
+ const nf=f=>famSpecies(f).filter(s=>!s.xsp);let fm=fam;if(!nf(fm).length)fm=nf(sb.fam).length?sb.fam:'slime';
+ let c=nf(fm).filter(s=>s.rank===rank);
+ if(!c.length)c=nf(fm).filter(s=>s.rank<=rank).sort((x,y)=>y.rank-x.rank).slice(0,1);
+ const ev=sa.fam===sb.fam&&EVO_FAMS.includes(sa.fam)?`ev_${sa.fam}_${Math.max(evoG(sa),evoG(sb))+1}`:null;
+ return {fam:fm,ev,rank,cands:c.map(s=>s.id),plus,mix:!!mx,shinyP:a.shiny||b.shiny?.25:.02};
 }
 function fzBreedId(a,b){const sa=SPECIES[a.sid],sb=SPECIES[b.sid];if(!sa||!sb)return null;
  const fa=sa.fam,fb=sb.fam;if(!fzOK(fa,fb)&&!(sa.fused&&fa!==fb)&&!(sb.fused&&fa!==fb))return null;
  const base=s=>s.replace(/^ph_/,'');const id=`fx(${base(a.sid)}|${base(b.sid)})`;return SPECIES[id]?id:null;}
-function doBreed(a,b){
+/* 親の「基礎値」：生まれたときの能力（レベルアップで振ったぶんは含まない） */
+function monBase(m){if(m.bst)return m.bst;const sp=SPECIES[m.sid];if(!sp)return {};const s=monStats(sp,m.shiny,m.plus);
+ return {vit:Math.max(1,Math.round((s.hp-20)/6)),str:Math.max(1,Math.round(s.atk/2)),int:Math.max(1,Math.round(s.int/2)),def:Math.max(1,Math.round(s.def/1.2)),agi:Math.max(1,s.agi)};}
+const breedSkillPool=(a,b)=>[...a.mskills,...b.mskills].filter((s,i,arr)=>s&&arr.findIndex(x=>x.name===s.name)===i);
+function doBreed(a,b,pick4){
  bump('breed');
- const pl=breedPlan(a,b),fzid=!pl.secret&&fzBreedId(a,b);let sid=fzid||pl.secret||pick(pl.cands);
- if(!fzid&&!pl.secret&&Math.random()<.12){const up=famSpecies(SPECIES[sid].fam).filter(s=>s.rank===SPECIES[sid].rank+1);if(up.length)sid=pick(up).id;}
- const pool=[...a.mskills,...b.mskills].filter((s,i,arr)=>arr.findIndex(x=>x.name===s.name)===i);
- const inh=[];while(pool.length&&inh.length<2)inh.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+ const pl=breedPlan(a,b),evid=!pl.secret&&pl.ev,fzid=!pl.secret&&!evid&&fzBreedId(a,b);let sid=evid||fzid||pl.secret||pick(pl.cands);
+ if(!evid&&!fzid&&!pl.secret&&Math.random()<.12){const alt=famSpecies(SPECIES[sid].fam).filter(s=>s.rank===SPECIES[sid].rank&&!s.xsp&&s.id!==sid);if(alt.length)sid=pick(alt).id;}
+ const pool=breedSkillPool(a,b),inh=(pick4||[]).map(n=>pool.find(x=>x.name===n)).filter(Boolean).slice(0,4);
  const child=newMonster(sid,Math.random()<pl.shinyP,pl.plus,inh,makeMonMix(a.jobKey,b.jobKey));
- STATS.forEach(([k])=>child.st[k]+=Math.floor((a.st[k]+b.st[k])*.1));as(child,heal);
+ const ba=monBase(a),bb=monBase(b);STATS.forEach(([k])=>child.st[k]+=Math.floor(((ba[k]||0)+(bb[k]||0))*.05));
+ /* 血統（何代重ねたか）：両親の平均+1。代を重ねるほど能力が少しずつ上がる（進化形は進化で伸びるので対象外） */
+ child.lg=Math.floor(((a.lg||0)+(b.lg||0))/2)+1;if(!SPECIES[child.sid].evo){const add=Math.round(.3*child.lg);STATS.forEach(([k])=>child.st[k]+=add);}
+ child.bst={...child.st};
+ /* レベルは親の高いほうを引き継ぐ（上がったぶんのポイントは「バランス」で上げたのと同じだけもらえる） */
+ {const L=Math.max(a.lv||1,b.lv||1);if(L>1){child.lv=L;child.exp=0;child.pts+=(3+lvBonus(child))*(L-1);child.sp+=(L-1);}}
+ {const mx={};const addX=(k,ids)=>{if(!k||!ids||!ids.length||!JOBS[k])return;mx[k]=[...new Set([...(mx[k]||[]),...ids])];};
+  [a,b].forEach(m=>{(m.xtrees||[]).forEach(x=>addX(x.k,x.ids));addX(m.jobKey,m.tree);});
+  child.xtrees=Object.entries(mx).map(([k,ids])=>({k,ids}));}
+ as(child,heal);
  [a,b].forEach(m=>{Object.values(m.eq).forEach(k=>{if(k)GS.bag[k]=(GS.bag[k]||0)+1;});GS.sbag.push(...m.gsk);
   GS.roster=GS.roster.filter(x=>x.id!==m.id);GS.party=GS.party.filter(x=>x!==m.id);});
  GS.roster.push(child);if(GS.party.length<4)GS.party.push(child.id);
  return child;
 }
+let BRSK=[];
 function renderBreed(selA,selB,msg){
  tabbar(false);wide(false);
  const mons=GS.roster.filter(m=>m.mon),A=GS.roster.find(m=>m.id===selA),Bm=GS.roster.find(m=>m.id===selB);
  let prev='<p class="sub">親を2体えらんでください（Lv5以上）。1体目の「系統」が子に引き継がれやすく、組み合わせ次第で別の系統や上のランクが生まれます。</p>';
+ const bk=(selA||'')+'|'+(selB||'');if(window._brk!==bk){window._brk=bk;BRSK=[];}
  if(A&&Bm){const pl=breedPlan(A,Bm);
-  prev=pl.secret?`<p class="note story">ひみつの組み合わせ！ 何が生まれるかは お楽しみ…</p>`:
+  prev=pl.secret?`<p class="note story">ひみつの組み合わせ！ 何が生まれるかは お楽しみ…</p>`:pl.ev?(()=>{const es=SPECIES[pl.ev];return `<div class="fzprev"><div class="fzpic">${monSprite(es,false)}</div><div><p class="note story">🔥 同じ系統の血が目覚める！ 新たな姿へ進化する！</p><p class="sub"><b>${esc(es.name)}</b>　${FAMS[es.fam].name}　ランク${es.rank}　第${es.evo}世代</p></div></div>`;})():
    (fzBreedId(A,Bm)?(()=>{const fs=SPECIES[fzBreedId(A,Bm)];return `<div class="fzprev"><div class="fzpic">${monSprite(fs,false)}</div><div><p class="note story">✨ 相性ばつぐん！ 2体の姿がまざった新しいモンスターが生まれる！</p><p class="sub"><b>${esc(fs.name)}</b>　${FAMS[fs.fam].name}　ランク${fs.rank}</p></div></div>`;})():
-   `<p class="note">生まれる系統：<b>${FAMS[pl.fam].name}</b>　ランク${pl.rank}${pl.mix?'（相性のよい組み合わせ！）':''}</p><p class="sub">候補：${pl.cands.map(c=>SPECIES[c].name).join('・')}　まれに突然変異で1ランク上</p>`);
+   `<p class="note">生まれる系統：<b>${FAMS[pl.fam].name}</b>　ランク${pl.rank}${pl.mix?'（相性のよい組み合わせ！）':''}</p><p class="sub">候補：${pl.cands.map(c=>SPECIES[c].name).join('・')}　まれに突然変異で別の種族に</p>`);
   {const mk=makeMonMix(A.jobKey,Bm.jobKey);prev+=`<p class="note">子のスキルツリー：<b>${esc(JOBS[mk].name)}</b>${A.jobKey===Bm.jobKey?'（両親と同じ系統のツリー）':'（両親の特徴をあわせ持つ新しいツリー）'}</p>`;}
   prev+=`<p class="sub">ツリーのポイントは引き継がず、子は新しいツリーで1から育てます。`;
-  prev+=`配合値 +${pl.plus}（ステータスが上がる）・親のスキルを2つまで引き継ぐ・親の能力の1割を受け継ぐ。親の2体は いなくなります。</p>`;}
+  prev+=`親が覚えてきたツリーの効果は、子にそのまま引き継がれます。配合値 +${pl.plus}（ステータスが上がる）・両親の基礎値（生まれたときの能力）の15%を受け継ぐ。子のレベルは 親の高いほう（Lv${Math.max(A.lv,Bm.lv)}）を引き継ぎ、そのぶんのステータス・スキルポイントももらえます。親の2体は いなくなります。</p>`;
+  const sp=breedSkillPool(A,Bm);prev+=`<div class="bsk"><p class="note">引き継ぐスキルを えらぶ（${BRSK.length}/4）</p><div class="bskl">${sp.map(k=>`<button class="bskb ${BRSK.includes(k.name)?'on':''}" data-sk="${esc(k.name)}" ${!BRSK.includes(k.name)&&BRSK.length>=4?'disabled':''}>${esc(k.name)}<small>${esc(k.desc||'')}</small></button>`).join('')}</div></div>`;}
  $('#app').innerHTML=`<div class="win"><h2>モンスター配合</h2>${msg?`<p class="note">${msg}</p>`:''}
   <div class="bpair"><div class="bslot">${A?monSprite(SPECIES[A.sid],A.shiny)+`<b>${esc(A.name)}</b>`:'<span>親1</span>'}</div><span class="plus">＋</span><div class="bslot">${Bm?monSprite(SPECIES[Bm.sid],Bm.shiny)+`<b>${esc(Bm.name)}</b>`:'<span>親2</span>'}</div></div>
   ${prev}<button class="cta" id="go" ${A&&Bm?'':'disabled'}>配合する</button></div>
@@ -5036,13 +5180,14 @@ function renderBreed(selA,selB,msg){
  <button class="cta" id="bk">もどる</button></div>`;
  document.querySelectorAll('.bm').forEach(b=>b.onclick=()=>{const id=b.dataset.m;
   if(id===selA)renderBreed(selB,null);else if(id===selB)renderBreed(selA,null);else if(!selA)renderBreed(id,selB);else if(!selB)renderBreed(selA,id);else renderBreed(selA,id);});
- $('#go').onclick=()=>{const c=doBreed(A,Bm);saveGame();renderBreedResult(c);};
+ document.querySelectorAll('.bskb').forEach(b=>b.onclick=()=>{const n=b.dataset.sk;if(BRSK.includes(n))BRSK=BRSK.filter(x=>x!==n);else if(BRSK.length<4)BRSK.push(n);SE('click');const y=window.scrollY;renderBreed(selA,selB);window.scrollTo(0,y);});
+ $('#go').onclick=()=>{const c=doBreed(A,Bm,BRSK);BRSK=[];saveGame();renderBreedResult(c);};
  $('#bk').onclick=()=>renderMain('party');
 }
 function renderBreedResult(c){
  SE('chime');
- $('#app').innerHTML=`<div class="win born"><p class="sub">${SPECIES[c.sid].fused?'✨ 2体の姿がまざった！':'配合が成功した！'}</p><div class="bornpic ${c.shiny?'shiny':SPECIES[c.sid].rank>=4?'rare':''}">${monSprite(SPECIES[c.sid],c.shiny)}</div>
-  <h1>${esc(c.name)}</h1><p class="note">${FAMS[SPECIES[c.sid].fam].name}　ランク${SPECIES[c.sid].rank}　+${c.plus}　${STYLE[SPECIES[c.sid].style]}</p>
+ $('#app').innerHTML=`<div class="win born"><p class="sub">${SPECIES[c.sid].evo?'🔥 新たな姿へ 進化した！':SPECIES[c.sid].fused?'✨ 2体の姿がまざった！':'配合が成功した！'}</p><div class="bornpic ${c.shiny?'shiny':SPECIES[c.sid].rank>=4?'rare':''}">${monSprite(SPECIES[c.sid],c.shiny)}</div>
+  <h1>${esc(c.name)}</h1><p class="note">${FAMS[SPECIES[c.sid].fam].name}　ランク${SPECIES[c.sid].rank}　+${c.plus}　第${c.lg||1}世代　Lv${c.lv}　${STYLE[SPECIES[c.sid].style]}</p>${c.pts||c.sp>1?`<p class="sub">ステータスポイント ${c.pts}・スキルポイント ${c.sp} を「なかま」で振り分けよう</p>`:''}
   <p class="sub">スキル：${c.mskills.map(s=>s.name).join('・')}</p>${monSig(SPECIES[c.sid],c.jobKey)?`<p class="sub">固有技：<b>${esc(monSig(SPECIES[c.sid],c.jobKey).name)}</b></p>`:''}<p class="sub">スキルツリー：<b>${esc(c.job.name)}</b></p><button class="cta" id="ok">やったね！</button></div>`;
  $('#ok').onclick=()=>renderBreed(null,null);
 }
@@ -5723,7 +5868,7 @@ function cmdSkill(){
 }
 function cmdItem(){
  const c=$('#cmd');c.className='cmd list';$('#cmd2').innerHTML='';const down=party().some(m=>m.hp<=0);
- c.innerHTML=Object.entries(ITEMS).map(([k,it])=>`<button class="it" data-k="${k}" ${!GS.items[k]||(k==='rev'&&!down)||(k==='ball'&&(E.kind==='raid'||E.mirror||E.noScout))?'disabled':''}>${it.name} ×${GS.items[k]||0}<small>${k==='ball'?(E.kind==='raid'||E.mirror||E.noScout?'この相手は スカウトできない':`いまの成功率 ${Math.round(scoutRate()*100)}%`):it.desc}</small></button>`).join('')+`<button id="back">もどる</button>`;
+ c.innerHTML=Object.entries(ITEMS).map(([k,it])=>`<button class="it" data-k="${k}" ${!GS.items[k]||(k==='rev'&&!down)||(k==='ball'&&((E.kind==='raid'&&!E.spOK)||E.mirror||E.noScout))?'disabled':''}>${it.name} ×${GS.items[k]||0}<small>${k==='ball'?((E.kind==='raid'&&!E.spOK)||E.mirror||E.noScout?'この相手は スカウトできない':`いまの成功率 ${Math.round(scoutRate()*100)}%`):it.desc}</small></button>`).join('')+`<button id="back">もどる</button>`;
  c.querySelectorAll('.it').forEach(b=>b.onclick=()=>choose({kind:'item',k:b.dataset.k}));
  $('#back').onclick=cmdMain;
 }
@@ -5851,7 +5996,7 @@ async function act(a){
   if(!aliveF().includes(E))E=aliveF()[0]||E;
   if(s.type!=='buff')P.buff=false;
  }else if(a.kind==='item'){
-  if(!GS.items[a.k]||(a.k==='rev'&&!party().some(x=>x.hp<=0))||(a.k==='ball'&&(E.kind==='raid'||E.mirror||E.noScout))){await say(`${P.name}は どうぐを 使えなかった。`);return false;}
+  if(!GS.items[a.k]||(a.k==='rev'&&!party().some(x=>x.hp<=0))||(a.k==='ball'&&((E.kind==='raid'&&!E.spOK)||E.mirror||E.noScout))){await say(`${P.name}は どうぐを 使えなかった。`);return false;}
   const it=ITEMS[a.k],x=1+(m.itemPct||0),free=Math.random()<(m.itemFree||0);if(!free)GS.items[a.k]--;hab('item');
   await say(`${P.name}は ${it.name}を つかった！`);if(free)await say('（道具は なくならなかった！）');
   if(a.k==='herb')await healP(30*x/(1+(m.healPct||0)));
