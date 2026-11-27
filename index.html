@@ -908,6 +908,18 @@ body{line-height:1.4}
 .stn.lock .corr{display:none}.stn.lock .sname2{margin:0 0 0 70px;font-size:13px;-webkit-text-stroke-width:3px}.stn.lock{padding:10px 10px 4px;margin-top:2px}.stn.lock .plate{font-size:14px;top:-9px;min-width:0;padding:0 8px}.stn.lock .plate::before,.stn.lock .plate::after{font-size:10px}.stn.lock .bub{top:-9px;font-size:10px;padding:1px 7px}.stn.lock .bub::after{display:none}.stn.lock+.stn.lock{margin-top:0}.stn.lock.bossl .sname2{margin-left:120px}
 .fzprev{display:grid;grid-template-columns:96px 1fr;gap:8px;align-items:center;margin:6px 0}.fzpic svg{width:96px;height:96px;filter:drop-shadow(0 0 8px #ffd54a88)}
 .pm{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#btalk{position:fixed;inset:0;z-index:60;background:radial-gradient(ellipse at 50% 35%,#3a1020ee,#000f 75%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 12px max(24px,env(safe-area-inset-bottom));animation:btin .5s ease}
+@keyframes btin{from{opacity:0}to{opacity:1}}
+#btalk .btpic{width:min(78vw,320px);height:min(78vw,320px);margin-bottom:auto;margin-top:max(40px,10vh);filter:drop-shadow(0 0 24px #ff174488);animation:btfl 2.4s ease-in-out infinite}
+#btalk .btpic svg{width:100%;height:100%}
+@keyframes btfl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+#btalk .btbox{position:relative;width:100%;max-width:520px;min-height:120px;background:#120a1af2;border:3px solid #ffd54a;border-radius:12px;padding:12px 14px 22px;box-shadow:0 0 0 3px #000,0 8px 24px #000c}
+#btalk .btnm{position:absolute;top:-14px;left:12px;background:#b71c1c;color:#fff;border:2px solid #ffd54a;border-radius:8px;padding:1px 10px;font-size:14px}
+#btalk #bttx{margin:8px 0 0;font-size:16px;line-height:1.6;color:#fff;min-height:52px}
+#btalk .btnx{position:absolute;right:12px;bottom:4px;color:#ffd54a;font-size:13px;animation:btnx 1s infinite}
+@keyframes btnx{50%{opacity:.2}}
+#btalk #btskip{position:fixed;top:max(10px,env(safe-area-inset-top));right:10px;width:auto;min-height:36px;padding:4px 12px;font-size:13px;border:2px solid #ffffff55;border-radius:8px;background:#0008;color:#fff}
+#btalk .btpic svg{overflow:visible}.eu>b{margin-top:0}.eu>.bar{margin:2px 0 4px}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2a2018">
@@ -1403,7 +1415,91 @@ SPECIES.metalK={id:'metalK',fam:'slime',name:'キングキラメタン',rank:5,s
 const famSpecies=f=>Object.values(SPECIES).filter(s=>s.fam===f&&!s.metal&&!s.gen&&!s.multi);
 
 const shade=(hex,a)=>{const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const f=x=>Math.max(0,Math.min(255,Math.round(a>0?x+(255-x)*a:x*(1+a))));return '#'+[f(r),f(g),f(b)].map(x=>x.toString(16).padStart(2,'0')).join('');};
+/* ===== デスピエロ（50層ごとの大ボス）：段階ごとに進化する邪悪なピエロ ===== */
+const DP_PAL=[
+ {a:'#5b2a86',b:'#16101f',c:'#e53935',g:'#b388ff',m:'#2a1640',name:'デスピエロ'},
+ {a:'#b71c1c',b:'#140707',c:'#ffd54a',g:'#ff5252',m:'#3a0c0c',name:'デスピエロ・改'},
+ {a:'#1b5e20',b:'#07110a',c:'#c6ff00',g:'#76ff03',m:'#0f2a12',name:'ナイトメア・デスピエロ'},
+ {a:'#212121',b:'#0b0b0b',c:'#ffd700',g:'#ffab00',m:'#3b2f00',name:'キング・デスピエロ'},
+ {a:'#0d47a1',b:'#050a18',c:'#00e5ff',g:'#40c4ff',m:'#0a1d3d',name:'カオス・デスピエロ'},
+ {a:'#e0e0e0',b:'#1a0010',c:'#ff1744',g:'#ff80ab',m:'#4a0026',name:'ゴッド・デスピエロ'}];
+const dpPal=t=>DP_PAL[Math.min(t,DP_PAL.length)-1]||DP_PAL[0];
+const dpName=t=>t<=DP_PAL.length?dpPal(t).name:`デスピエロ・第${t}形態`;
+function pierrotSprite(t,uid){
+ t=Math.max(1,t|0);const P=dpPal(t),u='dp'+t+String(uid||'').replace(/[^a-zA-Z0-9]/g,''),dk='#0a0610',W='#f4efe8';
+ const big=t>=2,wing=t>=3,crown=t>=4,halo=t>=5,horn=t>=3,arms4=t>=6;
+ const bell=(x,y)=>`<circle cx="${x}" cy="${y}" r="5.2" fill="url(#gold${u})" stroke="${dk}" stroke-width="1.6"/><path d="M${x-3} ${y+1} h6" stroke="${dk}" stroke-width="1.2"/><circle cx="${x-1.6}" cy="${y-1.8}" r="1.4" fill="#fff" opacity=".8"/>`;
+ const card=(x,y,r,s)=>`<g transform="translate(${x} ${y}) rotate(${r})"><rect x="-7" y="-10" width="14" height="20" rx="2" fill="${W}" stroke="${dk}" stroke-width="1.4"/><text x="0" y="4" text-anchor="middle" font-size="10" fill="${s==='♠'||s==='♣'?dk:P.c}" font-weight="bold">${s}</text></g>`;
+ const knife=(x,y,r)=>`<g transform="translate(${x} ${y}) rotate(${r})"><path d="M0 -16 L3 0 L-3 0 Z" fill="#cfd8dc" stroke="${dk}" stroke-width="1.2"/><rect x="-1.6" y="0" width="3.2" height="7" fill="${P.a}" stroke="${dk}" stroke-width="1"/></g>`;
+ const skull=(x,y,s)=>`<g transform="translate(${x} ${y}) scale(${s})"><path d="M-7 0 Q-7 -9 0 -9 Q7 -9 7 0 Q7 4 4 5 L4 8 L-4 8 L-4 5 Q-7 4 -7 0 Z" fill="${W}" stroke="${dk}" stroke-width="1.4"/><circle cx="-3" cy="0" r="2" fill="${dk}"/><circle cx="3" cy="0" r="2" fill="${dk}"/></g>`;
+ const defs=`<defs>
+  <radialGradient id="au${u}" cx="50%" cy="48%" r="55%"><stop offset="0" stop-color="${P.g}" stop-opacity=".55"/><stop offset=".55" stop-color="${P.g}" stop-opacity=".18"/><stop offset="1" stop-color="${P.g}" stop-opacity="0"/></radialGradient>
+  <linearGradient id="fc${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".7" stop-color="#e9e3dc"/><stop offset="1" stop-color="#bfb6ad"/></linearGradient>
+  <linearGradient id="gold${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff59d"/><stop offset=".5" stop-color="#ffc107"/><stop offset="1" stop-color="#8d5a00"/></linearGradient>
+  <linearGradient id="sh${u}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".45"/><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></linearGradient>
+  <linearGradient id="cp${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${P.m}"/><stop offset="1" stop-color="${P.b}"/></linearGradient>
+  <pattern id="hq${u}" width="16" height="20" patternUnits="userSpaceOnUse"><rect width="16" height="20" fill="${P.b}"/><path d="M8 0 L16 10 L8 20 L0 10 Z" fill="${P.a}"/><path d="M8 0 L16 10 L8 20 L0 10 Z" fill="none" stroke="${P.c}" stroke-width=".7" opacity=".55"/></pattern>
+  <pattern id="st${u}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="8" height="8" fill="${P.b}"/><rect width="4" height="8" fill="${P.a}"/></pattern>
+  <radialGradient id="ey${u}"><stop offset="0" stop-color="#fff7c2"/><stop offset=".35" stop-color="${P.c}"/><stop offset="1" stop-color="#3a0000"/></radialGradient>
+  <filter id="gl${u}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+ let s=`<ellipse cx="100" cy="100" rx="98" ry="98" fill="url(#au${u})"/>`;
+ if(halo)s+=`<circle cx="100" cy="64" r="56" fill="none" stroke="${P.g}" stroke-width="3" opacity=".7" stroke-dasharray="2 6"/>`+[0,1,2,3,4,5,6,7].map(i=>{const a=i*45*Math.PI/180;return skull(100+Math.cos(a)*58,64+Math.sin(a)*58,.7);}).join('');
+ if(wing)s+=`<g stroke="${dk}" stroke-width="2" stroke-linejoin="round"><path d="M70 100 Q30 60 6 44 Q18 70 10 86 Q28 84 26 104 Q40 96 44 116 Q52 104 64 118 Z" fill="url(#hq${u})"/><path d="M130 100 Q170 60 194 44 Q182 70 190 86 Q172 84 174 104 Q160 96 156 116 Q148 104 136 118 Z" fill="url(#hq${u})"/>
+  <path d="M70 100 Q30 60 6 44 Q18 70 10 86 Q28 84 26 104 Q40 96 44 116 Q52 104 64 118 Z" fill="url(#sh${u})" stroke="none"/><path d="M130 100 Q170 60 194 44 Q182 70 190 86 Q172 84 174 104 Q160 96 156 116 Q148 104 136 118 Z" fill="url(#sh${u})" stroke="none"/></g>`;
+ // マント（ぼろぼろ）
+ s+=`<path d="M64 96 Q46 140 40 192 L52 182 L58 194 L68 184 L76 196 L84 186 L100 196 L116 186 L124 196 L132 184 L142 194 L148 182 L160 192 Q154 140 136 96 Z" fill="url(#cp${u})" stroke="${dk}" stroke-width="2.2"/>
+  <path d="M60 130 Q56 160 50 182 M140 130 Q144 160 150 182" stroke="${P.a}" stroke-width="1.4" opacity=".5" fill="none"/>`;
+ // 脚と靴
+ s+=`<path d="M86 160 L84 184 L94 184 L96 160 Z M104 160 L106 184 L116 184 L114 160 Z" fill="url(#st${u})" stroke="${dk}" stroke-width="2"/>
+  <path d="M95 183 Q78 182 70 188 Q64 180 72 176 Q70 186 84 182 Z M105 183 Q122 182 130 188 Q136 180 128 176 Q130 186 116 182 Z" fill="${P.b}" stroke="${dk}" stroke-width="2"/>${bell(70,175)}${bell(130,175)}`;
+ // 胴体（道化の服・ひし形模様）
+ s+=`<path d="M70 98 L130 98 Q142 130 138 166 L62 166 Q58 130 70 98 Z" fill="url(#hq${u})" stroke="${dk}" stroke-width="2.4"/><path d="M70 98 L130 98 Q142 130 138 166 L62 166 Q58 130 70 98 Z" fill="url(#sh${u})"/>
+  <path d="M62 160 Q100 172 138 160 L138 166 L62 166 Z" fill="${P.c}" stroke="${dk}" stroke-width="1.6"/>`+[112,126,140,154].map(y=>`<circle cx="100" cy="${y}" r="4.2" fill="${W}" stroke="${dk}" stroke-width="1.6"/><circle cx="99" cy="${y-1.2}" r="1.3" fill="#fff"/>`).join('');
+ // 腕
+ const sleeve=(d)=>`<path d="${d}" fill="url(#hq${u})" stroke="${dk}" stroke-width="2.2"/>`;
+ s+=sleeve('M72 102 Q52 112 44 136 L54 142 Q62 124 76 118 Z')+sleeve('M128 102 Q148 112 156 128 L148 136 Q140 122 124 118 Z');
+ if(arms4)s+=sleeve('M74 120 Q56 136 52 158 L62 160 Q66 142 78 132 Z')+sleeve('M126 120 Q144 136 148 158 L138 160 Q134 142 122 132 Z');
+ const glove=(x,y,f)=>`<g transform="translate(${x} ${y}) scale(${f} 1)"><path d="M-8 -6 Q0 -12 8 -6 L9 6 Q0 10 -9 6 Z" fill="${W}" stroke="${dk}" stroke-width="2"/><path d="M-8 5 l-3 7 l5 -4 M-2 8 l-1 8 l4 -7 M4 7 l2 8 l1 -8 M8 4 l5 6 l-2 -7" fill="${W}" stroke="${dk}" stroke-width="1.6"/><path d="M-9 -6 Q0 -2 9 -6" fill="none" stroke="${P.c}" stroke-width="2.4"/></g>`;
+ // 武器：右手に大鎌（改以降）/ナイフ、左手にカード
+ if(big)s+=`<path d="M156 40 L150 150" stroke="#3e2723" stroke-width="5" stroke-linecap="round"/><path d="M156 40 L150 150" stroke="#6d4c41" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M157 38 Q120 16 92 36 Q120 30 140 46 Q150 44 157 46 Z" fill="#cfd8dc" stroke="${dk}" stroke-width="2"/><path d="M150 42 Q124 28 104 34" stroke="#fff" stroke-width="1.4" fill="none" opacity=".8"/><path d="M155 44 Q150 48 146 46" stroke="${P.c}" stroke-width="2" fill="none"/>`;
+ else s+=knife(156,120,30);
+ s+=glove(50,142,1)+glove(152,132,-1);
+ if(arms4)s+=glove(57,162,1)+glove(143,162,-1)+knife(48,176,-160)+knife(152,176,160);
+ s+=card(36,124,-24,'♠')+card(46,116,-8,'♥')+(big?card(24,98,-36,'♣')+card(176,100,30,'♦'):'');
+ if(big)s+=knife(30,70,-30)+knife(170,74,30);
+ // えり（ひだひだのラフ）
+ const ruff=(r,col,n,y)=>Array.from({length:n},(_,i)=>{const a=Math.PI+i*Math.PI/(n-1),x=100+Math.cos(a)*r*1.5,yy=y+Math.sin(a)*-r*.35;return `<ellipse cx="${x}" cy="${yy}" rx="9" ry="7" fill="${col}" stroke="${dk}" stroke-width="1.6"/>`;}).join('');
+ s+=ruff(24,P.a,9,104)+ruff(20,W,9,100);
+ // 角（ナイトメア以降）
+ if(horn)s+=`<path d="M80 46 Q58 28 62 6 Q70 24 86 36 Z M120 46 Q142 28 138 6 Q130 24 114 36 Z" fill="#2b1d1d" stroke="${dk}" stroke-width="2"/><path d="M66 14 Q70 26 82 36 M134 14 Q130 26 118 36" stroke="#8d6e63" stroke-width="1.2" fill="none"/>`;
+ // 帽子（先のとがった道化帽・鈴つき）
+ const hat=t>=2?`<path d="M74 52 Q60 24 36 30 Q52 36 54 54 Z" fill="${P.a}" stroke="${dk}" stroke-width="2"/><path d="M126 52 Q140 24 164 30 Q148 36 146 54 Z" fill="${P.b}" stroke="${dk}" stroke-width="2"/><path d="M90 46 Q96 14 100 2 Q106 16 110 46 Z" fill="${P.c}" stroke="${dk}" stroke-width="2"/>${bell(36,30)}${bell(164,30)}${bell(100,4)}`
+  :`<path d="M76 52 Q62 22 40 26 Q56 34 58 54 Z" fill="${P.a}" stroke="${dk}" stroke-width="2"/><path d="M124 52 Q138 22 160 26 Q144 34 142 54 Z" fill="${P.b}" stroke="${dk}" stroke-width="2"/>${bell(40,26)}${bell(160,26)}`;
+ s+=hat+`<path d="M72 54 Q100 34 128 54 L126 60 Q100 46 74 60 Z" fill="url(#hq${u})" stroke="${dk}" stroke-width="2"/>`;
+ // 顔
+ s+=`<path d="M76 58 Q76 92 100 98 Q124 92 124 58 Q100 50 76 58 Z" fill="url(#fc${u})" stroke="${dk}" stroke-width="2.4"/>
+  <path d="M78 74 l4 2 l-1 4 M121 70 l-4 3 l2 3" stroke="#8d8480" stroke-width="1" fill="none"/>`;
+ // 目のまわりの化粧（縦長のひし形）＋涙
+ s+=`<path d="M89 56 L94 68 L89 84 L84 68 Z" fill="${dk}"/><path d="M111 56 L116 68 L111 84 L106 68 Z" fill="${dk}"/>
+  <path d="M86 86 Q85 92 88 94 Q91 92 90 86 Z" fill="${P.c}" stroke="${dk}" stroke-width=".8"/>`;
+ // 光る目（つり目・縦長の瞳）
+ s+=`<g filter="url(#gl${u})"><path d="M83 67 Q89 62 95 66 Q89 72 83 67 Z" fill="url(#ey${u})"/><path d="M105 66 Q111 62 117 67 Q111 72 105 66 Z" fill="url(#ey${u})"/></g>
+  <path d="M89 63.5 L89 70.5 M111 63.5 L111 70.5" stroke="#000" stroke-width="1.6"/><path d="M81 61 L95 64 M119 61 L105 64" stroke="${dk}" stroke-width="2.6" stroke-linecap="round"/>`;
+ // 赤い鼻
+ s+=`<circle cx="100" cy="76" r="5" fill="${P.c==='#ffd54a'||P.c==='#ffd700'?'#e53935':P.c}" stroke="${dk}" stroke-width="1.6"/><circle cx="98.4" cy="74.4" r="1.6" fill="#fff" opacity=".85"/>`;
+ // 口：耳まで裂けた笑い＋ギザ歯＋縫い目
+ s+=`<path d="M80 80 Q100 98 120 80 Q100 88 80 80 Z" fill="#3a0010" stroke="${dk}" stroke-width="2"/>
+  <path d="M82 81.5 l3 4 l2 -3 l3 4.5 l2 -3.5 l3 5 l2 -4.5 l3 5 l2 -4.5 l3 4.5 l2 -3.5 l3 4 l2 -3 l3 3" fill="${W}" stroke="${dk}" stroke-width=".9"/>
+  <path d="M80 80 Q76 78 73 74 M120 80 Q124 78 127 74" stroke="${dk}" stroke-width="1.8" fill="none"/><path d="M75 75 l-2 3 M77 77 l-3 2 M125 75 l2 3 M123 77 l3 2" stroke="${dk}" stroke-width="1.2"/>
+  <path d="M100 90 Q100 96 98 99" stroke="${P.c}" stroke-width="1.6" fill="none" opacity=".8"/>`;
+ // 王冠（キング以降）
+ if(crown)s+=`<g transform="translate(100 30)"><path d="M-16 8 L-18 -8 L-9 0 L0 -12 L9 0 L18 -8 L16 8 Z" fill="url(#gold${u})" stroke="${dk}" stroke-width="2"/><circle cx="0" cy="1" r="3" fill="${P.c}" stroke="${dk}" stroke-width="1"/><circle cx="-10" cy="4" r="2" fill="#7c4dff"/><circle cx="10" cy="4" r="2" fill="#00e676"/></g>`;
+ // 浮かぶ火の粉
+ s+=Array.from({length:6+t*2},(_,i)=>{const x=20+((i*53)%160),y=14+((i*37)%170);return `<circle cx="${x}" cy="${y}" r="${1+(i%3)*.7}" fill="${P.g}" opacity=".7"/>`;}).join('');
+ return `<svg viewBox="0 0 200 200" aria-hidden="true">${defs}<ellipse cx="100" cy="194" rx="58" ry="6" fill="#0006"/>${s}</svg>`;}
 function monSprite(sp,shiny){
+ if(sp&&sp.pierrot)return pierrotSprite(sp.pierrot,sp.id+(shiny?'s':''));
  const c1=shiny?'#ffd54a':sp.c1,c2=shiny?'#fff8e1':sp.c2,dk='#1a1020',st=sp.style,gid=String(sp.id).replace(/[^a-zA-Z0-9_-]/g,'_')+(shiny?'s':'');
  const B=`url(#b${gid})`,W=`url(#w${gid})`,cl='#f5f0e6';
  let body='',fx=100,fy=110,ex='',gl='';
@@ -2631,7 +2727,7 @@ function fusedSpecies(id){
  return {id,fam:A.fam,name:nm.length>=2?nm:A.name+B.name.slice(-1),rank:Math.min(10,Math.max(A.rank,B.rank)+1),style:A.style,c1:A.c1,c2:B.c1,var:A.var||0,horn:!!(A.horn||B.horn),eyes:A.eyes||2,
   fz:parts,fzc:[B.c1,...(A.fzc||[]).slice(0,2)],gen:true,fused:true,pa:A.id,pb:B.id};}
 const SPECIES_BASE=SPECIES;
-SPECIES=new Proxy(SPECIES_BASE,{get(t,k){if(k in t)return t[k];if(typeof k==='string'&&k.startsWith('ph_')){const b=SPECIES[k.slice(3)];if(!b)return undefined;const s={...b,id:k,name:'幻の'+b.name,rank:Math.min(10,b.rank+2),c1:'#ce93d8',c2:'#80deea',phantom:true,gen:true};t[k]=s;return s;}if(typeof k==='string'&&k[0]==='g'){const s=genSpecies(k);if(s)t[k]=s;return s;}if(typeof k==='string'&&k.startsWith('fx(')){const s=fusedSpecies(k);if(s)t[k]=s;return s;}return undefined;}});
+SPECIES=new Proxy(SPECIES_BASE,{get(t,k){if(k in t)return t[k];if(typeof k==='string'&&k.startsWith('ph_')){const b=SPECIES[k.slice(3)];if(!b)return undefined;const s={...b,id:k,name:'幻の'+b.name,rank:Math.min(10,b.rank+2),c1:'#ce93d8',c2:'#80deea',phantom:true,gen:true};t[k]=s;return s;}if(typeof k==='string'&&k[0]==='g'){const s=genSpecies(k);if(s)t[k]=s;return s;}if(typeof k==='string'&&/^dp_\d{1,4}$/.test(k)){const n=+k.slice(3),pl=dpPal(n),s={id:k,fam:'demon',name:dpName(n),rank:10,style:'creepy',c1:pl.a,c2:pl.c,var:0,eyes:2,horn:false,pierrot:n,gen:true};t[k]=s;return s;}if(typeof k==='string'&&k.startsWith('fx(')){const s=fusedSpecies(k);if(s)t[k]=s;return s;}return undefined;}});
 
 /* 仲間モンスターの成長ツリー（職業ツリーと同じ形） */
 JOBS.monster={name:'モンスター',desc:'',color:'#8d6e63',base:{vit:3,str:3,int:3,def:3,agi:3},skills:[],lanes:[
@@ -4075,7 +4171,7 @@ function layerInfo(L){
   I={name:PADJ[Math.floor(srand()*PADJ.length)]+PLACE[Math.floor(srand()*PLACE.length)],fams,bg:[`hsl(${h} 40% 28%)`,`hsl(${h} 50% 8%)`],
    boss:`g${fams[Math.floor(srand()*fams.length)]}_${L*7919}_${Math.min(10,r1+1)}_k`};}
  const fl=Math.min(3,Math.floor((L-1)/8));
- I.L=L;I.r=[r0,r1];I.off=off;I.bossL=L%5===0;
+ I.L=L;I.r=[r0,r1];I.off=off;I.bossL=L%5===0;if(L%50===0)I.boss='dp_'+(L/50);
  I.dun=[I.bossL?{name:I.name+' 主の間',floors:1,boss:true}:{name:I.name,floors:3+fl}];
  return LCACHE[L]=I;
 }
@@ -4142,7 +4238,7 @@ function adaptAfter(res,L){if(!GS||(L&&L<4&&res!=='wipe'))return;let a=GS.adapt|
 function rollFoe(){
  if(D&&D.powK==null)D.powK=powK();
  const I=D.I,lvl=Math.max(0,Math.round(I.off+D.di*2+D.floor-1+lvAdj(I.L))),[r0,r1]=I.r;
- if(D.floor===D.total&&D.boss){GLAY.bossL=true;const e=adaptFoe(foeFrom(I.boss,lvl+2,'boss'));GLAY.bossL=false;if(I.L>=10){e.hp=e.max=Math.round(e.hp*1.12);e.atk=Math.round(e.atk*1.06);e.int=Math.round(e.int*1.06);}return e;}
+ if(D.floor===D.total&&D.boss){GLAY.bossL=true;const e=adaptFoe(foeFrom(I.boss,lvl+2,'boss'));GLAY.bossL=false;if(SPECIES[I.boss]&&SPECIES[I.boss].pierrot)e.noScout=true;if(I.L>=10){e.hp=e.max=Math.round(e.hp*1.12);e.atk=Math.round(e.atk*1.06);e.int=Math.round(e.int*1.06);}return e;}
  if(D.floor===D.total){const fam=pick(I.fams),early=I.L<=2;const e=foeFrom(pick(layerPool(I,fam,early?r1:Math.min(10,r1+1))),lvl+1,'boss');
   if(early){e.hp=e.max=Math.round(e.hp*(I.L===1?.6:.7));e.atk=Math.round(e.atk*.85);e.int=Math.round(e.int*.85);}return adaptFoe(e);}
  const x=Math.random();let rank=x<.06?r1+1+(Math.random()<.3?1:0):x<.32?r1:r0;
@@ -4377,8 +4473,11 @@ async function gStart(){
  return GLAY.start=Math.max(6,+v.L||9999);
 }
 /* 共通階層の強さは1層ずつなだらかに上げる（最強プレイヤーが一気に強くなっても急に跳ね上がらない） */
-function gSmooth(L,st,x,prev){let lv=+x.lv||expLv(L),pk=Math.max(1,+x.pk||1);
- if(prev){lv=Math.min(Math.max(lv,prev.lv+3),prev.lv+7);pk=Math.min(Math.max(pk,prev.pk),prev.pk+.06);}
+/* 1層ごとの上がり幅：ふつう+3〜7／5層ごとのボス+8〜15／50層ごとの大ボス+15〜25（ボスの段差はこの日以降に作られた階層から） */
+const GBOSS_T=Date.UTC(2026,10,27,3,45);
+const gStep=(L,at)=>(+at||0)>=GBOSS_T&&L%5===0?(L%50===0?[15,25]:[8,15]):[3,7];
+function gSmooth(L,st,x,prev){let lv=+x.lv||expLv(L),pk=Math.max(1,+x.pk||1);const [mn,mx]=gStep(L,x.at);
+ if(prev){lv=Math.min(Math.max(lv,prev.lv+mn),prev.lv+mx);pk=Math.min(Math.max(pk,prev.pk),prev.pk+.06);}
  else{lv=Math.min(lv,expLv(L)*1.35+5);pk=Math.min(pk,1.2);}
  return {lv,pk:Math.min(3.5,pk)};}
 async function gSpec(L,depth){
@@ -4393,11 +4492,11 @@ async function gSpec(L,depth){
   const prev=L>st?await gSpec(L-1):null;
   const gr=Math.max(.5,Math.min(3,+c.gr||1.6)),ahead=Math.max(0,L-(+c.lay||L));
   let lv=Math.max((+c.alv||avgLv())+gr*ahead,expLv(L)),pk=Math.max(1,+c.pk||1);
-  ({lv,pk}=gSmooth(L,st,{lv,pk},prev));
+  ({lv,pk}=gSmooth(L,st,{lv,pk,at:Date.now()},prev));
   const spec={L,lv:+lv.toFixed(1),pk:+Math.min(3.5,pk).toFixed(2),ad:+Math.min(.6,.35+.012*(L-st)).toFixed(3),by:String(c.n||'').slice(0,10),at:Date.now()};
   await gMake('layers/'+L,spec);v=await gGet('layers/'+L)||spec;
  }
- if(v&&typeof v==='object'){const prev=L>st?await gSpec(L-1):null;const sm=gSmooth(L,st,{lv:+v.lv||expLv(L),pk:+v.pk||1},prev);v={...v,lv:+sm.lv.toFixed(1),pk:+sm.pk.toFixed(2)};}
+ if(v&&typeof v==='object'){const prev=L>st?await gSpec(L-1):null;const sm=gSmooth(L,st,{lv:+v.lv||expLv(L),pk:+v.pk||1,at:+v.at||0},prev);v={...v,lv:+sm.lv.toFixed(1),pk:+sm.pk.toFixed(2)};}
  return GLAY.spec[L]=v;
 }
 const gSpecT=L=>Promise.race([gSpec(L).catch(()=>null),new Promise(r=>setTimeout(()=>r(null),12000))]);
@@ -4768,11 +4867,59 @@ function runFloor(notes,first){
   <div class="snotes">${notes.map(x=>`<p>${x}</p>`).join('')}</div>
   <div class="sbtns"><button id="ret">${D.special?'あきらめる':'撤退する'}<small>${D.special?'今回の挑戦は終わり':'拾ったアイテムは持ち帰れる'}</small></button><button class="cta" id="go" style="margin:0">すすむ ▶</button></div></div>`;
  SE('step');
- const go=()=>{clearTimeout(STEPT);const f=nextFoe();if(boss)bossAlert(f.name,()=>battleIn(f));else battleIn(f);};
+ const go=()=>{clearTimeout(STEPT);const f=nextFoe();if(boss)bossAlert(f.name,()=>(D&&!D.special&&D.boss&&D.L%50===0?bossTalk(f,()=>battleIn(f)):battleIn(f)));else battleIn(f);};
  $('#go').onclick=go;
  $('#ret').onclick=()=>{clearTimeout(STEPT);retreatDungeon('撤退して 戻ってきた。');};
  STEPT=setTimeout(go,notes.length?3200:2200);
 }
+/* ===== 50層ごとの大ボスは戦う前にしゃべる ===== */
+const BTALK_F={
+ slime:['ぷるぷる…この体を ただのスライムと思うなよ。','何度つぶされても 何度でも 立ち上がってきた。お前たちとは 年季がちがうのだ。'],
+ beast:['グルル…久しぶりに 骨のある獲物の においがする。','牙と爪だけで この階を 守りぬいてきた。お前らも 狩らせてもらうぞ。'],
+ bird:['ここは 空の果て。地をはう者には 届かぬ場所だ。','風よ 吹け。この翼が 羽ばたくとき お前たちは 立っていられまい。'],
+ bug:['キシキシ…数千の仲間の 亡きがらの上に わたしは立っている。','この殻は 千年の時を かけて かたまった。お前たちの刃など 通るものか。'],
+ plant:['よくぞ 来た。この森の土は 冒険者の なれのはてで できている。','根は 深く 深く のびている…お前たちの足元まで な。'],
+ material:['ガ…ガガ…侵入者を 確認。排除モードに 移行する。','わたしは この階を守るために 造られた。それ以外の 理由は いらない。'],
+ undead:['ひさしぶりの 生きた客人か…ふふ、あたたかい 血のにおいがする。','死は 終わりではない。お前たちも すぐに わかるだろう。'],
+ dragon:['ほう…人の子が ここまで 登ってくるとはな。','我が炎は 千の軍勢を 灰にしてきた。お前たちは 何秒 もつかな？'],
+ demon:['クク…ようこそ。魂の 取り立てに 来てくれたのかな？','契約しよう。勝てば 先へ進むがいい。負ければ…その魂は わたしのものだ。'],
+ spirit:['……あなたたちの 足音は 遠くから 聞こえていました。','この階には 古い力が ねむっています。ためさせてもらいますよ、あなたたちの 心を。']};
+function bossLines(L,name,fam){const h=(GS.roster[0]||{}).name||'冒険者',n=L/50,gs=GLAY.spec[L];
+ const tier=n===1?`わたしは 第50層の門番、${name}。ここから先は 本物の地獄だ。`:n===2?`百の階を越えた者は 久しく現れなかった…。わたしは ${name}。この塔の 中ほどを守る者。`
+  :n===4?`二百の階…ここまで来たのは お前たちが 初めてかもしれん。`:`${L}の階を越えてきた その力、本物かどうか この${name}が 確かめてやろう。`;
+ const fl=BTALK_F[fam]||BTALK_F.beast;
+ const end=['さあ、かかってくるがいい！','言葉は もういらぬ。力で 語れ！','ここで 終わりにしてやろう！'][n%3];
+ return [`……よくぞ ここまで来た、${h}たちよ。`,tier,...(gs&&gs.by&&gs.by!==h?[`この扉を 最初に たたいたのは「${gs.by}」という者だった…。`]:[]),...fl,end];}
+/* デスピエロのストーリー（50層ごと・4セリフ）。会うたびに進化して戻ってくる */
+const DP_STORY=[
+ h=>[`ケケケケケ！ ようこそ ようこそ、${h}クン！`,'ボクは デスピエロ。この塔で いちばん たのしい 道化師さァ♪','キミたちの 悲鳴は どんな 音色かなァ？ ワクワクしちゃう！','さあ ショーの はじまりだよォ！ 最後まで 笑っていられるかなァ？'],
+ h=>[`ケケッ…また 会えたねェ、${h}クン。`,'あのときの 痛み、ちゃ～んと おぼえてるよォ。だから ボク、強くなったんだァ！','見てよ この大鎌！ 新しい 衣装も ぜんぶ キミたちの ためだけに 用意したんだよォ♪','第二幕の 開演だァ！ 今度は 泣いても やめてあげないよォ！'],
+ h=>['ヒャハハハ！ しつこいなァ キミたちも！ でも ボクは もォっと しつこいよ？','負けるたびに 地獄の 楽屋で 何度も 何度も 生まれ変わってきたのさァ。','この翼と 角を 見てごらん。もう ただの 道化じゃない…悪夢の 座長だよォ！','第三幕！ 観客は キミたちだけ。フィナーレまで 付き合ってもらうよォ！'],
+ h=>['…ケ…ケケ…ようやく 来たねェ。ずっと ずぅっと 待ってたよォ。','200層の 闇を ぜんぶ 飲みこんで、ボクは 王さまに なったのさ。笑いの 王さまにねェ！','この王冠に 誓って、今日こそ キミたちを 最高の 見せ物に してあげる♪','第四幕！ 拍手は いらないよォ…悲鳴で 応えてねェ！'],
+ h=>['ケケケケ！ 時空の すきまから こんにちはァ！ 混沌の ボクの 登場だよォ！','キミたちに 負けた 4つの ボクが ひとつに まざって、ぐちゃぐちゃの 最強に なっちゃったァ♪','ルールなんて もう ないよォ？ 上も 下も 右も 左も、ぜぇんぶ ボクの 舞台さァ！','第五幕！ 混沌の カーニバルを 始めようかァ！'],
+ h=>['…ようこそ。ここは 天の 劇場。ボクは もう 神さまに なっちゃったんだァ。','笑いも 涙も 命も、ぜんぶ ボクの 手のひらの 上で 踊る お人形なのさァ♪',`でもねェ ${h}クン…キミたちと 遊ぶのが いちばん たのしいんだよォ！`,'第六幕！ 神さまの ショー、とくと 味わってねェ！']];
+function dpLines(t,L){const h=(GS.roster[0]||{}).name||'キミ';if(t<=DP_STORY.length)return DP_STORY[t-1](h);
+ const v=[`この ${L}層の 闇、とっても 甘くて おいしかったよォ。おかげで 力が あふれて 止まらないィ！`,'何度 倒されても ボクは 帰ってくる。だって ショーは 終わらないんだからねェ！','新しい 刃、新しい 仮面…今回の ボクは ひと味 ちがうよォ？'];
+ return [`ケケケケ！ 第${t}幕へ ようこそォ、${h}クン！ また 新しい ボクに なっちゃったァ♪`,v[t%3],`${dpName(t)}…それが 今の ボクの 名前さァ。おぼえて 帰れたらいいねェ？`,'さあ 開演だァ！ この舞台から 降りられるのは どっちか ひとりだけさァ！'];}
+/* 音声（端末の読み上げ機能でピエロっぽく高い声・早口で） */
+let DPVOICE=null;
+function dpSpeak(text){try{if(!window.speechSynthesis||(GS&&GS.sound===false))return;speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(String(text).replace(/[♪ァィォ～]/g,m=>m==='♪'||m==='～'?'':m).replace(/…+/g,'、'));u.lang='ja-JP';u.pitch=1.9;u.rate=1.12;u.volume=1;
+ if(!DPVOICE){const vs=speechSynthesis.getVoices().filter(v=>/ja/i.test(v.lang));DPVOICE=vs.find(v=>/male|otoya|kyoko|haruka|nanami/i.test(v.name))||vs[0]||null;}if(DPVOICE)u.voice=DPVOICE;
+ speechSynthesis.speak(u);}catch(e){}}
+const dpHush=()=>{try{window.speechSynthesis&&speechSynthesis.cancel();}catch(e){}};
+document.addEventListener('pointerdown',function un(){try{if(window.speechSynthesis){const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);speechSynthesis.getVoices();}}catch(e){}document.removeEventListener('pointerdown',un);},{passive:true});
+function bossTalk(f,next){
+ const L=D&&D.L,sp=f&&f.sid&&SPECIES[f.sid];if(!L||L%50!==0||!sp){next();return;}
+ const ls=sp.pierrot?dpLines(sp.pierrot,L):bossLines(L,f.name,sp.fam);let i=0,typing=null,full=false;
+ const el=document.createElement('div');el.id='btalk';
+ el.innerHTML=`<div class="btpic">${monSprite(sp,!!f.shiny)}</div><div class="btbox"><b class="btnm">${esc(f.name)}</b><p id="bttx"></p><span class="btnx">▼</span></div><button id="btskip">スキップ ▶▶</button>`;
+ document.body.appendChild(el);SE('alert');
+ const tx=el.querySelector('#bttx');
+ const show=()=>{const s=ls[i];dpSpeak(s);tx.textContent='';full=false;let k=0;clearInterval(typing);typing=setInterval(()=>{k++;tx.textContent=s.slice(0,k);if(k>=s.length){clearInterval(typing);full=true;}},45);};
+ const fin=()=>{clearInterval(typing);dpHush();el.remove();next();};
+ el.onclick=e=>{if(e.target.id==='btskip'){fin();return;}if(!full){clearInterval(typing);tx.textContent=ls[i];full=true;return;}i++;SE('click');if(i>=ls.length)fin();else show();};
+ show();}
 function bossFear(){if(D.special==='mirror')return 5;if(D.special==='raid'||D.special==='casino'||spdOf(D.special))return 6;if(D.special==='phantom')return 3;if(D.special==='kira')return 0;return Math.min(6,Math.floor((D.L||1)/2)+(D.boss?2:0));}
 function bossAlert(name,next){
  const el=document.createElement('div');el.id='alert';
@@ -5395,7 +5542,7 @@ function startBattle(foe,ctx){
  {const ob=party().reduce((v,m)=>v+(as(m,mods).openPbuff||0),0);if(ob>0){B.pbuff={n:2,v:+ob.toFixed(2)};lines.push('仲間の力で 全員の攻撃力が あがっている！');}}
  $('#app').innerHTML=`<div class="field bf cave ${E.kind==='boss'||E.kind==='raid'?'boss':''}" style="--d1:${ctx.bg[0]};--d2:${ctx.bg[1]}"><div class="sun"></div><div class="hill" style="left:-10%"></div><div class="hill" style="right:-15%;height:16%"></div><div class="ground"></div>
   <div class="tag" id="ftag"></div>${ES.length===1?`<div class="foe ${E.kind==='boss'||E.kind==='raid'?'big':''} ${E.shiny?'shiny':E.rank>=4?'rare':''} ${E.mirror?'mirror':''}" id="foe">${foeSpr(E)}</div>`
-   :`<div class="erow solo n${ES.length}">${ES.map(e=>`<div class="eu ${e.shiny?'shiny':e.rank>=4?'rare':''} ${e.mirror?'mirror':''}" id="foe${e.i}"><span class="es">${foeSpr(e)}</span><b>${esc(e.name)}${e.shiny?' ✦':''}</b><div class="bar"><i style="width:100%;background:var(--bad)"></i></div></div>`).join('')}</div>`}
+   :`<div class="erow solo n${ES.length}">${ES.map(e=>`<div class="eu ${e.shiny?'shiny':e.rank>=4?'rare':''} ${e.mirror?'mirror':''}" id="foe${e.i}"><b>${esc(e.name)}${e.shiny?' ✦':''}</b><div class="bar"><i style="width:100%;background:var(--bad)"></i></div><span class="es">${foeSpr(e)}</span></div>`).join('')}</div>`}
   <div class="pops" id="pops"></div><div class="log" id="msg"></div></div>
   <div class="pcwrap"><div class="pcards n${party().length}" id="st"></div><div class="pops" id="ppops"></div></div>
   <div class="cmdp" id="cmdw"><p class="who" id="who"></p><div class="cmd" id="cmd"></div><div class="cmd2" id="cmd2"></div></div>`;
@@ -5576,7 +5723,7 @@ function cmdSkill(){
 }
 function cmdItem(){
  const c=$('#cmd');c.className='cmd list';$('#cmd2').innerHTML='';const down=party().some(m=>m.hp<=0);
- c.innerHTML=Object.entries(ITEMS).map(([k,it])=>`<button class="it" data-k="${k}" ${!GS.items[k]||(k==='rev'&&!down)||(k==='ball'&&(E.kind==='raid'||E.mirror))?'disabled':''}>${it.name} ×${GS.items[k]||0}<small>${k==='ball'?(E.kind==='raid'||E.mirror?'この相手は スカウトできない':`いまの成功率 ${Math.round(scoutRate()*100)}%`):it.desc}</small></button>`).join('')+`<button id="back">もどる</button>`;
+ c.innerHTML=Object.entries(ITEMS).map(([k,it])=>`<button class="it" data-k="${k}" ${!GS.items[k]||(k==='rev'&&!down)||(k==='ball'&&(E.kind==='raid'||E.mirror||E.noScout))?'disabled':''}>${it.name} ×${GS.items[k]||0}<small>${k==='ball'?(E.kind==='raid'||E.mirror||E.noScout?'この相手は スカウトできない':`いまの成功率 ${Math.round(scoutRate()*100)}%`):it.desc}</small></button>`).join('')+`<button id="back">もどる</button>`;
  c.querySelectorAll('.it').forEach(b=>b.onclick=()=>choose({kind:'item',k:b.dataset.k}));
  $('#back').onclick=cmdMain;
 }
@@ -5704,7 +5851,7 @@ async function act(a){
   if(!aliveF().includes(E))E=aliveF()[0]||E;
   if(s.type!=='buff')P.buff=false;
  }else if(a.kind==='item'){
-  if(!GS.items[a.k]||(a.k==='rev'&&!party().some(x=>x.hp<=0))||(a.k==='ball'&&(E.kind==='raid'||E.mirror))){await say(`${P.name}は どうぐを 使えなかった。`);return false;}
+  if(!GS.items[a.k]||(a.k==='rev'&&!party().some(x=>x.hp<=0))||(a.k==='ball'&&(E.kind==='raid'||E.mirror||E.noScout))){await say(`${P.name}は どうぐを 使えなかった。`);return false;}
   const it=ITEMS[a.k],x=1+(m.itemPct||0),free=Math.random()<(m.itemFree||0);if(!free)GS.items[a.k]--;hab('item');
   await say(`${P.name}は ${it.name}を つかった！`);if(free)await say('（道具は なくならなかった！）');
   if(a.k==='herb')await healP(30*x/(1+(m.healPct||0)));
