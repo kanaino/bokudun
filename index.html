@@ -1006,7 +1006,7 @@ const FX={autoSpd:v=>`オートバトルの速さ×${v}`,s_str:v=>`力+${v}`,s_v
  foeAtk:v=>`敵の攻撃力-${pc(v)}`,mpCut:v=>`とくぎの消費MP-${v}`,endure:v=>`戦闘ごとに${v}回 HP1で耐える`,barrier:v=>`戦闘開始時 最大HPの${pc(v)}のバリア`,
  itemPct:v=>`道具の効果+${pc(v)}`,dropPct:v=>`道具の入手率+${pc(v)}`,runPct:v=>`逃走成功率+${pc(v)}`,firstPct:v=>`1ターン目の与ダメージ+${pc(v)}`,
  streakPct:v=>`同じ行動を続けるたび与ダメージ+${pc(v)}`,magCrit:v=>`呪文の会心率+${pc(v)}`,healToDmg:v=>`回復量の${pc(v)}を敵にダメージ`,buffPct:v=>`気合ため等の倍率+${pc(v)}`,scoutPct:v=>`スカウト成功率+${pc(v)}`,
- winGold:v=>`バトルで得るジンバブエ+${pc(v)}`,winExp:v=>`戦闘で得る経験値+${pc(v)}`,postHeal:v=>`戦闘後 HPが最大の${pc(v)}回復`,killHeal:v=>`敵を倒すと HPが最大の${pc(v)}回復`,killMp:v=>`敵を倒すと MP+${v}`,
+ winGold:v=>`バトルで得るジンバブエ+${pc(v)}`,confPct:v=>`混乱させる確率+${pc(v)}`,atkConf:v=>`「たたかう」で${pc(v)}の確率で混乱させる`,winExp:v=>`戦闘で得る経験値+${pc(v)}`,postHeal:v=>`戦闘後 HPが最大の${pc(v)}回復`,killHeal:v=>`敵を倒すと HPが最大の${pc(v)}回復`,killMp:v=>`敵を倒すと MP+${v}`,
  atkPoison:()=>'「たたかう」で敵を毒にする',atkStun:v=>`「たたかう」で${pc(v)}の確率でしびれさせる`,atkSteal:v=>`「たたかう」で${pc(v)}の確率で道具を盗む`,openPbuff:v=>`戦闘開始から2ターン 全員の与ダメージ+${pc(v)}`,
  itemFree:v=>`${pc(v)}の確率で道具を消費しない`,evade:v=>`${pc(v)}の確率で敵の攻撃をかわす`,guardHeal:v=>`ぼうぎょすると HPが最大の${pc(v)}回復`,teamRegen:v=>`毎ターン 仲間全員のHPが${pc(v)}回復`,
  thorns:v=>`攻撃を受けると ダメージの${pc(v)}をやり返す`,bossPct:v=>`ボスへのダメージ+${pc(v)}`,multiPct:v=>`敵が2体以上のとき与ダメージ+${pc(v)}`};
@@ -1164,7 +1164,7 @@ const STN={str:'力',int:'魔力',def:'守備',agi:'素早さ'};
 const KAN=['','','弐','参','肆','伍','陸','漆','捌','玖','拾'];
 const thr=(c,n)=>Math.round(CATS[c].base*Math.pow(n,1.5));
 let uqSeq=0;
-function tagTxt(s){return (s.aoe?'・全体攻撃':'')+(s.poison?'・毒':'')+(s.stun?`・${pc(s.stun)}でしびれ`:'')+(s.weaken?'・敵の攻撃ダウン':'')+(s.armor?'・敵の守備ダウン':'')+(s.pierce?'・守備無視':'')+(s.gold?'・ジンバブエを得る':'')+(s.summon?'・仲間モンスターが多いほど強い':'')+(s.revive?'・倒れた仲間を1人復活':'')+(s.regen?`・${s.regen}ターン自動回復`:'')+(s.mpAll?'・みんなのMP回復':'')+(s.taunt?'・敵の攻撃を引きつける':'');}
+function tagTxt(s){return (s.aoe?'・全体攻撃':'')+(s.conf?`・${pc(s.conf)}で混乱`:'')+(s.poison?'・毒':'')+(s.stun?`・${pc(s.stun)}でしびれ`:'')+(s.weaken?'・敵の攻撃ダウン':'')+(s.armor?'・敵の守備ダウン':'')+(s.pierce?'・守備無視':'')+(s.gold?'・ジンバブエを得る':'')+(s.summon?'・仲間モンスターが多いほど強い':'')+(s.revive?'・倒れた仲間を1人復活':'')+(s.regen?`・${s.regen}ターン自動回復`:'')+(s.mpAll?'・みんなのMP回復':'')+(s.taunt?'・敵の攻撃を引きつける':'');}
 function skillDesc(s){const b=skillDesc0(s);return b+tagTxt(s);}
 function skillDesc0(s){
  if(s.type==='sig')return s.desc;
@@ -1810,6 +1810,44 @@ function star7Sprite(kind,mode,m){
   <path d="M86 84 Q100 92 114 84" stroke="${ol}" stroke-width="2.4" fill="#fff" stroke-linecap="round"/><path d="M90 85 l2 5 l2 -4 M106 85 l2 5 l2 -5" fill="#fff" stroke="${ol}" stroke-width="1"/>
   <path d="M70 72 l10 2 M70 78 l10 0 M130 72 l-10 2 M130 78 l-10 0" stroke="#78909c" stroke-width="1.6"/>
   <path d="M118 52 l8 10" stroke="#b71c1c" stroke-width="2" stroke-linecap="round"/>`;
+ }else if(kind==='bsk'){
+  body=`<ellipse cx="100" cy="190" rx="54" ry="7" fill="#0004"/>
+  <rect x="76" y="168" width="21" height="16" rx="5" fill="#37474f" ${o2}/><rect x="103" y="168" width="21" height="16" rx="5" fill="#37474f" ${o2}/>
+  <path d="M74 178 h26 l2 8 h-30 Z M100 178 h26 l2 8 h-30 Z" fill="#212121" ${o2}/>
+  <path d="M84 122 Q68 118 52 110 Q40 104 38 86" stroke="url(#k${id})" stroke-width="19" stroke-linecap="round" fill="none"/>
+  <path d="M116 122 Q132 118 148 110 Q160 104 162 86" stroke="url(#k${id})" stroke-width="19" stroke-linecap="round" fill="none"/>
+  <path d="M30 86 Q28 72 38 70 Q48 70 46 84 Q44 92 36 92 Q30 92 30 86 Z" fill="url(#k${id})" ${o2}/><path d="M34 74 h10 M33 79 h11 M34 84 h9" stroke="${ol}" stroke-width="1.2" opacity=".6"/>
+  <path d="M170 86 Q172 72 162 70 Q152 70 154 84 Q156 92 164 92 Q170 92 170 86 Z" fill="url(#k${id})" ${o2}/><path d="M156 74 h10 M156 79 h11 M157 84 h9" stroke="${ol}" stroke-width="1.2" opacity=".6"/>
+  <path d="M56 140 Q48 162 62 172 Q100 186 138 172 Q152 162 144 140 Z" fill="url(#k${id})" ${o}/>
+  <ellipse cx="100" cy="164" rx="3" ry="4" fill="#a8654a"/><path d="M98 161 q2 3 4 0" stroke="#7a4030" stroke-width="1.2" fill="none"/>
+  <path d="M70 172 Q100 180 130 172" stroke="#c88a70" stroke-width="1.6" fill="none"/><path d="M64 156 q4 8 2 14 M136 156 q-4 8 -2 14" stroke="#c88a70" stroke-width="1.4" fill="none"/>
+  <path d="M58 112 Q100 96 142 112 Q156 132 150 148 Q100 160 50 148 Q44 132 58 112 Z" fill="#141414" ${o}/>
+  <path d="M54 146 Q100 158 146 146" stroke="#2c2c2c" stroke-width="2.4" fill="none"/>
+  <path d="M50 114 Q62 98 88 104 L86 128 Q58 130 50 114 Z M150 114 Q138 98 112 104 L114 128 Q142 130 150 114 Z" fill="#141414" ${o}/>
+  <path d="M88 106 Q100 114 112 106" stroke="#3a3a3a" stroke-width="3" fill="none"/><path d="M80 140 q20 6 40 0" stroke="#2c2c2c" stroke-width="2" fill="none"/>
+  <path d="M84 90 Q84 104 86 110 Q100 116 114 110 Q116 104 116 90 Z" fill="url(#k${id})" ${o2}/><path d="M88 106 Q100 110 112 106" stroke="#c88a70" stroke-width="1.4" fill="none"/>
+  <g transform="translate(0 -4)">
+  <path d="M57 64 Q56 26 100 26 Q144 26 143 64 Q146 94 126 102 Q100 114 74 102 Q54 94 57 64 Z" fill="url(#k${id})" ${o}/>
+  <path d="M76 102 Q100 112 124 102" stroke="#c88a70" stroke-width="1.6" fill="none"/><path d="M82 107 Q100 115 118 107" stroke="#c88a70" stroke-width="1.4" fill="none"/>
+  <ellipse cx="60" cy="70" rx="5" ry="8" fill="url(#k${id})" ${o2}/><ellipse cx="140" cy="70" rx="5" ry="8" fill="url(#k${id})" ${o2}/>
+  <path d="M57 74 Q50 18 100 14 Q150 18 143 74 Q140 62 136 58 L130 60 Q131 54 128 54 L122 56 L120 52 L112 55 L108 51 L100 54 L94 51 L88 55 L80 52 L78 56 L72 54 Q69 54 70 60 L66 58 Q62 62 57 74 Z" fill="#101010" ${o}/>
+  <path d="M74 32 q12 -10 26 -10 M110 24 q14 2 22 14" stroke="#3d3d3d" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M78 66 Q86 62 95 66 Q86 70 78 66 Z M105 66 Q114 62 122 66 Q114 70 105 66 Z" fill="#fff" stroke="${ol}" stroke-width="1.4"/>
+  <circle cx="88" cy="64.2" r="2.6" fill="#1a1a1a"/><circle cx="115" cy="64.2" r="2.6" fill="#1a1a1a"/><circle cx="88.8" cy="63.4" r=".8" fill="#fff"/><circle cx="115.8" cy="63.4" r=".8" fill="#fff"/>
+  <path d="M77 65 Q86 59 96 64 M104 64 Q114 59 123 65" stroke="${ol}" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <path d="M79 70 q8 3 15 0 M106 70 q8 3 15 0" stroke="#c88a70" stroke-width="1.4" fill="none"/>
+  <path d="M98 70 q-4 8 0 10 q3 1 5 -1" stroke="#b9775c" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="97" cy="79" r="1" fill="#8d5a45"/><circle cx="103" cy="79" r="1" fill="#8d5a45"/>
+  <path d="M80 84 Q86 90 100 90 Q114 90 122 82" stroke="${ol}" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <path d="M78 82 q2 3 4 3 M122 80 q1 4 -2 5" stroke="${ol}" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M86 89 q14 4 28 -1" stroke="#c88a70" stroke-width="1.2" fill="none"/>
+  <ellipse cx="74" cy="80" rx="9" ry="5" fill="#ff8a80" opacity=".4"/><ellipse cx="128" cy="78" rx="9" ry="5" fill="#ff8a80" opacity=".4"/>
+  <path d="M84 96 q16 6 32 0" stroke="#c88a70" stroke-width="1.4" fill="none" opacity=".7"/>
+  <path d="M140 44 q6 -4 4 -10 M146 52 q8 -2 8 -8" stroke="#90caf9" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M146 30 q3 6 0 8 q-3 -2 0 -8 Z" fill="#90caf9"/>
+  <path d="M54 66 Q50 10 100 10 Q150 10 146 66" stroke="#263238" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M58 52 Q56 16 100 16 Q144 16 142 52" stroke="#546e7a" stroke-width="2.4" fill="none"/>
+  <rect x="44" y="54" width="18" height="30" rx="8" fill="#e53935" ${o}/><rect x="138" y="54" width="18" height="30" rx="8" fill="#e53935" ${o}/>
+  <rect x="58" y="58" width="7" height="22" rx="3" fill="#263238" ${o2}/><rect x="135" y="58" width="7" height="22" rx="3" fill="#263238" ${o2}/>
+  <path d="M48 60 v18 M152 60 v18" stroke="#ff8a80" stroke-width="2" stroke-linecap="round"/>
+  </g>`;
  }else{
   const fl=(x,y)=>`<g><ellipse cx="${x}" cy="${y}" rx="3" ry="2.4" fill="#263238"/><ellipse cx="${x-2}" cy="${y-3}" rx="2.6" ry="1.6" fill="#e1f5fe" opacity=".85"/><ellipse cx="${x+2}" cy="${y-3}" rx="2.6" ry="1.6" fill="#e1f5fe" opacity=".85"/></g>`;
   body=`<ellipse cx="100" cy="190" rx="48" ry="7" fill="#0004"/>
@@ -2233,6 +2271,9 @@ const J7=[
  ['x7e','役職なし','speed','phys',[15,18,4,12,14],'#546e7a',[['牙突','phys',3,3],['遠吠え','buff',0,1],['獣王斬','phys',6.6,14],['月下狂乱','multi',1.3,9,6],['野生の守り','sanct',0,6,3],['血の渇き','phys',2.4,5,{drain:.5}]],['牙','月','獣王'],['獣王の血','銀狼の誇り','月下の覇者'],{custom:'beast'},'銀狼の血を引く半獣の戦士。満月の夜は誰にも止められない']];
 J6.forEach(d=>genJob(...d));
 J7.forEach(d=>{genJob(...d);JOBS[d[0]].special=true;JOBS[d[0]].star7=true;});
+/* お詫び配布の★6：バーサーカーI（職業「轟」）。敵を混乱させてバトルを乱す狂戦士 */
+genJob('bsk','轟','phys','speed',[16,19,5,11,13],'#b71c1c',[['狂乱の一撃','phys',3.2,3],['雄たけび','buff',0,1],['轟爆斬','phys',6.8,14],['暴れ回り','multi',1.3,9,6],['狂気の構え','sanct',0,6,3],['狂喜乱舞','multi',.9,6,4]],['狂乱','轟','暴走'],['狂戦士の血','轟の覇気','止まらない暴走'],{custom:'bsk'},'ニヤつきながら暴れまわる狂戦士。敵を混乱させてバトルをめちゃくちゃにする');
+JOBS.bsk.special=true;
 /* ===== 職業ごとの個性：技の名前から特別な効果をつける ===== */
 const TAGR=[
  ['aoe',/嵐|群れ|乱舞|大群|乱射|弾幕|雨|吹雪|噴火|大放水|花吹雪|百花|パレード|大回転|行進|雪崩|大渦|大水流|ロケット|爆発|大召喚|流星|メテオ|超新星|銀河|ばらまき|ゴロゴロ|おなら|ルーレット|ジャックポット|百連|百裂|竜巻|大波|大地|地震|宴|ライブ|フィーバー|ギガトン|火柱/],
@@ -2249,15 +2290,15 @@ const TAGR=[
  ['pbuff',/応援|声援|エール|号令|フレー|鼓舞|気合|士気|雄たけび|咆哮|指揮|勝利のポーズ|はげまし|腹太鼓|警笛|ほら貝|神回|高評価|観客|闘魂|屁のつっぱり/],
  ['taunt',/肉の壁|盾|壁|ガード|かばう|仁王立ち|包囲網|受けの美学|身代わり|受け身|構え/],
  ['summon',/召喚|群れの突撃|ハエの大群|ハチの群れ|獣王|守護霊|魔物の咆哮|群れ|契約/]];
-const TAG_OK={aoe:['phys','multi','mag','hybrid'],poison:['phys','multi','mag','hybrid'],stun:['phys','multi','mag','hybrid'],weaken:['phys','multi','mag','hybrid'],armor:['phys','multi','mag','hybrid'],
+const TAG_OK={conf:['phys','multi','mag','hybrid'],aoe:['phys','multi','mag','hybrid'],poison:['phys','multi','mag','hybrid'],stun:['phys','multi','mag','hybrid'],weaken:['phys','multi','mag','hybrid'],armor:['phys','multi','mag','hybrid'],
  pierce:['phys','multi','hybrid'],gold:['phys','multi','mag','hybrid'],healAll:['heal'],revive:['heal'],regen:['heal','buff','sanct'],mpAll:['heal','buff','sanct'],pbuff:['buff','sanct'],taunt:['sanct','buff'],summon:['phys','multi','mag']};
-const TAGV={stun:.45,weaken:.2,armor:.25,gold:.5,regen:3,mpAll:6};
+const TAGV={conf:.3,stun:.45,weaken:.2,armor:.25,gold:.5,regen:3,mpAll:6};
 function tagSkill(s,force){
  if(!s||s._tg)return s;s._tg=1;
  const tags=new Set(force||[]);for(const[t,r] of TAGR)if(r.test(s.name||'')&&TAG_OK[t].includes(s.type))tags.add(t);
  tags.forEach(t=>{if(!TAG_OK[t].includes(s.type))return;
   if(t==='aoe'){s.aoe=true;if(s.pow)s.pow=+(s.pow*.8).toFixed(2);}
-  else if(t==='stun')s.stun=TAGV.stun;else if(t==='weaken')s.weaken=TAGV.weaken;else if(t==='armor')s.armor=TAGV.armor;
+  else if(t==='stun')s.stun=TAGV.stun;else if(t==='conf')s.conf=TAGV.conf;else if(t==='weaken')s.weaken=TAGV.weaken;else if(t==='armor')s.armor=TAGV.armor;
   else if(t==='gold')s.gold=TAGV.gold;else if(t==='regen')s.regen=TAGV.regen;else if(t==='mpAll')s.mpAll=TAGV.mpAll;else s[t]=true;});
  return s;
 }
@@ -2269,6 +2310,7 @@ const JSIG={
  x7b:{'おなら':['aoe','poison'],'ケツ見せ':['stun','weaken'],'ギガトンおなら':['aoe','poison'],'ハエの大群':['poison','aoe'],'風呂キャンセル':['regen'],'屁のつっぱり':['pbuff']},
  x7c:{'ラブリービーム':['stun'],'ときめきハート':['healAll'],'キラキラ☆ミラクル':['aoe','weaken'],'ハートの嵐':['aoe'],'プリンセスガード':['regen'],'ウインクひとつ':['pbuff']},
  x7d:{'気功弾':['pierce'],'酔拳':['stun'],'天地開闢':['aoe','armor'],'百歩神拳':['pierce'],'不動心':['taunt'],'仙桃':['regen']},
+ bsk:{'狂乱の一撃':['conf'],'雄たけび':['pbuff'],'轟爆斬':['aoe','conf'],'暴れ回り':['conf'],'狂気の構え':['taunt'],'狂喜乱舞':['aoe','conf']},
  x7e:{'牙突':['pierce'],'遠吠え':['pbuff'],'獣王斬':['aoe'],'月下狂乱':['aoe'],'野生の守り':['taunt'],'血の渇き':['weaken']},
  mmaster:{'群れの突撃':['summon','aoe'],'獣王の一撃':['summon','pierce'],'号令':['pbuff']},
  gambler:{'ジャックポット':['gold','aoe'],'オールイン':['gold'],'ルーレット':['aoe']},
@@ -2374,7 +2416,7 @@ const SIGS={
  bard:['伝説のバラード','critAll',{n:2},7],knight:['騎士の誓い','sumo',{n:3},8],tamer:['なつかせる','charm',{k:.6,dmg:0},5],fortune:['運命の予言','lucky',{k:4},8],
  alchemist:['錬金反応','mpDrain',{k:2.4},8],brave:['勇者の一撃','berserk',{k:3.2},12],sage:['極大呪文','crowd',{k:2.2,stat:'int'},18],saint:['奇跡の復活','reviveAll',{p:.8},20],
  phantom:['月夜の盗み','dropUp',{},6],overlord:['覇王の威圧','timestop',{},14],mmaster:['魔物大行進','petHeal',{k:3,atk:true},10],gambler:['一か八か','lucky',{k:5},8],
- x7a:['ハラペコ大爆発','selfBomb',{k:4},10],x7b:['最終兵器おなら','burnAll',{k:2.5},12],x7c:['みんなだいすき♡','reviveAll',{p:.7},14],x7d:['奥義伝授','critAll',{n:3},10],x7e:['獣化・満月','berserk',{k:3.4},10],
+ x7a:['ハラペコ大爆発','selfBomb',{k:4},10],x7b:['最終兵器おなら','burnAll',{k:2.5},12],x7c:['みんなだいすき♡','reviveAll',{p:.7},14],x7d:['奥義伝授','critAll',{n:3},10],x7e:['獣化・満月','berserk',{k:3.4},10],bsk:['轟・バーサークラッシュ','combo',{seq:[['aoe',{k:1.8,x:{conf:.6}}],['berserk',{k:2.8}]]},12],
  barista:['おかわり自由','mpAll',{v:12},6],florist:['花言葉','regenAll',{n:3,p:.12},7],librarian:['禁書の封印','timestop',{},12],photographer:['決定的瞬間','critAll',{n:2},6],
  streamer:['投げ銭タイム','richDmg',{k:1.2},7],youtuber:['大バズり','crowd',{k:1.3,stat:'int'},9],mangaka:['締切前の覚醒','charge',{k:1.3},6],voiceactor:['七色ボイス','random',{},7],
  diver:['深海の水圧','breakDef',{n:2},8],mountaineer:['登頂アタック','charge',{k:1.4},8],racer:['ニトロ全開','arrows',{n:3,k:1.6},9],skater:['ノーリスク','dodge',{n:2},6],
@@ -2618,6 +2660,8 @@ x7c:{t:{'キラキラ☆ミラクル':['aoe',{k:1.9,mag:1,x:{weaken:.2}},12],'�
  p:[['恋の魔法',{scoutPct:.3,healPct:.25,lovely:1}],['永遠のプリンセス',{teamRegen:.04}],['奇跡の笑顔',{foeAtk:.12}]]},
 x7d:{t:{'天地開闢':['aoe',{k:1.9,x:{armor:.25}},12],'百歩神拳':['arrows',{n:7,k:.8,one:true},9],'不動心':['counter',{n:3,k:2},5],'仙桃':['regenAll',{n:5,p:.1},8]},
  p:[['天地の理',{magCrit:.12,crit:.08,mikiri:.3,stackPct:.08}],['金剛不壊',{taken:-.15,endure:1}],['武神',{dblAtk:true,winExp:.15}]]},
+bsk:{t:{'轟爆斬':['aoe',{k:2.1,x:{conf:.35}},12],'暴れ回り':['arrows',{n:6,k:1.15},9],'狂気の構え':['dodge',{n:2},5],'狂喜乱舞':['combo',{seq:[['aoe',{k:1.2,x:{conf:.3}}],['hit',{k:1.6,x:{crit:1}}]]},8]},
+ p:[['狂戦士の血',{lowAtk:.35,critDmg:.3}],['轟の覇気',{dmgPct:.15,confPct:.15}],['止まらない暴走',{atkConf:.25,firstPct:.25}]]},
 x7e:{t:{'獣王斬':['aoe',{k:2,x:{stun:.2}},12],'月下狂乱':['arrows',{n:6,k:1.1},9],'野生の守り':['dodge',{n:2},5],'血の渇き':['combo',{seq:[['arrows',{n:3,k:.8,one:true}],['hit',{k:1.4,x:{drain:.8}}]]},8]},
  p:[['獣王の血',{lowAtk:.35,killHeal:.1}],['銀狼の誇り',{evade:.1,critDmg:.3}],['月下の覇者',{firstPct:.3,dblAct:true}]]},
 brave:{t:{'ギガスラッシュ':['aoe',{k:1.9},12],'天の雷':['hit',{k:2.4,mag:1,x:{stun:.4}},9],'大いなる盾':['guardAll',{n:3},9],'癒しの光':['healAll',{k:3},9]},
@@ -2743,7 +2787,7 @@ oracle:{t:{'運命の糸':['swap',{},5],'占星':['lucky',{k:3.5},6],'神託':['
 beastfighter:{t:{'獣の連撃':['arrows',{n:4,k:.9,one:true},6],'野生の勘':['dodge',{n:2},4],'群れの力':['petHeal',{k:2.5,atk:true},7],'獣王の一撃':['hit',{k:2.4,x:{stun:.35}},7]},
  p:[['野性',{lowAtk:.3}],['狩りの本能',{killHeal:.1}],['獣の皮',{taken:-.08}]]}
 };
-const XTX=x=>!x?'':(x.crit?'・必ず会心':'')+(x.pierce?'・守備無視':'')+(x.stun?`・${pc(x.stun)}でしびれ`:'')+(x.poison?'・毒':'')+(x.freeze?`・${pc(x.freeze)}で凍結`:'')+(x.weaken?'・敵の攻撃ダウン':'')+(x.armor?'・敵の守備ダウン':'')+(x.drain?'・与ダメの一部を吸収':'')+(x.steal?`・${pc(Math.min(1,x.steal))}で道具を盗む`:'')+(x.gold?'・ジンバブエを奪う':'')+(x.self?'・反動あり':'');
+const XTX=x=>!x?'':(x.conf?`・${pc(x.conf)}で混乱`:'')+(x.crit?'・必ず会心':'')+(x.pierce?'・守備無視':'')+(x.stun?`・${pc(x.stun)}でしびれ`:'')+(x.poison?'・毒':'')+(x.freeze?`・${pc(x.freeze)}で凍結`:'')+(x.weaken?'・敵の攻撃ダウン':'')+(x.armor?'・敵の守備ダウン':'')+(x.drain?'・与ダメの一部を吸収':'')+(x.steal?`・${pc(Math.min(1,x.steal))}で道具を盗む`:'')+(x.gold?'・ジンバブエを奪う':'')+(x.self?'・反動あり':'');
 Object.assign(SIGD,{
  hit:p=>`${p.mag?'魔力':'力'}×${p.k}の一撃${XTX(p.x)}`,aoe:p=>`敵全体に${p.mag?'呪文':'攻撃'}（${p.mag?'魔力':'力'}×${p.k}）${XTX(p.x)}`,
  heal1:p=>`仲間1人のHPを大きく回復（魔力×${p.k}）`,healAll:p=>`仲間全員のHPを回復（魔力×${p.k}）`,guardAll:p=>`${p.n}ターン 全員の受けるダメージ半減`,
@@ -2770,7 +2814,7 @@ async function applyX(x,d,me){if(!x||!E)return;
  if(x.drain&&d>0)await healP(d*x.drain,me);
  if(E.hp>0&&x.steal&&Math.random()<x.steal){const k=pick(Object.keys(ITEMS));GS.items[k]=(GS.items[k]||0)+1;await say(`${ITEMS[k].name}を ぬすんだ！`);}
  if(E.hp>0&&x.freeze&&Math.random()<x.freeze){E.frozen=true;await say(`${E.name}は こおりついた！`);}
- await onHitTags({poison:x.poison,stun:x.stun,weaken:x.weaken,armor:x.armor,gold:x.gold?.3:0},d);}
+ await onHitTags({poison:x.poison,stun:x.stun,weaken:x.weaken,armor:x.armor,gold:x.gold?.3:0,conf:x.conf||0},d);}
 async function sigAct2(s,me){const p=s.p,st=k=>S(k),x=p.x||{};
  switch(s.kind){
   case 'hit':{E=E&&E.hp>0&&!E.gone?E:aliveF()[0];await fxPlay(p.mag?'orb':atkFx(me),'foe',{wait:220});const c=await critRoll(!!x.crit);
@@ -3003,7 +3047,7 @@ const SPLIT_CAP=new Set(['dmgPct','physPct','magPct','atkPct','critDmg','healPct
 /* 上限：回避80%・受けるダメージ−80%まで、会心は基本とあわせて100%まで、確率の効果は100%まで（与ダメージ%などは無限） */
 const MOD_CAP={evade:.8,crit:.92,magCrit:1,echo:1,atkStun:1,atkSteal:1,itemFree:1,
  foeAtk:.8,hpRegen:.3,teamRegen:.3,guardHeal:.3,killHeal:.3,postHeal:.3,barrier:.5,thorns:1,healToDmg:1,endure:2,
- dmgPct:1,physPct:1,magPct:1,atkPct:1,critDmg:1,healPct:1,bossPct:1,multiPct:1,firstPct:1,lowAtk:1,openPbuff:1,streakPct:.2,buffPct:2,winGold:1,winExp:.5};
+ dmgPct:1,physPct:1,magPct:1,atkPct:1,critDmg:1,healPct:1,bossPct:1,multiPct:1,firstPct:1,lowAtk:1,openPbuff:1,streakPct:.2,buffPct:2,winGold:1,winExp:.5,confPct:.5,atkConf:.6};
 function capMods(m){if(P&&P.jobKey==='x7e'){if(m.dblAtk){delete m.dblAtk;m.dblAct=true;}}else{delete m.dblAct;delete m.act3;}
  if(P&&P.jobKey==='x7c'){if(m.lovely2)m.lovely=1;}else{delete m.lovely;delete m.lovely2;}
  if(P&&P.jobKey==='x7d'){if(m.mikiri2){m.mikiri=.5;m.mikiriCrit=true;}if(m.mikiri>.5)m.mikiri=.5;if(m.stackPct>.08)m.stackPct=.08;}else{delete m.mikiri;delete m.mikiri2;delete m.stackPct;}for(const [k,v] of Object.entries(MOD_CAP))if(m[k]>v)m[k]=v;if(m.taken<-.8)m.taken=-.8;return m;}
@@ -3091,7 +3135,7 @@ function renderJob(o){
  $('#jbk').onclick=()=>renderCreator({app:o.app,name:o.name});
  document.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{
   uqSeq=0;
-  GS={v:2,layV:2,free:{comp:1,skill:1},cnt:{},treeV:TREE_V,gold:10000,zim:1,zim2:1,purgeX:1,gems:500,items:{herb:3,water:1,bomb:1,rev:1,ball:3},bag:{},sbag:[],roster:[],party:[],mseq:0,dg:{},spx:{},sound:true,friendCode:makeCode(),friends:[]};
+  GS={v:2,layV:2,free:{comp:1,skill:1},cnt:{},treeV:TREE_V,gold:10000,zim:1,zim2:1,purgeX:1,apo1:1,gems:500,items:{herb:3,water:1,bomb:1,rev:1,ball:3},bag:{},sbag:[],roster:[],party:[],mseq:0,dg:{},spx:{},sound:true,friendCode:makeCode(),friends:[]};
   normalize(GS);
   const name=($('#nm').value||'').trim().slice(0,8)||'ゆうしゃ';
   const h=newMember({name,jobKey:b.dataset.job,hero:true});h.app={...o.app};h.trees={[h.jobKey]:h.tree};h.jobsOwned=[h.jobKey];GS.roster.push(h);GS.party=[h.id];P=h;normalize(GS);
@@ -3134,6 +3178,7 @@ function normalize(g){
   g.lay.max=Math.max(1,c+1);g.lay.prog={};for(let L=1;L<g.lay.max;L++)g.lay.prog[L]=[true];g.layV=2;if(c)g.layNote=1;}
  g.dex=g.dex||{};g.dexOrder=g.dexOrder||[];(g.roster||[]).forEach(m=>{if(m.mon&&m.sid){g.dex[m.sid]=2;if(!g.dexOrder.includes(m.sid))g.dexOrder.push(m.sid);}});
  migrateTree(g);
+ if(!g.apo1){g.apo1=1;const XO=['x_goldsl','x_luckyd','x_maou','x_kami'];if(XO.some(k=>(g.prizeOwn||{})[k]||(g.dex||{})[k]))g.apoPend=1;}
  if(!g.purgeX){let n=0;g.sbag=g.sbag||[];g.bag=g.bag||{};(g.roster||[]).filter(xoldTaint).forEach(m=>{n++;Object.values(m.eq||{}).forEach(k=>{if(k)g.bag[k]=(g.bag[k]||0)+1;});g.sbag.push(...(m.gsk||[]));});
   if(n){const del=new Set(g.roster.filter(xoldTaint).map(m=>m.id));g.roster=g.roster.filter(m=>!del.has(m.id));g.party=(g.party||[]).filter(id=>!del.has(id));if(!g.party.length&&g.roster.length)g.party=[g.roster[0].id];g.purgeNote=n;}g.purgeX=1;}
  if(!g.zim2){if(g.coin!==undefined)g.coin=1000;g.zim2=1;if(g.zim&&!g.zimNote)g.coinNote=1;}
@@ -3277,6 +3322,8 @@ function renderMain(tab,notes){
 function treeNotice(){
  if(GS&&GS.layNote&&!$('#tut')){delete GS.layNote;saveGame();const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>ダンジョンが新しくなりました</h2><p>1つの階層＝1つのダンジョンになり、5層ごとにボスだけの階層があります。これまでにクリアしたダンジョンの数だけ、階層を進めた状態にしています（今は 第${GS.lay.max}層 から）。</p><button class="cta" id="tutok">わかった！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
  if(GS&&GS.zimNote&&!$('#tut')){delete GS.zimNote;saveGame();const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>新しいお金「ジンバブエ」</h2><p>これまでのゴールド（G）は廃止になり、新しいお金<b>ジンバブエ（Z）</b>に切り替わりました。</p><p>これまでのゴールドのかわりに、全員に <b class="gold">10,000Z</b> を配っています。</p><p>ダンジョンでは、クリア時に <b>500Z</b>（ボス階層は <b>1,000Z</b>）が手に入ります。</p><p>ギャンブルのコインもリセットし、全員 <b class="coin">1,000コイン</b> からのやり直しです。</p><button class="cta" id="tutok">わかった！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
+ if(GS&&GS.apoPend&&!GS.purgeNote&&!$('#tut')){delete GS.apoPend;let nm='バーサーカーI';const m=newMember({name:nm,jobKey:'bsk',rarity:6});GS.roster.push(m);if(GS.party.length<4)GS.party.push(m.id);saveGame();SE('jackpot');
+  const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お詫び</p><div style="width:150px;margin:0 auto">${heroSprite(m,'full')}</div><h2>★6 バーサーカーI が仲間になった！</h2><p>景品モンスターの廃止でご迷惑をおかけしました。お詫びとして、職業「轟」の狂戦士 <b>バーサーカーI</b> をお届けします。</p><p>攻撃しながら敵を<b>混乱</b>させ（2ターン・敵は自分や仲間の敵をなぐる）、狂戦士の火力でバトルをかき乱します。</p><button class="cta" id="tutok">ありがとう！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
  if(GS&&GS.purgeNote&&!$('#tut')){const n=GS.purgeNote;delete GS.purgeNote;saveGame();const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>景品モンスターが新しくなりました</h2><p>ゴールドスライム・ラッキードラゴン・魔皇ヴァルグリード・光輝神セレスティアと、それらから配合で生まれたモンスターを廃止しました（${n}体）。装備していた装備・スキルは手もとに戻しています。</p><p>景品交換所には<b>新ゴールドスライム・新ラッキードラゴン・新魔皇ヴァルグリード・新光輝神セレスティア</b>が並びます。</p><button class="cta" id="tutok">わかった！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
  if(GS&&GS.coinNote&&!$('#tut')){delete GS.coinNote;saveGame();const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>ギャンブルのコインをリセットしました</h2><p>全員のコインを <b class="coin">1,000コイン</b> にそろえて、やり直しにしています。</p><button class="cta" id="tutok">わかった！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
  if(!GS||!GS.treeNote||$('#tut'))return;delete GS.treeNote;saveGame();
@@ -5786,7 +5833,7 @@ function startBattle(foe,ctx){
 }
 function draw(){
  if(ES.length>1){$('#ftag').innerHTML=`${C.label}　魔物の群れ（のこり${aliveF().length}体）`;ES.forEach(e=>{const el=$('#foe'+e.i);if(!el)return;el.classList.toggle('down',e.hp<=0||e.gone);el.classList.toggle('ice',!!e.frozen);const b=el.querySelector('.bar i');if(b)b.style.width=Math.max(0,e.hp/e.max*100)+'%';});}
- else $('#ftag').innerHTML=`${C.label}　${E.kind==='boss'?'ボス：':''}${E.name}${E.shiny?' ✦':''}<small class="rk"> ${FAMS[E.fam].name} ランク${E.rank}${E.sh>0?`　🛡${E.sh}`:''}${E.chg?'　⚡ため中':''}${E.tired&&B&&B.turn<=E.tired?'　💦息切れ':''}${E.hard?'　鉄壁':''}${B&&B.pdown&&B.pdown.n>0?`　味方↓${B.pdown.n}`:''}</small><div class="bar"><i style="width:${E.hp/E.max*100}%;background:var(--bad)"></i></div>`;
+ else $('#ftag').innerHTML=`${C.label}　${E.kind==='boss'?'ボス：':''}${E.name}${E.shiny?' ✦':''}<small class="rk"> ${FAMS[E.fam].name} ランク${E.rank}${E.sh>0?`　🛡${E.sh}`:''}${E.chg?'　⚡ため中':''}${E.tired&&B&&B.turn<=E.tired?'　💦息切れ':''}${E.hard?'　鉄壁':''}${E.conf>0?'　😵混乱':''}${B&&B.pdown&&B.pdown.n>0?`　味方↓${B.pdown.n}`:''}</small><div class="bar"><i style="width:${E.hp/E.max*100}%;background:var(--bad)"></i></div>`;
  if(ES.length===1)$('#foe').classList.toggle('ice',E.frozen);
  $('#st').innerHTML=party().map(m=>as(m,()=>`<div class="pc ${m.hp<=0?'down':''} ${cur===m?'cur':''} ${FLASH===m.id?'hit':''}">
   <div class="pf">${avatar(m,'bust')}</div>
@@ -5806,7 +5853,7 @@ const ARCHATK={phys:'slash',tank:'smash',mag:'orb',trick:'dslash',support:'smash
 function atkFx(m){
  if(!m)return 'slash';
  if(m.mon)return FAMATK[SPECIES[m.sid].fam]||'smash';
- if(m.jobKey==='x7a')return 'stomp';if(m.jobKey==='x7b')return 'gas';if(m.jobKey==='x7c')return 'holy';if(m.jobKey==='x7d')return 'smash';if(m.jobKey==='x7e')return 'claw';
+ if(m.jobKey==='x7a')return 'stomp';if(m.jobKey==='x7b')return 'gas';if(m.jobKey==='x7c')return 'holy';if(m.jobKey==='x7d')return 'smash';if(m.jobKey==='x7e')return 'claw';if(m.jobKey==='bsk')return 'smash';
  const j=JOBS[m.jobKey]||{};return ARCHATK[j.arch]||'slash';
 }
 function skillFx(s,m){
@@ -5928,9 +5975,21 @@ function cmdTarget(a){
  c.querySelectorAll('.tgt').forEach(b=>b.onclick=()=>choose({...a,t:+b.dataset.t}));
  $('#back').onclick=cmdMain;
 }
+/* 混乱：2ターンの間、敵は攻撃のかわりに自分（または仲間の敵）をなぐる。ボスは半分の確率でしかかからず、かかっても6割 */
+async function tryConf(c){if(!E||E.hp<=0||E.metal||E.casino)return;const md=P&&!P.foe?as(P,mods):{};let p=Math.min(1,c+(md.confPct||0));if(E.kind==='boss'||E.kind==='raid')p*=.5;
+ if(Math.random()<p){const was=E.conf>0;E.conf=2;await say(was?`${E.name}は さらに 混乱している！`:`<span class="uqt">😵 ${E.name}は 混乱した！</span>`);draw();}}
+async function confAct(){const e=E;e.conf--;const boss=e.kind==='boss'||e.kind==='raid';
+ if(boss&&Math.random()>=.6){await say(`${e.name}は 混乱しているが なんとか 体勢を立て直した！`);if(!e.conf)await say(`${e.name}の 混乱が とけた！`);return null;}
+ const others=aliveF().filter(x=>x!==e),tgt=others.length&&Math.random()<.5?pick(others):e;
+ const d=Math.max(1,Math.round(e.atk*1.2*rnd(.9,1.1)-tgt.def*.4));
+ await say(tgt===e?`${e.name}は 混乱して 自分を 攻撃した！`:`${e.name}は 混乱して ${tgt.name}に おそいかかった！`);
+ E=tgt;const f=fel(tgt);if(f){f.classList.remove('hit');void f.offsetWidth;f.classList.add('hit');}pop(d,'','foe');SE('hit');tgt.hp=Math.max(0,tgt.hp-d);await say(`${tgt.name}に <span class="dmg">${d}</span> のダメージ！`);E=e;draw();
+ if(!e.conf&&e.hp>0)await say(`${e.name}の 混乱が とけた！`);
+ if(ES.some(x=>x.hp<=0&&!x.gone))return await settleDowns();return false;}
 async function onHitTags(s,dealt){
  if(!E||E.hp<=0)return;
  if(s.poison){E.dot=Math.max(E.dot||0,Math.round(dealt*.3)+3);E.dotT=3;await say(`${E.name}は 毒に おかされた！`);}
+ if(s.conf)await tryConf(s.conf);
  if(s.stun&&Math.random()<s.stun&&E.kind!=='raid'){E.stunned=true;await say(`${E.name}は しびれて 動けなくなった！`);}
  if(s.weaken){E.atk0=E.atk0||E.atk;if(E.atk>E.atk0*.5){E.atk=Math.round(E.atk*(1-s.weaken));await say(`${E.name}の 攻撃力が さがった！`);}}
  if(s.armor){E.def0=E.def0||E.def;if(E.def>E.def0*.4){E.def=Math.round(E.def*(1-s.armor));await say(`${E.name}の 守備力が さがった！`);}}
@@ -6054,7 +6113,7 @@ async function act(a){
   hab('atk');let pow=P.buff?2+(m.buffPct||0):1;P.buff=false;
   await say(`${P.name}の こうげき！`);
   let dl=0;for(let i=0;i<(m.dblAtk?2:1)&&E.hp>0;i++){await fxPlay(atkFx(me),'foe');dl+=await physHit(pow*(m.dblAtk?.8:1),true);}
-  if(E.hp>0&&(m.atkPoison||m.atkStun))await onHitTags({poison:m.atkPoison?1:0,stun:m.atkStun||0},dl);
+  if(E.hp>0&&(m.atkPoison||m.atkStun||m.atkConf))await onHitTags({poison:m.atkPoison?1:0,stun:m.atkStun||0,conf:m.atkConf||0},dl);
   if(E.hp>0&&m.atkSteal&&Math.random()<m.atkSteal){const k=pick(Object.keys(ITEMS));GS.items[k]=(GS.items[k]||0)+1;await say(`${ITEMS[k].name}を ぬすんだ！`);}
  }else if(a.kind==='skill'){
   let s=a.s;if(P.mp<cost(s)){await say(`${P.name}は MPが たりない！`);return false;}
@@ -6197,6 +6256,7 @@ async function foeAct(){
  if(E.frozen){E.frozen=false;await say(`${E.name}は こおっていて うごけない！`);return false;}
  if(E.stunned){E.stunned=false;await say(`${E.name}は しびれて うごけない！`);return false;}
  if(E.sleep>0){E.sleep--;await say(`${E.name}は ぐうぐう 眠っている…`);return false;}
+ if(E.conf>0){const r=await confAct();if(r!==null)return r;}
  if(E.metal&&Math.random()<.3){await say(`${E.name}は にげだした！`);await sleep(300);C.onFlee();return true;}
  const tg=alive();if(!tg.length)return false;
  if(E.casino)return casinoAct(tg);
