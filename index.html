@@ -907,6 +907,7 @@ body{line-height:1.4}
 .tpop{pointer-events:none;opacity:.96}.tpop .tpx{pointer-events:auto}.tpop .tst{margin-top:5px;font-size:12px;color:#ffe9b0}.tpop .tst.pk{color:#4fc3f7;font-weight:bold}.tpop .tst.ng{color:#ff8a80}.tpop .tst small{font-weight:normal}
 .stn.lock .corr{display:none}.stn.lock .sname2{margin:0 0 0 70px;font-size:13px;-webkit-text-stroke-width:3px}.stn.lock{padding:10px 10px 4px;margin-top:2px}.stn.lock .plate{font-size:14px;top:-9px;min-width:0;padding:0 8px}.stn.lock .plate::before,.stn.lock .plate::after{font-size:10px}.stn.lock .bub{top:-9px;font-size:10px;padding:1px 7px}.stn.lock .bub::after{display:none}.stn.lock+.stn.lock{margin-top:0}.stn.lock.bossl .sname2{margin-left:120px}
 .fzprev{display:grid;grid-template-columns:96px 1fr;gap:8px;align-items:center;margin:6px 0}.fzpic svg{width:96px;height:96px;filter:drop-shadow(0 0 8px #ffd54a88)}
+.pm{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2a2018">
@@ -1053,9 +1054,9 @@ function scaleSkillP(s,p){
  return null;}
 function genPageSkill(job,p,slot){
  const key=Object.keys(JOBS).find(k=>JOBS[k]===job),jt=JT[key];
- if(!jt){const base=job.skills[slot%job.skills.length];if(!base)return null;const k={...base,name:base.name+pageSuf(p),mp:(base.mp||0)+2*(p-1)};if(k.pow)k.pow=+(k.pow*(1+.3*(p-1))).toFixed(2);k.desc=(skillDesc(k)||'')+`（${p}枚目）`;return k;}
+ if(!jt){const bs=job.skills.filter(b=>!b.sig&&b.type!=='sig'),base=bs[slot%Math.max(1,bs.length)];if(!base)return null;const k={...base,name:base.name+pageSuf(p),mp:(base.mp||0)+2*(p-1)};if(k.pow)k.pow=+(k.pow*(1+.3*(p-1))).toFixed(2);k.desc=(skillDesc(k)||'')+`（${p}枚目）`;return k;}
  const conv=b=>b.type==='heal'?(b.healAll?['healAll',{k:+(b.pow*.7).toFixed(1)}]:['heal1',{k:b.pow}]):b.type==='buff'?['growth',{v:.15}]:b.type==='sanct'?['guardAll',{n:b.turns||2}]:b.type==='multi'?['arrows',{n:b.hits||3,k:+(b.pow*1.2).toFixed(2),one:true}]:['hit',{k:+((b.pow||2)*.8).toFixed(2),mag:b.type==='mag'?1:0}];
- const pairs=[...Object.entries(jt.t).map(([n,x])=>[n,x[0],x[1],x[2]]),...(job.sig?[[job.sig.name,job.sig.kind,job.sig.p,job.sig.mp]]:[]),...job.skills.filter(b=>!b.sig&&b.type!=='sig').map(b=>{const c=conv(b);return [b.name,c[0],c[1],b.mp];})];
+ const pairs=[...Object.entries(jt.t).map(([n,x])=>[n,x[0],x[1],x[2]]),...job.skills.filter(b=>!b.sig&&b.type!=='sig').map(b=>{const c=conv(b);return [b.name,c[0],c[1],b.mp];})];
  const pr=pairs[(p*3+slot*5)%pairs.length],sp=[pr[1],pr[2],pr[3]],nm=pr[0]+pageSuf(p)+(slot>=pairs.length?'弐':'');
  const s={name:nm,type:'sig',kind:sp[0],p:{...sp[1]},mp:(sp[2]||4)+2*(p-1),jt:true};s.p=scaleSkillP(s,p);s.desc=sigDesc(s)+`（${p}枚目）`;return s;}
 function pageJob(job,p){
@@ -1215,6 +1216,14 @@ const STIC={vit:'❤',str:'⚔',int:'✦',def:'🛡',agi:'💨'};
 function renderAlloc(msg,next){
  wide(false);
  const start={...P.st},startPts=P.pts;
+ /* 長押しで連続して上げ下げ（だんだん速く、長く押すほど一度に多く） */
+ let hold=null,lastPD=0;
+ const step=(k,d,n=1)=>{let c=0;for(let i=0;i<n;i++){if(d>0&&P.pts<=0)break;if(d<0&&P.st[k]<=start[k])break;P.st[k]+=d;P.pts-=d;c++;}return c;};
+ const holdStop=()=>{if(!hold)return;clearTimeout(hold.t);hold=null;document.removeEventListener('pointerup',holdStop);document.removeEventListener('pointercancel',holdStop);draw();};
+ const holdStart=(k,d)=>{holdStop();lastPD=Date.now();if(!step(k,d))return;draw();SE('click');
+  hold={k,d,t0:Date.now(),t:0};document.addEventListener('pointerup',holdStop);document.addEventListener('pointercancel',holdStop);
+  const tick=()=>{if(!hold)return;const el=Date.now()-hold.t0,n=el>3000?10:el>1800?3:1;if(!step(k,d,n)){holdStop();return;}draw();hold.t=setTimeout(tick,el>900?45:90);};
+  hold.t=setTimeout(tick,380);};
  const draw=()=>{
   const m=mods(),vals=STATS.map(([k])=>P.st[k]+(m['s_'+k]||0)+(m.all||0)),mx=Math.max(20,...vals);
   $('#app').innerHTML=`<div class="alh"><span class="lvpic">${avatar(P,'bust')}</span><div><b>${esc(P.name)}</b><small>${jobN(P)}　Lv${P.lv}</small><p class="sub">${msg}</p></div></div>
@@ -1226,7 +1235,9 @@ function renderAlloc(msg,next){
   <div class="win alsum"><span>最大HP <b>${maxHP()}</b></span><span>最大MP <b>${maxMP()}</b></span></div>
   <button class="cta" id="go">${P.pts>0?`決定（${P.pts}ポイントは貯めておく）`:'決定'}</button>
   ${P.pts<startPts?'<button id="reset" class="backb">振り直す</button>':''}`;
-  document.querySelectorAll('.pm').forEach(b=>b.onclick=()=>{const k=b.dataset.k,d=+b.dataset.d;P.st[k]+=d;P.pts-=d;draw();});
+  document.querySelectorAll('.pm').forEach(b=>{
+   b.onpointerdown=e=>{if(b.disabled)return;e.preventDefault();holdStart(b.dataset.k,+b.dataset.d);};
+   b.onclick=()=>{if(Date.now()-lastPD<700)return;step(b.dataset.k,+b.dataset.d);draw();};});
   $('#go').onclick=()=>{if(GS&&startPts>P.pts)bump('alloc',startPts-P.pts);next();};
   const r=$('#reset');if(r)r.onclick=()=>{P.st={...start};P.pts=startPts;draw();};
  };
@@ -2177,6 +2188,7 @@ async function sigAct(s,me){
  const p=s.p,st=k=>S(k),al=aliveF(),tg=()=>E&&E.hp>0&&!E.gone?E:al[0];
  const dmg1=async(raw,kind)=>{E=tg();if(!E)return 0;await fxPlay(kind||atkFx(me),'foe',{wait:220});return hitFoe(raw-(PIERCE?0:E.def*.6));};
  switch(s.kind){
+  case 'combo':{for(const [k,q] of (p.seq||[])){if(!aliveF().length)break;if(await sigAct({...s,kind:k,p:q},me))return true;}break;}
   case 'berserk':{const miss=1-me.hp/maxHP();await dmg1(st('str')*2*p.k*(1+miss*2)*mult('phys'),'bigslash');break;}
   case 'crowd':{const n=alive().length;await say(`仲間${n}人の力を合わせる！`);for(const e of [...aliveF()]){E=e;await fxPlay('holy','foe',{wait:120});await hitFoe(st(p.stat||'int')*2*p.k*(1+.35*(n-1))*.8-E.def*.5);}break;}
   case 'reviveAll':{const d=party().filter(x=>x.hp<=0);if(!d.length)await say('倒れている仲間は いない。');for(const t of d){as(t,()=>{t.hp=Math.round(maxHP()*p.p);});await say(`${t.name}が 生き返った！`);}break;}
@@ -2225,6 +2237,65 @@ async function sigAct(s,me){
 }
 
 const SIG_T=new Set(['hit','mark','execute','charm','swap','berserk','lucky','goldDmg','richDmg','mpDrain','revenge','charge']);
+/* 固有技はツリーの技と効果がかぶらないように：かぶる職業は「その職業らしい合わせ技」に作り直す */
+SIGD.combo=p=>(p.seq||[]).map(([k,q])=>SIGD[k]?SIGD[k](q):k).join(' → ');
+function C2(...seq){return {seq};}
+const SIGRE={
+ warrior:[C2(['critAll',{n:2}],['aoe',{k:1.6,x:{weaken:1}}]),8],
+ doctor:[C2(['shield1',{k:2.5}],['regenAll',{n:3,p:.1}]),12],
+ nurse:[C2(['healAll',{k:2}],['guardAll',{n:2}]),10],
+ chef:[C2(['healAll',{k:1.8}],['critAll',{n:2}]),12],
+ comedian:[C2(['breakDef',{n:2}],['mpAll',{v:8}]),8],
+ influencer:[C2(['mark',{n:3,v:.4}],['critAll',{n:2}]),10],
+ teacher:[C2(['buffMeal',{n:3}],['mpAll',{v:10}]),8],
+ carpenter:[C2(['guardAll',{n:2}],['regenAll',{n:3,p:.06}]),10],
+ fisher:[C2(['arrows',{n:3,k:1,one:true}],['weakAll',{v:.25}]),9],
+ baseball:[C2(['critAll',{n:2}],['aoe',{k:1.8}]),10],
+ soccer:[C2(['aoe',{k:1.4,x:{stun:.3}}],['buffMeal',{n:2}]),10],
+ ninja:[C2(['counter',{n:3,k:1.4}],['mark',{n:3,v:.35}]),9],
+ pirate:[C2(['arrows',{n:3,k:1.1}],['dropUp',{}]),9],
+ thief:[C2(['mark',{n:3,v:.35}],['richDmg',{k:1.3}]),8],
+ archer:[C2(['critAll',{n:2}],['aoe',{k:1.5}]),10],
+ knight:[C2(['barrier',{k:2.2}],['buffMeal',{n:3}]),10],
+ fortune:[C2(['regenAll',{n:3,p:.08}],['critAll',{n:2}]),10],
+ mmaster:[C2(['allyHit',{n:4,k:.9,name:'魔物たち'}],['buffMeal',{n:2}]),10],
+ gambler:[C2(['critAll',{n:2}],['richDmg',{k:1.5}]),8],
+ x7b:[C2(['aoe',{k:2,x:{stun:.4}}],['sleep',{n:1,all:1}]),12],
+ sage:[C2(['aoe',{k:2.2,mag:1,x:{freeze:.3}}],['mpAll',{v:10}]),14],
+ saint:[C2(['healAll',{k:2.6}],['guardAll',{n:2}]),14],
+ phantom:[C2(['richDmg',{k:1.3}],['sleep',{n:2,all:1}]),10],
+ barista:[C2(['healAll',{k:1.6}],['buffMeal',{n:2}]),10],
+ florist:[C2(['barrier',{k:2}],['weakAll',{v:.2}]),10],
+ youtuber:[C2(['critAll',{n:2}],['aoe',{k:1.6}]),10],
+ mangaka:[C2(['growth',{v:.4}],['arrows',{n:4,k:.9,one:true}]),10],
+ voiceactor:[C2(['weakAll',{v:.25}],['healAll',{k:1.6}]),10],
+ mountaineer:[C2(['growth',{v:.3}],['arrows',{n:3,k:1.1,one:true}]),9],
+ racer:[C2(['critAll',{n:2}],['aoe',{k:1.6,x:{stun:.25}}]),10],
+ skater:[C2(['guardAll',{n:2}],['aoe',{k:1.4}]),10],
+ judo:[C2(['mark',{n:3,v:.4}],['counter',{n:3,k:1.6}]),9],
+ wrestler:[C2(['sumo',{n:2}],['berserk',{k:2.4}]),10],
+ cheerleader:[C2(['mpAll',{v:10}],['regenAll',{n:3,p:.08}]),10],
+ electrician:[C2(['mpDrain',{k:2.2}],['sleep',{n:1,all:1}]),12],
+ beekeeper:[C2(['burnAll',{k:1.6}],['weakAll',{v:.2}]),10],
+ tailor:[C2(['breakDef',{n:2}],['guardAll',{n:2}]),10],
+ calligrapher:[C2(['aoe',{k:1.8,mag:1}],['growth',{v:.2}]),10],
+ tea:[C2(['regenAll',{n:3,p:.1}],['guardAll',{n:2}]),10],
+ geisha:[C2(['weakAll',{v:.25}],['mpAll',{v:8}]),9],
+ cowboy:[C2(['mark',{n:2,v:.4}],['lucky',{k:3.5}]),9],
+ viking:[C2(['aoe',{k:1.6,x:{armor:.3}}],['dropUp',{}]),10],
+ druid:[C2(['healAll',{k:2}],['sleep',{n:1,all:1}]),12],
+ necromancer:[C2(['burnAll',{k:1.8}],['weakAll',{v:.25}]),12],
+ summoner:[C2(['aoe',{k:2,mag:1,x:{stun:.25}}],['barrier',{k:1.8}]),14],
+ runeknight:[C2(['aoe',{k:1.6,mag:1,x:{freeze:.3}}],['critAll',{n:2}]),12],
+ assassin:[C2(['breakDef',{n:2}],['berserk',{k:2.4}]),10],
+ ranger:[C2(['aoe',{k:1.7,x:{poison:1}}],['growth',{v:.2}]),10],
+ spearman:[C2(['guardAll',{n:2}],['breakDef',{n:2}]),10],
+ monkfist:[C2(['aoe',{k:1.8,mag:1}],['regenAll',{n:2,p:.08}]),10],
+ merchant:[C2(['buffMeal',{n:3}],['mpAll',{v:10}]),10],
+ priestess:[C2(['sleep',{n:2,all:1}],['regenAll',{n:3,p:.1}]),12],
+ jester:[C2(['aoe',{k:1.3,x:{stun:.4}}],['weakAll',{v:.2}]),10],
+ oracle:[C2(['critAll',{n:2}],['regenAll',{n:3,p:.08}]),12]};
+for(const [k,[p,mp]] of Object.entries(SIGRE))if(SIGS[k])SIGS[k]=[SIGS[k][0],'combo',p,mp];
 for(const k in JOBS){const g=makeSig(k);if(g){JOBS[k].sig=g;JOBS[k].skills.push(g);}}
 /* ===== スキルツリーの職業技・職業パッシブ（職業ごとに作り分け） ===== */
 const JT={
@@ -2460,6 +2531,7 @@ Object.assign(SIGD,{
  mark:p=>`敵1体に印をつけ、${p.n}ターンの間 受けるダメージ+${pc(p.v)}`,growth:p=>`この戦闘中ずっと 自分の与ダメージ+${pc(p.v)}（重ねがけ可・最大+100%）`,
  shield1:p=>`いちばん弱っている仲間に 大きなバリア`});
 const sigDesc=s=>(s.sig?'【固有】':s.ms?'【種族技】':'【職業技】')+SIGD[s.kind](s.p);
+for(const k in JOBS){const j=JOBS[k];if(j.sig&&j.sig.kind==='combo')j.sig.desc=sigDesc(j.sig);}
 function mkJT(name,[kind,p,mp]){const s={name,type:'sig',kind,p,mp,jt:true};s.desc=sigDesc(s);return s;}
 function plusSig(s){const p={...s.p};
  for(const k of ['k','pay'])if(p[k])p[k]=+(p[k]*1.3).toFixed(2);if(p.n&&s.kind!=='sleep')p.n++;if(p.th)p.th=+(p.th+.05).toFixed(2);if(p.v)p.v=+(p.v*1.25).toFixed(2);if(p.p&&p.p<1)p.p=Math.min(.9,+(p.p*1.25).toFixed(2));
@@ -2573,43 +2645,43 @@ JOBS.monster={name:'モンスター',desc:'',color:'#8d6e63',base:{vit:3,str:3,i
 const MSK=(name,kind,p,mp)=>{const k=mkJT(name,[kind,p,mp]);k.ms=true;k.desc=sigDesc(k);return {n:name,skill:k};};
 const MLN=(name,col,sa,sb,x1,x2,bigs,cap)=>({name,col,entry:{[sa]:1},pairs:[[{[sa]:2},{[sb]:2}],[x1,{[sa]:2}],[{[sa]:3},{[sb]:3}],x2],bigs,cap});
 const MFAM={
- slime:{arch:'tank',base:{vit:4,str:3,int:3,def:4,agi:3},sig:[['キングのしかかり','hit',{k:2.6,x:{stun:.4}},7],['ぷるぷるガード','sumo',{n:2},6],['いやしの大波','healAll',{k:2.4},9]],lanes:[
+ slime:{arch:'tank',base:{vit:4,str:3,int:3,def:4,agi:3},sig:[['スライムキングの号令','combo',{seq:[['buffMeal',{n:3}],['guardAll',{n:2}]]},9],['ぷるぷるバリア','barrier',{k:2.2},8],['めぐみの大雨','regenAll',{n:4,p:.1},9]],lanes:[
   MLN('ぷるぷる','#4fc3f7','s_vit','s_def',{hpFlat:15},[{hpRegen:.02},{taken:-.04}],[MSK('ぷるぷるボディ','dodge',{n:1},4),{n:'弾力の体',thorns:.15},MSK('のしかかり','hit',{k:2,x:{stun:.3}},5)],{n:'キングの風格',hpFlat:60,taken:-.15}),
   MLN('分裂','#81c784','s_agi','s_str',{crit:.04},[{multiPct:.1},{s_agi:2}],[MSK('ぶんれつアタック','arrows',{n:3,k:.8},5),{n:'仲間を呼ぶ声',teamRegen:.02},MSK('スライムの大群','aoe',{k:1.3},7)],{n:'無限分裂',multiPct:.25,dmgPct:.1}),
   MLN('いやしの雫','#80deea','s_int','s_vit',{healPct:.08},[{mpFlat:6},{healPct:.1}],[MSK('いやしの雫','heal1',{k:3.5},5),{n:'しずくの恵み',postHeal:.1},MSK('ぷるぷるの泉','healAll',{k:2},8)],{n:'聖なる雫',healPct:.3,teamRegen:.03})]},
- beast:{arch:'phys',base:{vit:3,str:5,int:2,def:3,agi:4},sig:[['猛獣の連撃','arrows',{n:4,k:.9,one:true},7],['野生の雄叫び','berserk',{k:2.4},7],['獣王の牙','hit',{k:2.6,x:{stun:.35}},7]],lanes:[
+ beast:{arch:'phys',base:{vit:3,str:5,int:2,def:3,agi:4},sig:[['百獣の咆哮','combo',{seq:[['critAll',{n:2}],['mark',{n:3,v:.35}]]},8],['獣の本能','counter',{n:3,k:1.6},7],['狩りの連携','allyHit',{n:3,k:1,name:'群れの仲間'},8]],lanes:[
   MLN('牙','#ff8a65','s_str','s_agi',{crit:.05},[{critDmg:.15},{atkPct:.1}],[MSK('かみくだく','hit',{k:2.2,x:{armor:.3}},5),{n:'狩りの本能',killHeal:.08},MSK('食らいつき','hit',{k:1.8,x:{drain:.5}},6)],{n:'百獣の王',dmgPct:.25,crit:.08}),
   MLN('群れ','#ffb74d','s_agi','s_vit',{firstPct:.1},[{multiPct:.1},{evade:.04}],[MSK('とおぼえ','growth',{v:.2},4),{n:'群れの絆',openPbuff:.1},MSK('包囲網','aoe',{k:1.3,x:{weaken:1}},7)],{n:'群れの長',openPbuff:.15,multiPct:.2}),
   MLN('野生','#a1887f','s_vit','s_str',{lowAtk:.1},[{hpFlat:20},{lowAtk:.1}],[MSK('捨て身の突進','berserk',{k:2.2},6),{n:'手負いの獣',lowAtk:.2},MSK('野生の咆哮','weakAll',{v:.2},6)],{n:'不屈の野性',endure:1,lowAtk:.25})]},
- bird:{arch:'phys',base:{vit:3,str:3,int:3,def:2,agi:6},sig:[['疾風怒濤','arrows',{n:5,k:.75},8],['天空の大竜巻','aoe',{k:1.9,mag:1},10],['神速の急降下','hit',{k:2.8,x:{crit:1}},8]],lanes:[
+ bird:{arch:'phys',base:{vit:3,str:3,int:3,def:2,agi:6},sig:[['天空の舞','combo',{seq:[['guardAll',{n:2}],['critAll',{n:2}]]},9],['渡りの風','regenAll',{n:3,p:.08},8],['神速の嘴','execute',{th:.25,k:2.2},8]],lanes:[
   MLN('疾風','#a5d6a7','s_agi','s_str',{firstPct:.1},[{evade:.04},{crit:.04}],[MSK('つばさの刃','arrows',{n:3,k:.85},5),{n:'先手必勝',firstPct:.2},MSK('急降下','hit',{k:2.3,x:{crit:1}},6)],{n:'音速の翼',evade:.12,firstPct:.25}),
   MLN('風術','#80cbc4','s_int','s_agi',{magPct:.06},[{mpFlat:6},{magPct:.08}],[MSK('つむじ風','aoe',{k:1.3,mag:1},6),{n:'風読み',magCrit:.08},MSK('大竜巻','aoe',{k:1.7,mag:1,x:{weaken:1}},10)],{n:'嵐の化身',magPct:.25,echo:.1}),
   MLN('空の目','#90caf9','s_agi','s_vit',{dropPct:.1},[{evade:.03},{hpFlat:15}],[MSK('見切り','dodge',{n:2},5),{n:'空の目',crit:.06},MSK('目つぶしの羽','weakAll',{v:.15},6)],{n:'天空の覇者',evade:.15,dmgPct:.1})]},
- bug:{arch:'tank',base:{vit:3,str:4,int:2,def:5,agi:3},sig:[['猛毒の一刺し','hit',{k:2.4,x:{poison:1,stun:.3}},7],['鉄壁の甲殻','sumo',{n:3},7],['蟲毒の霧','burnAll',{k:2},8]],lanes:[
+ bug:{arch:'tank',base:{vit:3,str:4,int:2,def:5,agi:3},sig:[['女王の脱皮','combo',{seq:[['barrier',{k:2}],['growth',{v:.3}]]},8],['蟲の大群','allyHit',{n:4,k:.8,name:'蟲の群れ'},8],['溶解液','breakDef',{n:2},8]],lanes:[
   MLN('毒','#aed581','s_str','s_agi',{atkPct:.08},[{dmgPct:.06},{s_str:2}],[MSK('毒針さし','hit',{k:1.8,x:{poison:1}},5),{n:'猛毒の体',atkStun:.08},MSK('毒の霧','burnAll',{k:1.4},7)],{n:'猛毒の王',dmgPct:.2,atkStun:.12}),
   MLN('甲殻','#8d6e63','s_def','s_vit',{taken:-.05},[{thorns:.1},{hpFlat:20}],[MSK('硬い殻','guardAll',{n:2},7),{n:'トゲの殻',thorns:.2},MSK('カウンター殻','counter',{n:2,k:1.5},6)],{n:'鋼の甲殻',taken:-.2,thorns:.25}),
   MLN('群生','#dce775','s_agi','s_str',{multiPct:.08},[{crit:.04},{multiPct:.08}],[MSK('むしの大群','arrows',{n:4,k:.7},6),{n:'脱皮',endure:1},MSK('羽音の嵐','sleep',{n:1,all:1},8)],{n:'女王の号令',multiPct:.25,crit:.08})]},
- plant:{arch:'mag',base:{vit:4,str:3,int:4,def:3,agi:2},sig:[['大樹の恵み','regenAll',{n:4,p:.1},9],['花吹雪','aoe',{k:1.6,mag:1,x:{stun:.25}},9],['眠りの森','sleep',{n:2,all:1},9]],lanes:[
+ plant:{arch:'mag',base:{vit:4,str:3,int:4,def:3,agi:2},sig:[['大樹の守り','barrier',{k:2.2},8],['花吹雪の魅了','combo',{seq:[['weakAll',{v:.25}],['mpAll',{v:8}]]},9],['根の締めつけ','mark',{n:3,v:.4},6]],lanes:[
   MLN('光合成','#9ccc65','s_int','s_vit',{hpRegen:.02},[{healPct:.08},{hpFlat:15}],[MSK('光合成','regenAll',{n:3,p:.08},7),{n:'根を張る',hpRegen:.03},MSK('いのちの花','heal1',{k:4},6)],{n:'世界樹の加護',teamRegen:.04,healPct:.2}),
   MLN('種','#c5e1a5','s_str','s_agi',{crit:.04},[{multiPct:.08},{s_agi:2}],[MSK('種マシンガン','arrows',{n:4,k:.7},6),{n:'実り',winGold:.1},MSK('いばらの鞭','hit',{k:2,x:{weaken:1}},6)],{n:'豊穣',dmgPct:.15,winGold:.2}),
   MLN('花粉','#f48fb1','s_int','s_def',{magPct:.06},[{mpFlat:6},{foeAtk:.03}],[MSK('ねむり花粉','sleep',{n:2,all:1},8),{n:'甘い香り',foeAtk:.06},MSK('しびれ花粉','aoe',{k:1.1,mag:1,x:{stun:.3}},8)],{n:'魔性の花',foeAtk:.1,magPct:.2})]},
- material:{arch:'tank',base:{vit:4,str:4,int:2,def:6,agi:1},sig:[['メガトンボディ','hit',{k:2.8,x:{stun:.4}},8],['絶対防壁','guardAll',{n:3},10],['大爆発','bomb',{t:1,k:2.8},8]],lanes:[
+ material:{arch:'tank',base:{vit:4,str:4,int:2,def:6,agi:1},sig:[['メガトンプレス','berserk',{k:2.4},8],['超合金ボディ','combo',{seq:[['barrier',{k:2.2}],['counter',{n:2,k:1.6}]]},10],['自己修復','regenAll',{n:3,p:.1},8]],lanes:[
   MLN('鋼鉄','#b0bec5','s_def','s_vit',{taken:-.05},[{barrier:.06},{hpFlat:20}],[MSK('鉄壁化','guardAll',{n:3},8),{n:'不壊の体',wall:true},MSK('身代わりの壁','sumo',{n:2},6)],{n:'不動の城',taken:-.25,barrier:.12}),
   MLN('重量','#8d6e63','s_str','s_def',{atkPct:.08},[{bossPct:.08},{s_str:2}],[MSK('ロケット頭突き','hit',{k:2.4,x:{stun:.3}},6),{n:'重量級',bossPct:.15},MSK('大地ゆらし','aoe',{k:1.4,x:{stun:.2}},8)],{n:'超重量',bossPct:.25,dmgPct:.1}),
   MLN('からくり','#ffd54a','s_int','s_def',{mpFlat:6},[{itemPct:.1},{magPct:.06}],[MSK('自爆装置','bomb',{t:2,k:3},8),{n:'精密機構',itemFree:.15},MSK('分解ビーム','breakDef',{n:2},8)],{n:'超合金',magPct:.15,itemFree:.25})]},
- undead:{arch:'mag',base:{vit:5,str:3,int:4,def:3,agi:2},sig:[['死者の行進','aoe',{k:1.5,mag:1,x:{poison:1}},9],['命の簒奪','hit',{k:2.2,x:{drain:.8}},7],['冥府の呪い','weakAll',{v:.3},8]],lanes:[
+ undead:{arch:'mag',base:{vit:5,str:3,int:4,def:3,agi:2},sig:[['死者の行進','allyHit',{n:3,k:1,name:'亡者'},9],['不死の儀式','reviveAll',{p:.35},12],['冥府の呪縛','combo',{seq:[['sleep',{n:1,all:1}],['mark',{n:3,v:.35}]]},9]],lanes:[
   MLN('不死','#9e9e9e','s_vit','s_def',{hpFlat:20},[{guardHeal:.04},{hpRegen:.02}],[MSK('生気吸い','hit',{k:1.6,x:{drain:.6}},5),{n:'不死の体',endure:1},MSK('死んだふり','dodge',{n:2},5)],{n:'不死の王',endure:2,hpRegen:.04}),
   MLN('呪い','#7e57c2','s_int','s_vit',{magPct:.06},[{foeAtk:.03},{magPct:.06}],[MSK('のろいの呪文','hit',{k:2.2,mag:1,x:{weaken:1}},6),{n:'怨念',lowAtk:.15},MSK('呪いの言葉','weakAll',{v:.2},7)],{n:'怨霊の主',magPct:.25,foeAtk:.08}),
   MLN('腐敗','#689f38','s_str','s_int',{killHeal:.04},[{atkPct:.08},{killMp:2}],[MSK('腐食の息','burnAll',{k:1.6},7),{n:'屍肉喰らい',killHeal:.1},MSK('魂抜き','mpDrain',{k:2.2},7)],{n:'冥府の門',killHeal:.15,dmgPct:.12})]},
- dragon:{arch:'phys',base:{vit:5,str:5,int:4,def:4,agi:3},sig:[['ギガブレス','aoe',{k:2,mag:1},11],['竜王の一撃','hit',{k:3,x:{crit:1}},9],['滅びの咆哮','weakAll',{v:.35},9]],lanes:[
+ dragon:{arch:'phys',base:{vit:5,str:5,int:4,def:4,agi:3},sig:[['竜王の覇気','combo',{seq:[['critAll',{n:2}],['growth',{v:.3}]]},10],['竜の逆鱗','berserk',{k:2.6},9],['古竜の加護','guardAll',{n:3},10]],lanes:[
   MLN('竜爪','#ef5350','s_str','s_vit',{critDmg:.1},[{atkPct:.1},{crit:.04}],[MSK('ドラゴンクロー','hit',{k:2.2,x:{armor:.3}},5),{n:'竜の血',lowAtk:.15},MSK('竜の尾','aoe',{k:1.3},7)],{n:'竜王の爪',dmgPct:.25,critDmg:.25}),
   MLN('竜息','#ff7043','s_int','s_str',{magPct:.06},[{mpFlat:6},{magPct:.08}],[MSK('ドラゴンブレス','aoe',{k:1.5,mag:1},8),{n:'灼熱の喉',magCrit:.08},MSK('業火の息','burnAll',{k:2},9)],{n:'終末の業火',magPct:.25,echo:.1}),
   MLN('竜鱗','#66bb6a','s_def','s_vit',{taken:-.05},[{barrier:.05},{hpFlat:25}],[MSK('竜鱗の守り','barrier',{k:2},7),{n:'威圧',foeAtk:.06},MSK('竜の咆哮','weakAll',{v:.25},7)],{n:'古竜の鱗',taken:-.2,foeAtk:.08})]},
- demon:{arch:'mag',base:{vit:3,str:4,int:5,def:3,agi:4},sig:[['魔界の門','aoe',{k:1.9,mag:1,x:{weaken:1}},11],['悪魔の取引','berserk',{k:2.8},8],['堕落の誘い','charm',{k:.5,dmg:1.2},7]],lanes:[
+ demon:{arch:'mag',base:{vit:3,str:4,int:5,def:3,agi:4},sig:[['魔界の業火','burnAll',{k:2},10],['悪魔の取引','mpDrain',{k:2.4},9],['堕落の呪い','combo',{seq:[['breakDef',{n:2}],['weakAll',{v:.25}]]},10]],lanes:[
   MLN('闇魔法','#7b1fa2','s_int','s_agi',{magPct:.07},[{magCrit:.05},{mpFlat:6}],[MSK('闇の呪文','hit',{k:2.4,mag:1},6),{n:'魔界の知識',mpCut:1},MSK('暗黒の渦','aoe',{k:1.6,mag:1},9)],{n:'魔王の魔力',magPct:.25,magCrit:.1}),
   MLN('契約','#c62828','s_str','s_int',{lowAtk:.1},[{dmgPct:.05},{lowAtk:.1}],[MSK('悪魔の契約','growth',{v:.25},4),{n:'代償の力',lowAtk:.2},MSK('血の契り','berserk',{k:2.4},7)],{n:'魂の契約',dmgPct:.2,lowAtk:.25}),
   MLN('誘惑','#ec407a','s_agi','s_int',{evade:.04},[{foeAtk:.03},{evade:.03}],[MSK('魅惑のまなざし','charm',{k:.4,dmg:1},6),{n:'悪魔のささやき',atkSteal:.1},MSK('混沌の宴','random',{},6)],{n:'夜の支配者',evade:.12,foeAtk:.08})]},
- spirit:{arch:'mag',base:{vit:2,str:2,int:6,def:2,agi:5},sig:[['天の怒り','aoe',{k:2,mag:1,x:{stun:.3}},12],['精霊の祝福','healAll',{k:2.8},10],['時の精霊','timestop',{},12]],lanes:[
+ spirit:{arch:'mag',base:{vit:2,str:2,int:6,def:2,agi:5},sig:[['時の精霊','timestop',{},12],['精霊の円舞','regenAll',{n:4,p:.1},10],['星の導き','combo',{seq:[['critAll',{n:2}],['mpAll',{v:10}]]},10]],lanes:[
   MLN('雷光','#ffee58','s_int','s_agi',{magPct:.07},[{magCrit:.05},{magPct:.06}],[MSK('雷光','hit',{k:2.4,mag:1,x:{stun:.3}},6),{n:'帯電',echo:.08},MSK('いかずちの雨','aoe',{k:1.6,mag:1,x:{stun:.2}},10)],{n:'雷神',magPct:.3,echo:.12}),
   MLN('加護','#80deea','s_int','s_vit',{healPct:.08},[{mpRegen:1},{healPct:.08}],[MSK('精霊の加護','healAll',{k:2.2},8),{n:'祝福',guardHeal:.08},MSK('聖なる結界','barrier',{k:2.2},8)],{n:'大精霊',healPct:.3,teamRegen:.03}),
   MLN('霊体','#b39ddb','s_agi','s_def',{evade:.04},[{mpFlat:8},{evade:.03}],[MSK('すりぬけ','dodge',{n:2},5),{n:'霊体',taken:-.08},MSK('マナの奔流','mpDrain',{k:2.2},7)],{n:'精霊王',evade:.12,mpRegen:2})]}
@@ -2617,17 +2689,22 @@ const MFAM={
 const mkMSig=([name,kind,p,mp])=>{const s={name,type:'sig',kind,p:{...p},mp,sig:true};s.desc=sigDesc(s);return s;};
 for(const [f,d] of Object.entries(MFAM)){const F=FAMS[f];if(!F)continue;
  const t={};d.lanes.forEach(L=>L.bigs.forEach(b=>{if(b&&b.skill)t[b.skill.name]=[b.skill.kind,b.skill.p,b.skill.mp];}));
- d.sig.forEach(s=>t[s[0]]=[s[1],s[2],s[3]]);
  const key='mon_'+f,sg=mkMSig(d.sig[0]);
  JOBS[key]={name:F.name,desc:F.name+'のモンスターのスキルツリー',color:d.lanes[0].col,arch:d.arch,base:d.base,skills:[],lanes:d.lanes,sig:sg,special:true,monJob:true,fam:f};
  JT[key]={t,p:[]};}
 const famJobKey=sp=>sp&&JOBS['mon_'+sp.fam]?'mon_'+sp.fam:'monster';
 /* 種族ごとの固有技：系統の3つの型から種族で決まり、ランクで強くなる */
-const MSIGC={};
-function monSig(sp){if(!sp)return null;if(MSIGC[sp.id])return MSIGC[sp.id];const d=MFAM[sp.fam];if(!d)return null;
- let h=0;for(const c of String(sp.id))h=(h*31+c.charCodeAt(0))>>>0;const b=d.sig[h%d.sig.length],f=1+.07*Math.max(0,(sp.rank||1)-1);
- const p={...b[2]};for(const k of ['k'])if(p[k])p[k]=+(p[k]*f).toFixed(2);if(p.v)p.v=Math.min(.6,+(p.v*f).toFixed(2));if(p.p&&p.p<1)p.p=Math.min(.3,+(p.p*f).toFixed(2));if(p.x)p.x={...p.x};
- const s=mkMSig([b[0],b[1],p,b[3]+Math.floor((sp.rank||1)/3)]);return MSIGC[sp.id]=s;}
+const MSIGC={},JKINDS={};
+const sKinds=x=>x&&x.type==='sig'?(x.kind==='combo'?(x.p.seq||[]).map(q=>q[0]):[x.kind]):[];
+function jobKinds(jk){if(JKINDS[jk])return JKINDS[jk];const j=JOBS[jk],o=new Set();if(j){(j.lanes||[]).forEach(L=>(L.bigs||[]).forEach(b=>{if(b&&b.skill)sKinds(b.skill).forEach(k=>o.add(k));}));
+ Object.values((JT[jk]||{}).t||{}).forEach(v=>o.add(v[0]));}return JKINDS[jk]=o;}
+function monSig(sp,jk){if(!sp)return null;const key=sp.id+'|'+(jk||'');if(MSIGC[key])return MSIGC[key];const d=MFAM[sp.fam];if(!d)return null;
+ let h=0;for(const c of String(sp.id))h=(h*31+c.charCodeAt(0))>>>0;const ks=jobKinds(jk||('mon_'+sp.fam));
+ let b=null;for(let i=0;i<d.sig.length;i++){const c=d.sig[(h+i)%d.sig.length],cs=c[1]==='combo'?c[2].seq.map(q=>q[0]):[c[1]];if(!cs.some(k=>ks.has(k))){b=c;break;}}
+ if(!b)b=d.sig[h%d.sig.length];const f=1+.07*Math.max(0,(sp.rank||1)-1);
+ const sc=q=>{const p={...q};if(p.k)p.k=+(p.k*f).toFixed(2);if(p.v)p.v=Math.min(.6,+(p.v*f).toFixed(2));if(p.p&&p.p<1)p.p=Math.min(.3,+(p.p*f).toFixed(2));if(p.x)p.x={...p.x};return p;};
+ const p=b[1]==='combo'?{seq:b[2].seq.map(([k,q])=>[k,sc(q)])}:sc(b[2]);
+ const s=mkMSig([b[0],b[1],p,b[3]+Math.floor((sp.rank||1)/3)]);return MSIGC[key]=s;}
 /* 配合で生まれる新しいツリー：両親のツリーの特徴をまぜる */
 const mjShort=j=>String(j.name).replace(/系/g,'');
 function makeMonMix(a,b){
@@ -2645,7 +2722,7 @@ function makeMonMix(a,b){
  const base={};STATS.forEach(([k])=>base[k]=Math.round(((A.base[k]||3)+(B.base[k]||3))/2));
  const sig=A.sig&&B.sig?mkMSig([mixName(A.sig.name,B.sig.name),A.sig.kind,Object.fromEntries(Object.entries(A.sig.p||{}).map(([k,v])=>[k,typeof v==='number'&&k==='k'?+(v*1.1).toFixed(2):v])),A.sig.mp+2]):A.sig||B.sig;
  const j={name:tk.join('×'),desc:`${A.name}と${B.name}の特徴をあわせ持つ配合ツリー`,color:A.color,arch:A.arch,base,skills:[],lanes,sig,special:true,monJob:true,mix:[a,b]};
- JOBS[key]=j;JT[key]={t:{...((JT[a]||{}).t||{}),...((JT[b]||{}).t||{})},p:[]};if(sig)JT[key].t[sig.name]=[sig.kind,sig.p,sig.mp];
+ JOBS[key]=j;JT[key]={t:{...((JT[a]||{}).t||{}),...((JT[b]||{}).t||{})},p:[]};
  if(GS){GS.mjobs=GS.mjobs||{};GS.mjobs[key]={a,b};}return key;}
 const HUMAN=['warrior','mage','priest'];
 
@@ -2700,7 +2777,16 @@ const maxHP=()=>20+S('vit')*6+(mods().hpFlat||0);
 const maxMP=()=>4+S('int')*2+(mods().mpFlat||0);
 const cost=s=>Math.max(1,s.mp-(mods().mpCut||0));
 const inherited=()=>{if(!P.hero||!P.trees)return [];const out=[];Object.entries(P.trees).forEach(([k,ids])=>{if(k===P.jobKey)return;const j=JOBS[k];j.G=j.G||buildTree(j);out.push(...j.skills);ids.forEach(id=>{const n=j.G.by[id];if(n&&n.eff.skill)out.push(n.eff.skill);});});return out;};
-const allSkills=()=>{const a=[...(P.mon?[...P.mskills,...(monSig(SPECIES[P.sid])?[monSig(SPECIES[P.sid])]:[])]:P.job.skills),...P.tree.map(id=>P.G.by[id].eff.skill).filter(Boolean),...(P.fskills||[]),...(P.fused?fzTreeEffs(P).map(n=>n.eff.skill).filter(Boolean):[]),...(P.xtrees||[]).flatMap(x=>{const j=JOBS[x.k];if(!j)return [];j.G=j.G||buildTree(j);return x.ids.map(id=>j.G.by[id]&&j.G.by[id].eff.skill).filter(Boolean);}),...P.uniq.filter(u=>u.skill&&P.uqEq.includes(u.id)).map(u=>u.skill),...P.gsk.filter(u=>u.skill).map(u=>u.skill),...inherited(),...(P.jobKey==='mmaster'?party().filter(x=>x.mon).flatMap(x=>(x.mskills||[]).map(k=>({...k,name:k.name}))):[])];return a.filter((s,i)=>a.findIndex(x=>x.name===s.name)===i);};
+const allSkills=()=>{const a=[...(P.mon?[...P.mskills,...(monSig(SPECIES[P.sid],P.jobKey)?[monSig(SPECIES[P.sid],P.jobKey)]:[])]:P.job.skills),...P.tree.map(id=>P.G.by[id].eff.skill).filter(Boolean),...(P.fskills||[]),...(P.fused?fzTreeEffs(P).map(n=>n.eff.skill).filter(Boolean):[]),...(P.xtrees||[]).flatMap(x=>{const j=JOBS[x.k];if(!j)return [];j.G=j.G||buildTree(j);return x.ids.map(id=>j.G.by[id]&&j.G.by[id].eff.skill).filter(Boolean);}),...P.uniq.filter(u=>u.skill&&P.uqEq.includes(u.id)).map(u=>u.skill),...P.gsk.filter(u=>u.skill).map(u=>u.skill),...inherited(),...(P.jobKey==='mmaster'?party().filter(x=>x.mon).flatMap(x=>(x.mskills||[]).map(k=>({...k,name:k.name}))):[])];return skStrongest(a);};
+const PSUF={'真':2,'極':3,'神':4,'覇':5,'天':6,'無双':7,'終':8,'合体':2};
+/* 強化版（・改／2枚目以降の・真 など）を覚えたら、元の技は一覧に出さず強いほうだけ残す */
+function skLv(name){let n=String(name),lv=0;if(n.endsWith('弐'))n=n.slice(0,-1);let g=true;while(g){g=false;
+  let m=n.match(/・改$/);if(m){lv+=1;n=n.slice(0,-2);g=true;continue;}
+  m=n.match(/・第(\d+)式$/);if(m){lv+=(+m[1])*10;n=n.slice(0,-m[0].length);g=true;continue;}
+  m=n.match(/・(真|極|神|覇|天|無双|終|合体)$/);if(m){lv+=PSUF[m[1]]*10;n=n.slice(0,-m[0].length);g=true;}}
+ return [n,lv];}
+function skStrongest(a){const best=new Map();a.forEach((s,i)=>{if(!s||!s.name)return;const [b,lv]=skLv(s.name);const c=best.get(b);if(!c||lv>c.lv||(lv===c.lv&&s.type==='sig'&&c.s.type!=='sig'))best.set(b,{s,lv,i:c&&lv===c.lv?c.i:i});});
+ const keep=new Set([...best.values()].map(v=>v.s));return a.filter((s,i)=>keep.has(s)&&a.indexOf(s)===i);}
 const heal=()=>{P.hp=maxHP();P.mp=maxMP();};
 const hab=(k,n=1)=>{P.habit[k]=(P.habit[k]||0)+n;};
 const wide=on=>$('#app').classList.toggle('wide',on);
@@ -3055,7 +3141,7 @@ function renderMember(id,msg){
  const m=GS.roster.find(x=>x.id===id);P=m;tabbar(false);wide(false);
  const inP=GS.party.includes(m.id),back=()=>renderMember(id);
  $('#app').innerHTML=as(m,()=>`<div class="win mhead">${avatar(m)}<div><h2 style="margin:0">${esc(m.name)}</h2><span class="star">${badge(m)}</span><p class="sub">${jobN(m)} Lv${m.lv}　EXP ${m.exp}/${expNeed(m.lv)}${m.mon?`　${STYLE[SPECIES[m.sid].style]}`:''}</p>${m.hero?`<button class="minib" id="rnbtn">✏️ 名前を変える</button>`:''}</div></div>
- ${m.mon&&monSig(SPECIES[m.sid])?`<div class="win sigb"><b class="sigt">◎ 種族固有技「${monSig(SPECIES[m.sid]).name}」</b> <small>MP${monSig(SPECIES[m.sid]).mp}</small><p class="sub" style="margin:4px 0 0">${monSig(SPECIES[m.sid]).desc}</p><p class="sub" style="margin:2px 0 0">スキルツリー：<b>${esc(m.job.name)}</b></p></div>`:''}${!m.mon&&m.job&&m.job.sig?`<div class="win sigb"><b class="sigt">◎ 職業固有技「${m.job.sig.name}」</b> <small>MP${m.job.sig.mp}</small><p class="sub" style="margin:4px 0 0">${m.job.sig.desc.replace('【固有】','')}</p></div>`:''}
+ ${m.mon&&monSig(SPECIES[m.sid],m.jobKey)?`<div class="win sigb"><b class="sigt">◎ 種族固有技「${monSig(SPECIES[m.sid],m.jobKey).name}」</b> <small>MP${monSig(SPECIES[m.sid],m.jobKey).mp}</small><p class="sub" style="margin:4px 0 0">${monSig(SPECIES[m.sid],m.jobKey).desc}</p><p class="sub" style="margin:2px 0 0">スキルツリー：<b>${esc(m.job.name)}</b></p></div>`:''}${!m.mon&&m.job&&m.job.sig?`<div class="win sigb"><b class="sigt">◎ 職業固有技「${m.job.sig.name}」</b> <small>MP${m.job.sig.mp}</small><p class="sub" style="margin:4px 0 0">${m.job.sig.desc.replace('【固有】','')}</p></div>`:''}
  ${m.mon?`<div class="win"><p class="sub">種族のとくぎ・引き継いだスキル：${m.mskills.map(x=>x.name).join('・')}</p></div>`:''}
  ${msg?`<div class="win"><p class="note">${msg}</p></div>`:''}
  <div class="win st">${STATS.map(([k,nm])=>`<div>${nm} ${S(k)}</div>`).join('')}<div>HP ${m.hp}/${maxHP()}</div><div>MP ${m.mp}/${maxMP()}</div></div>
@@ -4810,7 +4896,7 @@ function renderBreedResult(c){
  SE('chime');
  $('#app').innerHTML=`<div class="win born"><p class="sub">${SPECIES[c.sid].fused?'✨ 2体の姿がまざった！':'配合が成功した！'}</p><div class="bornpic ${c.shiny?'shiny':SPECIES[c.sid].rank>=4?'rare':''}">${monSprite(SPECIES[c.sid],c.shiny)}</div>
   <h1>${esc(c.name)}</h1><p class="note">${FAMS[SPECIES[c.sid].fam].name}　ランク${SPECIES[c.sid].rank}　+${c.plus}　${STYLE[SPECIES[c.sid].style]}</p>
-  <p class="sub">スキル：${c.mskills.map(s=>s.name).join('・')}</p>${monSig(SPECIES[c.sid])?`<p class="sub">固有技：<b>${esc(monSig(SPECIES[c.sid]).name)}</b></p>`:''}<p class="sub">スキルツリー：<b>${esc(c.job.name)}</b></p><button class="cta" id="ok">やったね！</button></div>`;
+  <p class="sub">スキル：${c.mskills.map(s=>s.name).join('・')}</p>${monSig(SPECIES[c.sid],c.jobKey)?`<p class="sub">固有技：<b>${esc(monSig(SPECIES[c.sid],c.jobKey).name)}</b></p>`:''}<p class="sub">スキルツリー：<b>${esc(c.job.name)}</b></p><button class="cta" id="ok">やったね！</button></div>`;
  $('#ok').onclick=()=>renderBreed(null,null);
 }
 
@@ -5418,7 +5504,7 @@ function pop(txt,cls,target){
  if(target==='foe')el.style.left=ES.length>1?((E.i+.5)/ES.length*100-4+Math.random()*8)+'%':(42+Math.random()*16)+'%';else{const ps=party(),i=ps.indexOf(target);el.style.left=((i+.5)/ps.length*100)+'%';}
  box.appendChild(el);setTimeout(()=>el.remove(),1200);
 }
-function sigOk(g){const k=g.kind,dead=party().some(x=>x.hp<=0);
+function sigOk(g){const k=g.kind,dead=party().some(x=>x.hp<=0);if(k==='combo')return (g.p.seq||[]).some(([kk,q])=>sigOk({kind:kk,p:q}));
  if(k==='reviveAll')return dead;if(k==='fullHeal'||k==='sacrHeal')return alive().some(x=>ratio(x)<.5)&&(k!=='sacrHeal'||ratio(P)>.5);
  if(k==='revenge')return !!P.bs.lastTaken;if(k==='harvest')return !B.harvested;if(k==='selfBomb')return ratio(P)<.3;
  if(k==='goldDmg')return GS.gold>P.lv*g.p.pay*3;if(k==='lesson')return !B.expx;if(k==='dropUp')return !B.dropx;if(k==='charm')return false;
@@ -5448,7 +5534,7 @@ function nextInput(){
  if(AUTO){acts.push({m,a:autoAct(m)});return nextInput();}
  $('#who').textContent=`${m.name}は どうする？`;draw();cmdMain();
 }
-const needT=a=>aliveF().length>1&&(a.kind==='atk'||(a.kind==='skill'&&(['phys','multi','mag','hybrid'].includes(a.s.type)||(a.s.type==='sig'&&(SIG_T.has(a.s.kind)||(a.s.kind==='sleep'&&!a.s.p.all)||(a.s.kind==='arrows'&&a.s.p.one)))))||(a.kind==='item'&&(a.k==='ball'||a.k==='bomb')));
+const needT=a=>aliveF().length>1&&(a.kind==='atk'||(a.kind==='skill'&&(['phys','multi','mag','hybrid'].includes(a.s.type)||(a.s.type==='sig'&&(SIG_T.has(a.s.kind)||(a.s.kind==='combo'&&a.s.p.seq&&a.s.p.seq[0]&&SIG_T.has(a.s.p.seq[0][0]))||(a.s.kind==='sleep'&&!a.s.p.all)||(a.s.kind==='arrows'&&a.s.p.one)))))||(a.kind==='item'&&(a.k==='ball'||a.k==='bomb')));
 const choose=a=>{if(a.t==null&&needT(a))return cmdTarget(a);acts.push({m:cur,a});nextInput();};
 function cmdTarget(a){
  const c=$('#cmd');c.className='cmd list';$('#cmd2').innerHTML='';$('#who').textContent=`${cur.name}：どれを ねらう？`;
