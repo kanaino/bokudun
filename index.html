@@ -3091,7 +3091,7 @@ function renderJob(o){
  $('#jbk').onclick=()=>renderCreator({app:o.app,name:o.name});
  document.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{
   uqSeq=0;
-  GS={v:2,layV:2,free:{comp:1,skill:1},cnt:{},treeV:TREE_V,gold:10000,zim:1,zim2:1,gems:500,items:{herb:3,water:1,bomb:1,rev:1,ball:3},bag:{},sbag:[],roster:[],party:[],mseq:0,dg:{},spx:{},sound:true,friendCode:makeCode(),friends:[]};
+  GS={v:2,layV:2,free:{comp:1,skill:1},cnt:{},treeV:TREE_V,gold:10000,zim:1,zim2:1,purgeX:1,gems:500,items:{herb:3,water:1,bomb:1,rev:1,ball:3},bag:{},sbag:[],roster:[],party:[],mseq:0,dg:{},spx:{},sound:true,friendCode:makeCode(),friends:[]};
   normalize(GS);
   const name=($('#nm').value||'').trim().slice(0,8)||'ゆうしゃ';
   const h=newMember({name,jobKey:b.dataset.job,hero:true});h.app={...o.app};h.trees={[h.jobKey]:h.tree};h.jobsOwned=[h.jobKey];GS.roster.push(h);GS.party=[h.id];P=h;normalize(GS);
@@ -3134,6 +3134,8 @@ function normalize(g){
   g.lay.max=Math.max(1,c+1);g.lay.prog={};for(let L=1;L<g.lay.max;L++)g.lay.prog[L]=[true];g.layV=2;if(c)g.layNote=1;}
  g.dex=g.dex||{};g.dexOrder=g.dexOrder||[];(g.roster||[]).forEach(m=>{if(m.mon&&m.sid){g.dex[m.sid]=2;if(!g.dexOrder.includes(m.sid))g.dexOrder.push(m.sid);}});
  migrateTree(g);
+ if(!g.purgeX){let n=0;g.sbag=g.sbag||[];g.bag=g.bag||{};(g.roster||[]).filter(xoldTaint).forEach(m=>{n++;Object.values(m.eq||{}).forEach(k=>{if(k)g.bag[k]=(g.bag[k]||0)+1;});g.sbag.push(...(m.gsk||[]));});
+  if(n){const del=new Set(g.roster.filter(xoldTaint).map(m=>m.id));g.roster=g.roster.filter(m=>!del.has(m.id));g.party=(g.party||[]).filter(id=>!del.has(id));if(!g.party.length&&g.roster.length)g.party=[g.roster[0].id];g.purgeNote=n;}g.purgeX=1;}
  if(!g.zim2){if(g.coin!==undefined)g.coin=1000;g.zim2=1;if(g.zim&&!g.zimNote)g.coinNote=1;}
  if(!g.zim){g.gold=10000;g.zim=1;g.zimNote=1;}
  g.spx=g.spx||{};if(g.sound===undefined)g.sound=true;if(g.bgm===undefined)g.bgm=true;g.seenJobs=g.seenJobs||[];
@@ -3275,6 +3277,7 @@ function renderMain(tab,notes){
 function treeNotice(){
  if(GS&&GS.layNote&&!$('#tut')){delete GS.layNote;saveGame();const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>ダンジョンが新しくなりました</h2><p>1つの階層＝1つのダンジョンになり、5層ごとにボスだけの階層があります。これまでにクリアしたダンジョンの数だけ、階層を進めた状態にしています（今は 第${GS.lay.max}層 から）。</p><button class="cta" id="tutok">わかった！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
  if(GS&&GS.zimNote&&!$('#tut')){delete GS.zimNote;saveGame();const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>新しいお金「ジンバブエ」</h2><p>これまでのゴールド（G）は廃止になり、新しいお金<b>ジンバブエ（Z）</b>に切り替わりました。</p><p>これまでのゴールドのかわりに、全員に <b class="gold">10,000Z</b> を配っています。</p><p>ダンジョンでは、クリア時に <b>500Z</b>（ボス階層は <b>1,000Z</b>）が手に入ります。</p><p>ギャンブルのコインもリセットし、全員 <b class="coin">1,000コイン</b> からのやり直しです。</p><button class="cta" id="tutok">わかった！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
+ if(GS&&GS.purgeNote&&!$('#tut')){const n=GS.purgeNote;delete GS.purgeNote;saveGame();const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>景品モンスターが新しくなりました</h2><p>ゴールドスライム・ラッキードラゴン・魔皇ヴァルグリード・光輝神セレスティアと、それらから配合で生まれたモンスターを廃止しました（${n}体）。装備していた装備・スキルは手もとに戻しています。</p><p>景品交換所には<b>新ゴールドスライム・新ラッキードラゴン・新魔皇ヴァルグリード・新光輝神セレスティア</b>が並びます。</p><button class="cta" id="tutok">わかった！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
  if(GS&&GS.coinNote&&!$('#tut')){delete GS.coinNote;saveGame();const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>ギャンブルのコインをリセットしました</h2><p>全員のコインを <b class="coin">1,000コイン</b> にそろえて、やり直しにしています。</p><button class="cta" id="tutok">わかった！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
  if(!GS||!GS.treeNote||$('#tut'))return;delete GS.treeNote;saveGame();
  const el=document.createElement('div');el.id='tut';
@@ -4100,6 +4103,14 @@ SPECIES_BASE.x_maou={id:'x_maou',fam:'demon',name:'魔皇ヴァルグリード',
 SPECIES_BASE.x_kami={id:'x_kami',fam:'god',name:'光輝神セレスティア',rank:6,style:'cool',c1:'#fffde7',c2:'#ffd700',var:0,horn:false,eyes:2,multi:true,evo:5,evoFam:'god',epal:['#fff8e1','#ffffff','#ffd700','#ffb300'],mul:.92,
  xsk:[['天光の審判','aoe',{k:2.2,mag:1,x:{stun:.35}},14],['女神の大祝福','fullHeal',{},18]],xsig:['光輝の奇跡','combo',{seq:[['weakAll',{v:.3}],['regenAll',{n:4,p:.12}],['critAll',{n:2}]]},20]};
 SPECIES_BASE.x_luckyd={id:'x_luckyd',fam:'dragon',name:'ラッキードラゴン',rank:5,mul:.8,xsk:[['幸運の七色ブレス','aoe',{k:1.8,mag:1,x:{weaken:1}},10],['ラッキーセブン','arrows',{n:7,k:.55},9]],xsig:['ラッキーフォーチュン','combo',{seq:[['critAll',{n:2}],['dropUp',{}]]},10],style:'cool',c1:'#43a047',c2:'#ffd54a',var:1,horn:true,eyes:2,multi:true};
+/* 新・景品モンスター（旧4体は廃止）。進化の世代はとばさない（配合すると第2世代から） */
+const XOLD=['goldsl','luckyd','maou','kami'];
+XOLD.forEach(k=>{const o=SPECIES_BASE['x_'+k];const n={...o,id:'xn_'+k,name:'新'+o.name};if(o.evo)n.evoGen=1;SPECIES_BASE['xn_'+k]=n;});
+const XOLD_RE=/(^|[(|])(ph_)?x_(goldsl|luckyd|maou|kami)(?=$|[|)])/;
+const XOLD_SK=new Set(['魔皇剣ヴァルディス','冥府の黒炎','天光の審判','女神の大祝福','幸運の七色ブレス','ラッキーセブン']);
+function xoldTaint(m){if(!m||!m.mon)return false;const sid=String(m.sid||'');if(/^xn_/.test(sid))return false;if(XOLD_RE.test(sid))return true;
+ const ev=sid.match(/^ev_(demon|god)_(\d+)$/);if(ev&&+ev[2]>=31)return true;
+ if((m.mskills||[]).some(k=>k&&XOLD_SK.has(k.name)))return true;if((m.xa||[]).some(x=>/^x_/.test(x)))return true;return false;}
 Object.assign(EQUIP,{
  p1:{slot:'weapon',name:'勝負師の大剣',prize:12000,eff:{s_str:18,physPct:.2,crit:.1}},
  p2:{slot:'weapon',name:'星くずの杖',prize:12000,eff:{s_int:18,magPct:.2,mpFlat:20}},
@@ -4120,10 +4131,10 @@ const PRIZE={
   {k:'sk_c',name:'景品限定スキル：癒',cat:'heal',c:18000},
   {k:'sk_d',name:'景品限定スキル：会心',cat:'crit',c:18000}],
  mon:[
-  {sid:'x_goldsl',c:30000,desc:'景品限定のランク6。金ピカでかわいい'},
-  {sid:'x_luckyd',c:80000,desc:'景品限定・★6級。幸運のブレスと7連撃、固有技ラッキーフォーチュン'},
-  {sid:'x_maou',c:300000,desc:'景品限定・★7級の悪魔系。魔皇剣と冥府の黒炎、固有技「魔皇降臨」'},
-  {sid:'x_kami',c:300000,desc:'景品限定・★7級の神系。天光の審判と全回復、固有技「光輝の奇跡」'}]};
+  {sid:'xn_goldsl',c:30000,desc:'景品限定のランク6。金ピカでかわいい'},
+  {sid:'xn_luckyd',c:80000,desc:'景品限定・★6級。幸運のブレスと7連撃、固有技ラッキーフォーチュン'},
+  {sid:'xn_maou',c:300000,desc:'景品限定・★7級の悪魔系。魔皇剣と冥府の黒炎、固有技「魔皇降臨」'},
+  {sid:'xn_kami',c:300000,desc:'景品限定・★7級の神系。天光の審判と全回復、固有技「光輝の奇跡」'}]};
 let PRZT='item';
 var CXN=0,CXMSG='';
 function renderPrize(msg){
@@ -5223,6 +5234,7 @@ function doBreed(a,b,pick4){
  const ba=monBase(a),bb=monBase(b);STATS.forEach(([k])=>child.st[k]+=Math.floor(((ba[k]||0)+(bb[k]||0))*.05));
  /* 血統（何代重ねたか）：両親の平均+1。代を重ねるほど能力が少しずつ上がる（進化形は進化で伸びるので対象外） */
  child.lg=Math.floor(((a.lg||0)+(b.lg||0))/2)+1;if(SPECIES[child.sid].evo)child.lg=Math.max(child.lg,SPECIES[child.sid].evoGen||1);if(!SPECIES[child.sid].evo){const add=Math.round(.3*child.lg);STATS.forEach(([k])=>child.st[k]+=add);}
+ child.xa=[...new Set([...(a.xa||[]),...(b.xa||[]),...[a.sid,b.sid].filter(x=>/^xn?_/.test(String(x)))])].slice(0,12);
  child.bst={...child.st};
  /* レベルは親の高いほうを引き継ぐ（上がったぶんのポイントは「バランス」で上げたのと同じだけもらえる） */
  {const L=Math.max(a.lv||1,b.lv||1);if(L>1){child.lv=L;child.exp=0;child.pts+=(3+lvBonus(child))*(L-1);child.sp+=(L-1);}}
