@@ -922,6 +922,7 @@ body{line-height:1.4}
 #btalk .btpic svg{overflow:visible}.eu>b{margin-top:0}.eu>.bar{margin:2px 0 4px}
 .bsk{margin:6px 0}.bskl{display:grid;grid-template-columns:1fr 1fr;gap:5px}.bskb{padding:5px 7px;font-size:13px;line-height:1.3;min-height:44px;border:2px solid #ffffff33;border-radius:8px;text-align:left}.bskb small{display:block;font-size:10px;opacity:.75;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.bskb.on{border-color:#4fc3f7;background:#0d47a1aa}
 .cxbox{margin-top:6px}.cxrow{display:grid;grid-template-columns:1fr 1fr 1.6fr 1fr 1fr;gap:4px;align-items:center}.cxrow2{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:4px}.cxs{min-height:40px;padding:2px;font-size:13px;text-align:center;border:2px solid #ffffff33;border-radius:8px}.cxv{text-align:center;line-height:1.1}.cxv b{display:block;font-size:20px;color:#ffd54a}.cxv small{font-size:11px}
+.stt.heart{left:auto;right:2px;background:#ff4f9a;color:#fff}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2a2018">
@@ -1001,7 +1002,7 @@ const FX={autoSpd:v=>`オートバトルの速さ×${v}`,s_str:v=>`力+${v}`,s_v
  magPct:v=>`呪文ダメージ+${pc(v)}`,dmgPct:v=>`与ダメージ+${pc(v)}`,atkPct:v=>`「たたかう」のダメージ+${pc(v)}`,healPct:v=>`回復量+${pc(v)}`,
  taken:v=>v<0?`被ダメージ-${pc(-v)}`:`被ダメージ+${pc(v)}`,lowAtk:v=>`HP半分以下で与ダメージ+${pc(v)}`,mpRegen:v=>`毎ターンMP+${v}`,
  hpRegen:v=>`毎ターン最大HPの${pc(v)}回復`,wall:()=>'ぼうぎょ時のダメージ1/4',counter:v=>`ぼうぎょ中に攻撃されると反撃（${pc(v)}）`,
- dblAtk:()=>'「たたかう」が2回攻撃になる',echo:v=>`${pc(v)}で呪文がもう一度発動`,iceBonus:v=>`凍った敵へのダメージ+${pc(v)}`,
+ dblAtk:()=>'「たたかう」が2回攻撃になる',dblAct:()=>'1ターンに2回 行動できる',mikiri:v=>`${pc(v)}で敵の攻撃を見切ってかわし、そのまま反撃する`,stackPct:v=>`ターンを重ねるごとに与ダメ+${pc(v)}（最大+80%）`,mikiri2:()=>'見切りが50%になり、反撃が必ず会心になる',lovely:()=>'仲間が回復したぶんだけハートがたまり、満タンで全員を大回復＋バリア（ラブリーチャージ）',lovely2:()=>'ハートのたまる速さが2倍・発動時に敵全体へハート攻撃',act3:()=>'1ターンに3回 行動できる',echo:v=>`${pc(v)}で呪文がもう一度発動`,iceBonus:v=>`凍った敵へのダメージ+${pc(v)}`,
  foeAtk:v=>`敵の攻撃力-${pc(v)}`,mpCut:v=>`とくぎの消費MP-${v}`,endure:v=>`戦闘ごとに${v}回 HP1で耐える`,barrier:v=>`戦闘開始時 最大HPの${pc(v)}のバリア`,
  itemPct:v=>`道具の効果+${pc(v)}`,dropPct:v=>`道具の入手率+${pc(v)}`,runPct:v=>`逃走成功率+${pc(v)}`,firstPct:v=>`1ターン目の与ダメージ+${pc(v)}`,
  streakPct:v=>`同じ行動を続けるたび与ダメージ+${pc(v)}`,magCrit:v=>`呪文の会心率+${pc(v)}`,healToDmg:v=>`回復量の${pc(v)}を敵にダメージ`,buffPct:v=>`気合ため等の倍率+${pc(v)}`,scoutPct:v=>`スカウト成功率+${pc(v)}`,
@@ -1062,6 +1063,7 @@ const PAGE_SUF=['','','・真','・極','・神','・覇','・天','・無双','
 const pageSuf=p=>PAGE_SUF[p]||`・第${p}式`;
 const pageRoot=p=>p===1?'root':`P${p}root`;
 function scaleSkillP(s,p){
+ if(s.type==='sig'&&s.kind==='combo'&&s.p&&s.p.seq)return {seq:s.p.seq.map(([k,q])=>[k,scaleSkillP({type:'sig',kind:k,p:q},p)||q])};
  if(s.type==='sig'){const q={...s.p};const f=1+.22*(p-1);
   for(const k of ['k','pay'])if(q[k])q[k]=+(q[k]*f).toFixed(2);if(q.n&&s.kind!=='sleep')q.n=Math.min(q.n+Math.floor((p-1)/2),9);if(q.th)q.th=Math.min(.5,+(q.th+.02*(p-1)).toFixed(2));if(q.v)q.v=Math.min(.6,+(q.v*(1+.1*(p-1))).toFixed(2));if(q.p&&q.p<1)q.p=Math.min(.9,+(q.p*(1+.1*(p-1))).toFixed(2));
   if(q.x)q.x={...q.x};return q;}
@@ -1076,7 +1078,7 @@ function genPageSkill(job,p,slot){
 function pageJob(job,p){
  const vS=p,vP=1+.5*(p-1),sc=(e,v)=>e?scaleEff(e,v):e;let slot=0;
  return {...job,lanes:job.lanes.map(L=>({...L,name:L.name+pageSuf(p),entry:sc(L.entry,vS),pairs:(L.pairs||[]).map(pr=>pr.map(e=>sc(e,vS))),
-  bigs:(L.bigs||[]).map(b=>{if(!b)return b;if(b.skill){const k=genPageSkill(job,p,slot++);return k?{n:k.name,skill:k}:{...sc(b,vP),n:b.n+pageSuf(p)};}const e=sc(b,vP);return {...e,n:(b.n||'')+pageSuf(p)};}),
+  bigs:(L.bigs||[]).map(b=>{if(!b)return b;if(b.skill){const k=genPageSkill(job,p,slot++);return k?{n:k.name,skill:k}:{...sc(b,vP),n:b.n+pageSuf(p)};}const e=sc(b,vP);if(p===2&&job===JOBS.x7e&&e.dblAct)e.act3=true;if(job===JOBS.x7d&&e.mikiri){delete e.mikiri;delete e.stackPct;e.mikiri2=true;}if(job===JOBS.x7c&&e.lovely){delete e.lovely;e.lovely2=true;}return {...e,n:(b.n||'')+pageSuf(p)};}),
   cap:L.cap?{...sc(L.cap,vP),n:(L.cap.n||'')+pageSuf(p)}:L.cap}))};
 }
 function pageG(job,p){
@@ -2380,7 +2382,7 @@ const SIGD={
  barrier:p=>`全員にバリアをはる（魔力・守備に応じた量）`,harvest:()=>`やくそう・まほうの水などの道具を手に入れる（1戦闘1回）`,charm:p=>`${p.dmg?'攻撃しながら、':''}この敵のスカウト成功率を大きく上げる`,
  charge:p=>`使うたびに威力がたまる一撃（4回まで）`,counter:p=>`${p.n}回、攻撃されたら反撃する`,sumo:p=>`${p.n}ターン 敵の攻撃を引きつけ、受けるダメージを大きく減らす`,dodge:p=>`${p.n}ターン 自分への攻撃をすべてかわす`,
  goldDmg:p=>`ゴールドを払って、払った額に応じたダメージ（最大 Lv×${p.pay}G）`,weakAll:p=>`敵全体の攻撃力と守備力を下げる`,petHeal:p=>p.atk?`仲間のモンスター全員が攻撃に参加する`:`仲間のモンスターを大きく回復し、攻撃力アップ`,
- richDmg:p=>`持っているゴールドが多いほど強い一撃＋ゴールドを奪う`,dropUp:()=>`この戦闘の敵が 必ず道具を落とす`,lucky:p=>`当たれば${p.k}倍の大ダメージ、外れると敵が回復することも`,
+ richDmg:p=>`持っているゴールドが多いほど強い一撃＋${p.g?`${p.g[0].toLocaleString()}〜${p.g[1].toLocaleString()}Gを手に入れる`:'ゴールドを奪う'}`,dropUp:()=>`この戦闘の敵が 必ず道具を落とす`,lucky:p=>`当たれば${p.k}倍の大ダメージ、外れると敵が回復することも`,
  mpDrain:p=>`呪文で攻撃し、与えたダメージの一部を全員のMPに変える`,selfBomb:p=>`自分のHPを1にして、敵全体に超ダメージ`,burnAll:p=>`敵全体に毒（毎ターンダメージ）`,mpAll:p=>`全員のMPを${p.v}回復`,
  breakDef:p=>`敵全体の守備力を${p.n}ターン0にする`,revenge:p=>`さっき受けたダメージの${p.k}倍で やり返す`,allyHit:p=>`${p.n}ターンの間 ${p.name}が毎ターン敵を攻撃する`};
 function makeSig(k){const d=SIGS[k];if(!d)return null;const [name,kind,p,mp]=d;return {name,type:'sig',kind,p,mp,sig:true,desc:'【固有】'+SIGD[kind](p)};}
@@ -2423,7 +2425,7 @@ async function sigAct(s,me){
   case 'petHeal':{const mons=party().filter(x=>x.mon&&x.hp>0);if(!mons.length){await say('仲間のモンスターが いない…');break;}
    if(p.atk){for(const mo of mons){E=tg();if(!E)break;await say(`${mo.name}の 攻撃！`);await fxPlay(atkFx(mo),'foe',{wait:120});await hitFoe(as(mo,()=>S('str'))*2*p.k*.5-E.def);if(E.hp<=0&&await settleDowns())return true;}}
    else{for(const mo of mons)await healP(st('int')*p.k+20,mo);B.pbuff={n:3,v:.25};await say('モンスターたちが 元気いっぱいだ！');}break;}
-  case 'richDmg':{const g=GS.gold;await dmg1(st('str')*2*p.k*(1+Math.log10(1+g)/3)*mult('phys'),'claw');const t=Math.round(10+me.lv*3);GS.gold+=t;await say(`<span class="gold">${t}G</span> を うばった！`);break;}
+  case 'richDmg':{const g=GS.gold;await dmg1(st('str')*2*p.k*(1+Math.log10(1+g)/3)*mult('phys'),'claw');const t=p.g?Math.round(p.g[0]+Math.random()*(p.g[1]-p.g[0])):Math.round(10+me.lv*3);GS.gold+=t;await say(`<span class="gold">${t}G</span> を うばった！`);break;}
   case 'dropUp':{B.dropx=true;await say('この戦闘の敵は 必ず道具を落とす！');break;}
   case 'lucky':{const r=Math.random();E=tg();if(r<.45){await say('大当たり！');await dmg1(st('str')*2*p.k*mult('phys'),'crit');}else if(r<.8){await say('まあまあ…');await dmg1(st('str')*2*mult('phys'));}else{const h=Math.round(E.max*.1);E.hp=Math.min(E.max,E.hp+h);await say(`大はずれ！ ${E.name}が ${h} 回復した…`);}break;}
   case 'mpDrain':{const d=await dmg1(st('int')*2*p.k*mult('mag'),'dark');const g=Math.max(1,Math.round(d/6));for(const t of alive())as(t,()=>{t.mp=Math.min(maxMP(),t.mp+g);});await say(`みんなの MPが ${g} 回復した！`);break;}
@@ -2460,7 +2462,7 @@ const SIGRE={
  knight:[C2(['barrier',{k:2.2}],['buffMeal',{n:3}]),10],
  fortune:[C2(['regenAll',{n:3,p:.08}],['critAll',{n:2}]),10],
  mmaster:[C2(['allyHit',{n:4,k:.9,name:'魔物たち'}],['buffMeal',{n:2}]),10],
- gambler:[C2(['critAll',{n:2}],['richDmg',{k:1.5}]),8],
+ gambler:[C2(['critAll',{n:2}],['richDmg',{k:1.5,g:[1000,5000]}]),8],
  x7b:[C2(['aoe',{k:2,x:{stun:.4}}],['sleep',{n:1,all:1}]),12],
  sage:[C2(['aoe',{k:2.2,mag:1,x:{freeze:.3}}],['mpAll',{v:10}]),14],
  saint:[C2(['healAll',{k:2.6}],['guardAll',{n:2}]),14],
@@ -2597,11 +2599,11 @@ x7a:{t:{'ハラペコ大噴火':['aoe',{k:1.8,x:{self:.08}},9],'ゴロゴロ大�
 x7b:{t:{'ギガトンおなら':['burnAll',{k:2.2},9],'ハエの大群':['allyHit',{n:4,k:.9,name:'ハエ'},8],'風呂キャンセル':['weakAll',{v:.3},7],'屁のつっぱり':['growth',{v:.3},3]},
  p:[['悪臭',{foeAtk:.15}],['不潔パワー',{atkPoison:1}],['誰も近寄らない',{evade:.1}]]},
 x7c:{t:{'キラキラ☆ミラクル':['aoe',{k:1.9,mag:1,x:{weaken:.2}},12],'ハートの嵐':['healAll',{k:3},8],'プリンセスガード':['guardAll',{n:3},8],'ウインクひとつ':['sleep',{n:2,all:true},9]},
- p:[['恋の魔法',{scoutPct:.3,healPct:.25}],['永遠のプリンセス',{teamRegen:.04}],['奇跡の笑顔',{foeAtk:.12}]]},
+ p:[['恋の魔法',{scoutPct:.3,healPct:.25,lovely:1}],['永遠のプリンセス',{teamRegen:.04}],['奇跡の笑顔',{foeAtk:.12}]]},
 x7d:{t:{'天地開闢':['aoe',{k:1.9,x:{armor:.25}},12],'百歩神拳':['arrows',{n:7,k:.8,one:true},9],'不動心':['counter',{n:3,k:2},5],'仙桃':['regenAll',{n:5,p:.1},8]},
- p:[['天地の理',{magCrit:.12,crit:.08}],['金剛不壊',{taken:-.15,endure:1}],['武神',{dblAtk:true,winExp:.15}]]},
-x7e:{t:{'獣王斬':['aoe',{k:2,x:{stun:.2}},12],'月下狂乱':['arrows',{n:6,k:1.1},9],'野生の守り':['dodge',{n:2},5],'血の渇き':['hit',{k:2.2,x:{drain:.6}},6]},
- p:[['獣王の血',{lowAtk:.35,killHeal:.1}],['銀狼の誇り',{evade:.1,critDmg:.3}],['月下の覇者',{firstPct:.3,dblAtk:true}]]},
+ p:[['天地の理',{magCrit:.12,crit:.08,mikiri:.3,stackPct:.08}],['金剛不壊',{taken:-.15,endure:1}],['武神',{dblAtk:true,winExp:.15}]]},
+x7e:{t:{'獣王斬':['aoe',{k:2,x:{stun:.2}},12],'月下狂乱':['arrows',{n:6,k:1.1},9],'野生の守り':['dodge',{n:2},5],'血の渇き':['combo',{seq:[['arrows',{n:3,k:.8,one:true}],['hit',{k:1.4,x:{drain:.8}}]]},8]},
+ p:[['獣王の血',{lowAtk:.35,killHeal:.1}],['銀狼の誇り',{evade:.1,critDmg:.3}],['月下の覇者',{firstPct:.3,dblAct:true}]]},
 brave:{t:{'ギガスラッシュ':['aoe',{k:1.9},12],'天の雷':['hit',{k:2.4,mag:1,x:{stun:.4}},9],'大いなる盾':['guardAll',{n:3},9],'癒しの光':['healAll',{k:3},9]},
  p:[['勇者の血',{endure:1,lowAtk:.2}],['伝説の加護',{teamRegen:.03}],['魔王討伐の志',{bossPct:.25}]]},
 sage:{t:{'魔力解放':['crowd',{k:1.6,stat:'int'},12],'星降り':['arrows',{n:7,k:.9,mag:true},12],'聖域':['guardAll',{n:3},9],'癒しの雨':['regenAll',{n:5,p:.1},10]},
@@ -2979,7 +2981,9 @@ function mods(){
 }
 /* 上限：回避80%・受けるダメージ−80%まで、会心は基本とあわせて100%まで、確率の効果は100%まで（与ダメージ%などは無限） */
 const MOD_CAP={evade:.8,crit:.92,magCrit:1,echo:1,atkStun:1,atkSteal:1,itemFree:1};
-function capMods(m){for(const [k,v] of Object.entries(MOD_CAP))if(m[k]>v)m[k]=v;if(m.taken<-.8)m.taken=-.8;return m;}
+function capMods(m){if(P&&P.jobKey==='x7e'){if(m.dblAtk){delete m.dblAtk;m.dblAct=true;}}else{delete m.dblAct;delete m.act3;}
+ if(P&&P.jobKey==='x7c'){if(m.lovely2)m.lovely=1;}else{delete m.lovely;delete m.lovely2;}
+ if(P&&P.jobKey==='x7d'){if(m.mikiri2){m.mikiri=.5;m.mikiriCrit=true;}if(m.mikiri>.5)m.mikiri=.5;if(m.stackPct>.08)m.stackPct=.08;}else{delete m.mikiri;delete m.mikiri2;delete m.stackPct;}for(const [k,v] of Object.entries(MOD_CAP))if(m[k]>v)m[k]=v;if(m.taken<-.8)m.taken=-.8;return m;}
 const S=k=>{const m=mods();return P.st[k]+(m['s_'+k]||0)+(m.all||0);};
 const maxHP=()=>20+S('vit')*6+(mods().hpFlat||0);
 const maxMP=()=>4+S('int')*2+(mods().mpFlat||0);
@@ -3733,7 +3737,9 @@ const BTN={win:'単勝',quin:'モンスター連',tri:'三連単'};
 const BTD={win:'1着になるモンスターを当てる',quin:'1着・2着の2匹を当てる（順番は問わない）',tri:'1着・2着・3着を順番どおりに当てる'};
 const grade=v=>v>=85?'S':v>=75?'A':v>=65?'B':v>=55?'C':v>=45?'D':'E';
 const gauss=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
-const R_SD=14,TAKE=.8;
+const R_SD=14,TAKE0=.8;
+/* 日曜日はレースのオッズが2倍 */
+const rTake=()=>TAKE0*(isSun()?2:1);
 const coinF=n=>Math.floor(n).toLocaleString();
 const hasGambler=()=>party().some(m=>m.jobKey==='gambler');
 function genRace(){
@@ -3751,13 +3757,13 @@ function genRace(){
  const wins=Array(6).fill(0),N=4000;
  for(let k=0;k<N;k++){let bi=0,bv=-1e9;run.forEach((r,i)=>{const v=r.str+gauss()*R_SD;if(v>bv){bv=v;bi=i;}});wins[bi]++;}
  run.forEach((r,i)=>{r.p=Math.max(wins[i],2)/N;});
- const s=run.reduce((a,r)=>a+r.p,0);run.forEach(r=>{r.p/=s;r.odds=Math.min(999.9,Math.max(1.1,Math.round(TAKE/r.p*10)/10));});
+ const s=run.reduce((a,r)=>a+r.p,0);run.forEach(r=>{r.p/=s;r.odds=Math.min(999.9,Math.max(1.1,Math.round(rTake()/r.p*10)/10));});
  [...run].sort((a,b)=>b.p-a.p).forEach((r,i)=>r.pop=i+1);
  GS.raceNo=(GS.raceNo||0)+1;
- return {no:GS.raceNo,name:pick(RNAME),dist:d,run,weather:pick(['晴','晴','曇','雨']),track:pick(['良','良','稍重','重'])};
+ return {no:GS.raceNo,tk:rTake(),name:pick(RNAME),dist:d,run,weather:pick(['晴','晴','曇','雨']),track:pick(['良','良','稍重','重'])};
 }
 function betOdds(type,sel){
- const p=i=>RACE.run[i].p,c=x=>Math.min(9999.9,Math.max(1.1,Math.round(TAKE/x*10)/10));
+ const p=i=>RACE.run[i].p,c=x=>Math.min(9999.9,Math.max(1.1,Math.round((RACE.tk||rTake())/x*10)/10));
  if(type==='win')return sel.length===1?RACE.run[sel[0]].odds:0;
  if(type==='quin'){if(sel.length<2)return 0;const[a,b]=sel;return c(p(a)*p(b)/(1-p(a))+p(b)*p(a)/(1-p(b)));}
  if(sel.length<3)return 0;const[a,b,k]=sel;return c(p(a)*p(b)/(1-p(a))*p(k)/(1-p(a)-p(b)));
@@ -3771,9 +3777,9 @@ function tabCasino(n){
  const day=dayId(),resc=GS.coin<10&&GS.coinDay!==day;if(typeof CXN!=='number')CXN=0;
  $('#app').innerHTML=`${header()}${n?`<div class="win">${n}</div>`:''}
  <div class="win coinbox"><span>所持コイン</span><b class="coin">${coinF(GS.coin)}</b><small>勝ち枚数の合計：${coinF(cnt('gwin'))}枚${cnt('gwin')<GWIN_NEED?`（${GWIN_NEED.toLocaleString()}枚で 何かが起きる…）`:'（カジノ魔王が スペシャルダンジョンに出現中）'}</small>${hasGambler()?'<small class="gold">ギャンブラーがパーティにいる：払い戻し+10%</small>':''}</div>
- <button class="pan casino race" id="g-race"><span class="pt">モンスターレース</span><span class="pic">${['beast2','bird3','dragon1'].map(id=>`<i>${monSprite(SPECIES[id],false)}</i>`).join('')}</span><small>6匹のモンスターが走る！ 単勝・モンスター連・三連単</small></button>
+ <button class="pan casino race" id="g-race"><span class="pt">モンスターレース</span><span class="pic">${['beast2','bird3','dragon1'].map(id=>`<i>${monSprite(SPECIES[id],false)}</i>`).join('')}</span><small>6匹のモンスターが走る！ 単勝・モンスター連・三連単${isSun()?'<br><b class="gold">🎉 日曜日はオッズ2倍！</b>':''}</small></button>
  <button class="pan casino prize" id="g-prize"><span class="pt">景品交換所</span><small>コインで ★5確定チケット・転職玉・強い装備やスキル・限定モンスターと交換</small></button>
- <button class="pan casino slot" id="g-slot"><span class="pt">スロット「${SLN}」</span><span class="pic">${lamp(true).replace('class="tlamp on"','class="tlamp on" style="width:70px;height:56px"')}<span class="reel0">${SL_SYM['7']}</span><span class="reel0">${SL_SYM['7']}</span><span class="reel0">${SL_SYM['7']}</span></span><small>宝箱が開いたらボーナス確定！ 5ライン・3台・毎日設定が変わる</small></button>
+ <button class="pan casino slot" id="g-slot"><span class="pt">スロット「${SLN}」</span><span class="pic">${lamp(true).replace('class="tlamp on"','class="tlamp on" style="width:70px;height:56px"')}<span class="reel0">${SL_SYM['7']}</span><span class="reel0">${SL_SYM['7']}</span><span class="reel0">${SL_SYM['7']}</span></span><small>宝箱が開いたらボーナス確定！ 5ライン・3台・毎日設定が変わる${isSat()?'<br><b class="gold">🎰 土曜日は どれか1台が設定6！</b>':''}</small></button>
  <div class="win"><h2>コイン両替</h2><p class="sub">ゴールドをコインにかえられます（10G＝1コイン）。コインはギャンブルでだけ使えます。</p>
   ${(()=>{const mx=Math.floor(GS.gold/10);CXN=Math.max(0,Math.min(CXN,mx));return `<div class="cxbox"><div class="cxrow"><button class="cxs" data-d="-1000">−1000</button><button class="cxs" data-d="-100">−100</button><div class="cxv"><b id="cxn">${CXN.toLocaleString()}</b><small>コイン</small></div><button class="cxs" data-d="100">＋100</button><button class="cxs" data-d="1000">＋1000</button></div>
    <div class="cxrow2"><button class="cxs" data-d="10000">＋1万</button><button class="cxs" data-d="100000">＋10万</button><button class="cxs" data-m="0">0にする</button><button class="cxs" data-m="1">最大</button></div>
@@ -3893,6 +3899,8 @@ function slotDay(){
  const d=dayId();GS.slot=GS.slot||{};
  if(GS.slot.day!==d||GS.slot.v!==2){const W=[30,25,20,12,8,5],pk=()=>{let x=Math.random()*100;for(let i=0;i<6;i++){x-=W[i];if(x<0)return i;}return 0;};
   GS.slot={v:2,day:d,assist:GS.slot.assist||false,m:[0,1,2].map(()=>({set:pk(),tot:0,g:0,big:0,reg:0,gem:0,apl:0,bell:0,crown:0,hist:[],flag:null}))};}
+ /* 土曜日は どれか1台が設定6 */
+ if(isSat()&&GS.slot.sat6!==d){GS.slot.sat6=d;GS.slot.m[Math.floor(Math.random()*3)].set=5;}
  return GS.slot;
 }
 const lamp=on=>`<svg viewBox="0 0 80 64" class="tlamp ${on?'on':''}"><defs><radialGradient id="tlg"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#fff176"/><stop offset="1" stop-color="#ff6f00" stop-opacity="0"/></radialGradient></defs>
@@ -4332,6 +4340,8 @@ const layerDone=L=>!!layerProg(L)[0];
 const hourId=()=>Math.floor(Date.now()/3600000);
 const kiraOpen=id=>((id*2654435761)>>>0)%3===0;
 const dayId=()=>Math.floor((Date.now()+9*3600000)/86400000);
+/* 曜日（日本時間）：0=日曜 … 6=土曜 */
+const wday=()=>(dayId()+4)%7;const isSat=()=>wday()===6,isSun=()=>wday()===0;
 const raidSpecies=()=>{const l=Object.values(SPECIES).filter(s=>s.rank===5&&!s.metal&&!s.gen&&!s.multi);return l[dayId()%l.length];};
 const avgLv=()=>Math.round(party().reduce((s,m)=>s+m.lv,0)/Math.max(1,party().length));
 
@@ -4562,7 +4572,7 @@ function tabDungeon(n){
    :`<div class="win dcard sp lockd" style="--d1:#2a2a3a;--d2:#0a0a14"><h2>？？？の賭場 <small class="sub">（封印中）</small></h2><p class="sub">ギャンブル（レース・スロット）で 合計${GWIN_NEED.toLocaleString()}枚 勝つと 何かが現れるらしい…</p>
    <div class="barw"><i style="width:${Math.min(100,gw/GWIN_NEED*100)}%"></i></div><p class="sub" style="text-align:right">${Math.min(gw,GWIN_NEED).toLocaleString()} / ${GWIN_NEED.toLocaleString()}枚</p></div>`;
   if(fuseOpen()){const mp=mirrorPair(),md=GS.spx.mirror===dayId(),ml=mirLeft();
-   body+=`<div class="win dcard sp" style="--d1:#3a3a5a;--d2:#0a0a18"><h2>鏡の試練 <span class="live-b">合体の書</span></h2><div class="raid">${mp[0]?`<span style="width:64px;flex:none">${heroSprite({...fzSnap(mp[0]),id:'mpv'+mp[0].id},'bust')}</span>`:''}<p class="sub">自分のなかまの「影」と戦う。1階：パーティで強い2人の影（本人より5%強い）。2階：その2人が合体した影のボス。<br>報酬：<b class="gold">合体の書 ×1</b>（1日1回）${mp.length<2?'<br><b style="color:#ff8a80">主人公以外のなかまを2人以上パーティに入れてください</b>':`<br>今日の影：${esc(mp[0].name)}・${esc(mp[1].name)}`}</p></div>
+   body+=`<div class="win dcard sp" style="--d1:#3a3a5a;--d2:#0a0a18"><h2>鏡の試練 <span class="live-b">合体の書</span></h2><div class="raid">${mp[0]?`<span style="width:64px;flex:none">${heroSprite({...fzSnap(mp[0]),id:'mpv'+mp[0].id},'bust')}</span>`:''}<p class="sub">自分のなかまの「影」と戦う。1階：パーティで強い2人の影（本人より15%強い）。2階：その2人が合体した影のボス。<br>報酬：<b class="gold">合体の書 ×1</b>（1日1回）${mp.length<2?'<br><b style="color:#ff8a80">主人公以外のなかまを2人以上パーティに入れてください</b>':`<br>今日の影：${esc(mp[0].name)}・${esc(mp[1].name)}`}</p></div>
    <button class="cta" id="sp-mirror" ${md||ml<=0||mp.length<2?'disabled':''}>${md?'今日はクリア済み':ml<=0?'今日はもう挑戦できない（3回負けた）':`挑戦する<small>今日あと${ml}回まで負けられる</small>`}</button></div>`;}
   body+=spdCards();
  }
@@ -4986,8 +4996,8 @@ function mirrorFoe(m,k,kind){
 }
 function mirrorFoes(){
  const [A,B]=D.mir.map(id=>GS.roster.find(x=>x.id===id));if(!A||!B)return rollGroup();
- if(D.floor<D.total){const g=[mirrorFoe(A,1.05,'elite'),mirrorFoe(B,1.05,'elite')];return g;}
- const a=mirrorFoe(A,1.05,'boss'),b=mirrorFoe(B,1.05,'boss');
+ if(D.floor<D.total){const g=[mirrorFoe(A,1.15,'elite'),mirrorFoe(B,1.15,'elite')];return g;}
+ const a=mirrorFoe(A,1.15,'boss'),b=mirrorFoe(B,1.15,'boss');
  const e={...a,name:'影の'+mixName(A.name,B.name),hp:a.hp+b.hp,atk:a.atk+b.atk,def:a.def+b.def,int:a.int+b.int,agi:Math.max(a.agi,b.agi),exp:a.exp+b.exp,gold:a.gold+b.gold,
   look:{id:'mirF'+A.id+B.id,name:mixName(A.name,B.name),jobKey:A.jobKey,rarity:A.rarity,hero:false,fz:{A:fzSnap(A),B:fzSnap(B)}},
   moves:[...a.moves.slice(0,2),...b.moves.slice(0,2),['合体奥義・影','all',1.25],['ダブルインパクト','phys',2.4]],acts:2,spRate:.55,fusionBoss:true};
@@ -5118,7 +5128,7 @@ function clearDungeon(notes){
   if(first){gems=bl?100:30;if(bl){GS.items.ball=(GS.items.ball||0)+2;rew.push('スカウト玉 ×2');}}
   if(L>=GS.lay.max){GS.lvh=GS.lvh||{};if(GS.lvh[L]==null)GS.lvh[L]=avgLv();GS.lpred=GS.lpred||{};const pn=predLv(L+1);if(pn!=null)GS.lpred[L+1]=+pn.toFixed(1);GS.lay.max=L+1;unlockL=L+1;FRONT_AT=0;frontierSync();}}
  GS.gold+=gold;GS.gems+=gems;rew.unshift(`${gold}G`,`ジェム◆${gems}${first?'（初回クリア）':''}`);
- D=null;saveGame();playBGM('clear');
+ const spK=D.special;D=null;saveGame();playBGM('clear');
  wide(false);tabbar(false);
  $('#app').innerHTML=`<div class="clearscr"><div class="fw">${Array.from({length:7},(_,i)=>`<i style="left:${8+i*13}%;top:${10+(i%3)*12}%;animation-delay:${i*.35}s;--c:hsl(${i*50} 90% 60%)"></i>`).join('')}</div>
   <div class="conf2">${Array.from({length:40},(_,i)=>`<b style="left:${Math.random()*100}%;animation-delay:${Math.random()*2}s;background:hsl(${i*29%360} 90% 60%)"></b>`).join('')}</div>
@@ -5128,8 +5138,13 @@ function clearDungeon(notes){
    <h2 style="margin-top:10px">クリア報酬</h2>${rew.map(x=>`<p>${x}</p>`).join('')}
    ${notes.filter(x=>x.includes('★')).map(x=>`<p>${x}</p>`).join('')}
    ${unlockL?`<p class="gold">★ 第${unlockL}層「${layerInfo(unlockL).name}」への道が開いた！</p>`:''}</div>
-  <button class="cta" id="ok">${L?'階層にもどる':'町へ もどる'}</button></div>`;
+  ${(L&&!spK)||spdOf(spK)?`<button class="cta" id="again">もう一度 戦う<small>同じダンジョンにもう一度もぐる</small></button>`:''}
+  <button class="cta" id="ok" style="${(L&&!spK)||spdOf(spK)?'background:#4e342e;color:#ffecb3 !important;text-shadow:none':''}">${L?'階層にもどる':'町へ もどる'}</button></div>`;
  $('#ok').onclick=()=>{playBGM('main');renderMain('dungeon');jobballTutorial();};
+ if($('#again'))$('#again').onclick=async()=>{SE('click');playBGM('main');
+  if(!alive().length){renderMain('dungeon',['全員たおれています。宿屋で休みましょう。']);return;}
+  if(L&&!spK){renderLayer(L);const g=$('#godun');if(g)g.click();return;}
+  const sd=spdOf(spK);if(sd)enterDungeon({key:'sp_'+sd.key,name:sd.name,floors:sd.floors,bg:sd.bg,gold:sd.rec*20},{special:sd.key});};
 }
 
 /* ===== スカウトと配合 ===== */
@@ -5737,7 +5752,7 @@ function draw(){
   <div class="pv"><span>HP<b>${m.hp}</b></span><div class="bar"><i style="width:${m.hp/maxHP()*100}%;background:${m.hp<=maxHP()*.25?'var(--bad)':'var(--hp)'}"></i></div>
    <span>MP<b>${m.mp}</b></span><div class="bar"><i style="width:${m.mp/maxMP()*100}%;background:var(--mp)"></i></div></div>
   <div class="pj">${jobN(m)}<span>Lv${m.lv}</span></div><div class="pnm">${esc(m.name)}</div>
-  ${m.guard?'<em class="stt">防御</em>':m.bs.barrier?`<em class="stt">盾${m.bs.barrier}</em>`:''}</div>`)).join('');
+  ${m.guard?'<em class="stt">防御</em>':m.bs.barrier?`<em class="stt">盾${m.bs.barrier}</em>`:''}${m.jobKey==='x7c'&&B&&heartOwner()===m?`<em class="stt heart">💗${Math.min(100,Math.round((B.heart||0)/Math.max(1,heartNeed())*100))}%</em>`:''}</div>`)).join('');
  $('#msg').innerHTML=lines.slice(-3).map(l=>`<p>${l}</p>`).join('')+(B.sanct?`<p class="habit">守りの力 あと${B.sanct}ターン</p>`:'');
 }
 /* ===== バトルエフェクト（キャラ・技ごとに違う見た目と効果音） ===== */
@@ -5854,12 +5869,13 @@ function autoBar(){
  $('#c-auto').onclick=()=>{AUTO=false;$('#cmd2').innerHTML='<p class="habit" style="text-align:center">このターンが終わったら 止まります</p>';};
 }
 function inputPhase(){acts=[];nextInput();}
+const nAct=x=>{const md=as(x,mods);return md.act3?3:md.dblAct?2:1;};
 function nextInput(){
- const al=alive(),m=al.find(x=>!acts.some(a=>a.m===x));
+ const al=alive(),m=al.find(x=>acts.filter(a=>a.m===x).length<nAct(x));
  if(!m){cur=null;resolve();return;}
  cur=m;P=m;
  if(AUTO){acts.push({m,a:autoAct(m)});return nextInput();}
- $('#who').textContent=`${m.name}は どうする？`;draw();cmdMain();
+ const k=acts.filter(a=>a.m===m).length;$('#who').textContent=`${m.name}は どうする？${nAct(m)>1?`（${k+1}回目の行動）`:''}`;draw();cmdMain();
 }
 const needT=a=>aliveF().length>1&&(a.kind==='atk'||(a.kind==='skill'&&(['phys','multi','mag','hybrid'].includes(a.s.type)||(a.s.type==='sig'&&(SIG_T.has(a.s.kind)||(a.s.kind==='combo'&&a.s.p.seq&&a.s.p.seq[0]&&SIG_T.has(a.s.p.seq[0][0]))||(a.s.kind==='sleep'&&!a.s.p.all)||(a.s.kind==='arrows'&&a.s.p.one)))))||(a.kind==='item'&&(a.k==='ball'||a.k==='bomb')));
 const choose=a=>{if(a.t==null&&needT(a))return cmdTarget(a);acts.push({m:cur,a});nextInput();};
@@ -5926,13 +5942,14 @@ async function resolve(){
  for(const o of order){
   if(o.foe){if(o.e.hp<=0||o.e.gone)continue;E=o.e;if(await foeAct())return;}
   else{if(o.m.hp<=0)continue;P=o.m;if(await act(o.a))return;}
+  if(await heartCheck())return;
  }
  for(const m of alive()){P=m;const md=mods();
   if(md.mpRegen)m.mp=Math.min(maxMP(),m.mp+md.mpRegen);
-  if(md.hpRegen&&m.hp<maxHP()){const r=Math.max(1,Math.round(maxHP()*md.hpRegen));m.hp=Math.min(maxHP(),m.hp+r);await say(`${m.name}の HPが <span class="heal">${r}</span> 自然回復。`);}
+  if(md.hpRegen&&m.hp<maxHP()){const r=Math.max(1,Math.round(maxHP()*md.hpRegen));heartAdd(Math.min(r,maxHP()-m.hp));m.hp=Math.min(maxHP(),m.hp+r);await say(`${m.name}の HPが <span class="heal">${r}</span> 自然回復。`);}
  }
  if(B.sanct)B.sanct--;
- if(B.regen&&B.regen.n>0){B.regen.n--;for(const m of alive()){P=m;const r=Math.max(1,Math.round(maxHP()*(B.regen.p||.08)));m.hp=Math.min(maxHP(),m.hp+r);}await say(`自動回復で みんなのHPが 少し回復した。`);}
+ if(B.regen&&B.regen.n>0){B.regen.n--;for(const m of alive()){P=m;const r=Math.max(1,Math.round(maxHP()*(B.regen.p||.08)));heartAdd(Math.min(r,maxHP()-m.hp));m.hp=Math.min(maxHP(),m.hp+r);}if(await heartCheck())return;await say(`自動回復で みんなのHPが 少し回復した。`);}
  for(const e of aliveF())if(e.dotT>0){e.dotT--;E=e;const d=Math.max(1,e.dot);e.hp=Math.max(0,e.hp-d);pop(d,'','foe');await say(`${e.name}は 毒で <span class="dmg">${d}</span> のダメージ！`);if(e.hp<=0&&await settleDowns())return;}
  if(B.allies&&B.allies.length){for(const a of B.allies){if(a.n<=0)continue;a.n--;const al=aliveF();if(!al.length)break;E=pick(al);await say(`${a.name}の 攻撃！`);await fxPlay('claw','foe',{wait:120});await hitFoe(a.pw*rnd(.9,1.1)-E.def*.5);if(E.hp<=0&&await settleDowns())return;if(!a.n)await say(`${a.name}は 帰っていった。`);}B.allies=B.allies.filter(a=>a.n>0);}
  if(B.bombs&&B.bombs.length){for(const b of B.bombs){b.t--;if(b.t<=0){await say('<span class="dmg">ドカーン！ しかけた装置が 大爆発！</span>');for(const e of [...aliveF()]){E=e;await fxPlay('explode','foe',{wait:100});await hitFoe(b.dmg*rnd(.9,1.1)-e.def*.3);}if(ES.some(e=>e.hp<=0&&!e.gone)&&await settleDowns())return;}else await say(`装置の爆発まで あと${b.t}ターン…`);}B.bombs=B.bombs.filter(b=>b.t>0);}
@@ -5949,7 +5966,7 @@ async function resolve(){
 function mult(kind,normal){
  const m=mods();let x=1+(m.dmgPct||0)+(kind==='phys'?(m.physPct||0):kind==='mag'?(m.magPct||0):0)+(normal?(m.atkPct||0):0);
  if(P.hp<=maxHP()/2)x+=m.lowAtk||0;
- if(B.turn===1)x+=m.firstPct||0;
+ if(B.turn===1)x+=m.firstPct||0;if(m.stackPct)x+=Math.min(.8,m.stackPct*Math.max(0,B.turn-1));
  x+=m['slay_'+E.fam]||0;
  if(B.pbuff&&B.pbuff.n>0)x+=B.pbuff.v;
  if(P.bs.streak>=2)x+=(m.streakPct||0)*(P.bs.streak-1);
@@ -5968,10 +5985,20 @@ async function magHit(pow){
  const m=mods();let c=1;if(Math.random()<(m.magCrit||0)){await say('じゅもんが かいしんした！');hab('crit');LASTCRIT=true;c=1.5;}
  SE('magic');return hitFoe(S('int')*2*pow*c*mult('mag')*rnd(.9,1.1)-E.def/2);
 }
+/* ラブリン姫専用：ラブリーチャージ（仲間の回復量がハートにたまる→満タンで全員大回復＋バリア） */
+const heartOwner=()=>alive().find(x=>x.jobKey==='x7c'&&as(x,mods).lovely);
+const heartNeed=()=>Math.round(party().reduce((a,m)=>a+as(m,maxHP),0)*.6);
+function heartAdd(v){if(!B||!(v>0))return;const o=heartOwner();if(!o)return;B.heart=(B.heart||0)+v*(as(o,mods).lovely2?2:1);}
+async function heartCheck(){const o=heartOwner();if(!o||!B||!B.heart||B.heart<heartNeed())return false;B.heart=0;const md=as(o,mods);
+ SE('jackpot');await say(`<span class="uqt">💗 ${o.name}の ラブリーチャージ！</span>`);
+ for(const t of alive())as(t,()=>{const v=Math.round(maxHP()*.4);t.hp=Math.min(maxHP(),t.hp+v);t.bs.barrier=(t.bs.barrier||0)+Math.round(maxHP()*.25);pop('+'+v,'heal',t);});
+ draw();await say('みんなのHPが 大きく回復し、ハートのバリアに つつまれた！');
+ if(md.lovely2){P=o;for(const e of aliveF()){E=e;await fxPlay('star','foe',{wait:120});await hitFoe(as(o,()=>S('int'))*2*2.2*as(o,()=>mult('mag')));if(E.hp<=0&&await settleDowns())return true;}}
+ return false;}
 async function healP(base,target){
  const md=mods(),t=target||alive().reduce((a,b)=>ratio(a)<=ratio(b)?a:b);
  const h=as(t,()=>{const v=Math.min(maxHP()-t.hp,Math.round(base*(1+(md.healPct||0))*rnd(.9,1.1)));t.hp+=v;return v;});
- fxPlay('heal',t,{mute:true,wait:0});pop('+'+h,'heal',t);SE('heal');await say(`${t.name}の HPが <span class="heal">${h}</span> 回復した！`);
+ fxPlay('heal',t,{mute:true,wait:0});pop('+'+h,'heal',t);SE('heal');await say(`${t.name}の HPが <span class="heal">${h}</span> 回復した！`);heartAdd(h);
  if(md.healToDmg&&h>0&&E&&E.hp>0&&!E.gone)await hitFoe(h*md.healToDmg);
 }
 
@@ -6089,6 +6116,7 @@ async function casinoAct(tg){
 async function hitMember(t,raw,mag){
  P=t;const m=mods();
  if(P.bs.dodge>0||(m.evade&&Math.random()<m.evade)){await say(`${P.name}は ひらりと かわした！`);return false;}
+ if(m.mikiri&&E&&E.hp>0&&Math.random()<m.mikiri){await say(`${P.name}は 攻撃を 見切った！`);await say(`${P.name}の 返し技！`);await physHit(m.mikiriCrit?1.6:1.2,false,!!m.mikiriCrit);if(E.hp<=0&&await settleDowns())return true;return false;}
  let d=Math.max(1,(raw*(1-(m.foeAtk||0))*rnd(.85,1.15)-(mag?S('int')*.6:S('def')*1.2))*(1+(m.taken||0)));
  if(P.guard)d/=m.wall?4:2;
  if(B.sanct)d/=2;
