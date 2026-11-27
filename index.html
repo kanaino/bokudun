@@ -5141,6 +5141,7 @@ function retreatDungeon(msg){
  if(L)renderLayer(L,[msg,...(nt.length?['持ち帰ったもの：'+nt.join('、')]:[])].join('<br>'));else renderMain('dungeon',[msg.replace('戻ってきた','撤退した')]);
 }
 function battleIn(foe){
+ aiAssign(Array.isArray(foe)?foe:[foe]);
  startBattle(foe,{label:`${D.floor}/${D.total}`,bg:D.dun.bg,
   drop:e=>{if(e.metal&&e.kind!=='boss')return [];const l=rollDrops(e);addDrops(D.drops,l);return l.map(([k,c])=>`${e.name}は ${DROPN[k]}${k==='gem'?`◆${c}`:''}を 落とした！`);},
   onWin:notes=>{if(D.floor>=D.total)return clearDungeon(notes);D.floor++;saveGame();runFloor(notes);},
@@ -5773,10 +5774,11 @@ function startBattle(foe,ctx){
  party().forEach(m=>as(m,()=>{const md=mods();m.buff=false;m.guard=false;
   m.bs={h0:{...(m.habit||{})},took:false,minR:1,last:null,streak:0,barrier:m.hp>0?Math.round(maxHP()*(md.barrier||0)):0,endure:md.endure||0};
   if(m.bs.barrier)lines.push(`${m.name}は バリアに つつまれた。`);}));
+ aiPre();
  {const ob=party().reduce((v,m)=>v+(as(m,mods).openPbuff||0),0);if(ob>0){B.pbuff={n:2,v:+ob.toFixed(2)};lines.push('仲間の力で 全員の攻撃力が あがっている！');}}
  $('#app').innerHTML=`<div class="field bf cave ${E.kind==='boss'||E.kind==='raid'?'boss':''}" style="--d1:${ctx.bg[0]};--d2:${ctx.bg[1]}"><div class="sun"></div><div class="hill" style="left:-10%"></div><div class="hill" style="right:-15%;height:16%"></div><div class="ground"></div>
   <div class="tag" id="ftag"></div>${ES.length===1?`<div class="foe ${E.kind==='boss'||E.kind==='raid'?'big':''} ${E.shiny?'shiny':E.rank>=4?'rare':''} ${E.mirror?'mirror':''}" id="foe">${foeSpr(E)}</div>`
-   :`<div class="erow solo n${ES.length}">${ES.map(e=>`<div class="eu ${e.shiny?'shiny':e.rank>=4?'rare':''} ${e.mirror?'mirror':''}" id="foe${e.i}"><b>${esc(e.name)}${e.shiny?' ✦':''}</b><div class="bar"><i style="width:100%;background:var(--bad)"></i></div><span class="es">${foeSpr(e)}</span></div>`).join('')}</div>`}
+   :`<div class="erow solo n${ES.length}">${ES.map(e=>`<div class="eu ${e.shiny?'shiny':e.rank>=4?'rare':''} ${e.mirror?'mirror':''}" id="foe${e.i}"><b>${esc(e.name)}${e.shiny?' ✦':''}${e.hard?' 🪨':''}</b><div class="bar"><i style="width:100%;background:var(--bad)"></i></div><span class="es">${foeSpr(e)}</span></div>`).join('')}</div>`}
   <div class="pops" id="pops"></div><div class="log" id="msg"></div></div>
   <div class="pcwrap"><div class="pcards n${party().length}" id="st"></div><div class="pops" id="ppops"></div></div>
   <div class="cmdp" id="cmdw"><p class="who" id="who"></p><div class="cmd" id="cmd"></div><div class="cmd2" id="cmd2"></div></div>`;
@@ -5784,14 +5786,14 @@ function startBattle(foe,ctx){
 }
 function draw(){
  if(ES.length>1){$('#ftag').innerHTML=`${C.label}　魔物の群れ（のこり${aliveF().length}体）`;ES.forEach(e=>{const el=$('#foe'+e.i);if(!el)return;el.classList.toggle('down',e.hp<=0||e.gone);el.classList.toggle('ice',!!e.frozen);const b=el.querySelector('.bar i');if(b)b.style.width=Math.max(0,e.hp/e.max*100)+'%';});}
- else $('#ftag').innerHTML=`${C.label}　${E.kind==='boss'?'ボス：':''}${E.name}${E.shiny?' ✦':''}<small class="rk"> ${FAMS[E.fam].name} ランク${E.rank}</small><div class="bar"><i style="width:${E.hp/E.max*100}%;background:var(--bad)"></i></div>`;
+ else $('#ftag').innerHTML=`${C.label}　${E.kind==='boss'?'ボス：':''}${E.name}${E.shiny?' ✦':''}<small class="rk"> ${FAMS[E.fam].name} ランク${E.rank}${E.sh>0?`　🛡${E.sh}`:''}${E.chg?'　⚡ため中':''}${E.tired&&B&&B.turn<=E.tired?'　💦息切れ':''}${E.hard?'　鉄壁':''}${B&&B.pdown&&B.pdown.n>0?`　味方↓${B.pdown.n}`:''}</small><div class="bar"><i style="width:${E.hp/E.max*100}%;background:var(--bad)"></i></div>`;
  if(ES.length===1)$('#foe').classList.toggle('ice',E.frozen);
  $('#st').innerHTML=party().map(m=>as(m,()=>`<div class="pc ${m.hp<=0?'down':''} ${cur===m?'cur':''} ${FLASH===m.id?'hit':''}">
   <div class="pf">${avatar(m,'bust')}</div>
   <div class="pv"><span>HP<b>${m.hp}</b></span><div class="bar"><i style="width:${m.hp/maxHP()*100}%;background:${m.hp<=maxHP()*.25?'var(--bad)':'var(--hp)'}"></i></div>
    <span>MP<b>${m.mp}</b></span><div class="bar"><i style="width:${m.mp/maxMP()*100}%;background:var(--mp)"></i></div></div>
   <div class="pj">${jobN(m)}<span>Lv${m.lv}</span></div><div class="pnm">${esc(m.name)}</div>
-  ${m.guard?'<em class="stt">防御</em>':m.bs.barrier?`<em class="stt">盾${m.bs.barrier}</em>`:''}${m.jobKey==='x7c'&&B&&heartOwner()===m?`<em class="stt heart">💗${Math.min(100,Math.round((B.heart||0)/Math.max(1,heartNeed())*100))}%</em>`:''}</div>`)).join('');
+  ${m.guard?'<em class="stt">防御</em>':m.bs.barrier?`<em class="stt">盾${m.bs.barrier}</em>`:''}${m.bs.slp>0?'<em class="stt">💤</em>':''}${m.bs.psn>0?'<em class="stt">☠毒</em>':''}${m.bs.seal>0?'<em class="stt">封</em>':''}${m.jobKey==='x7c'&&B&&heartOwner()===m?`<em class="stt heart">💗${Math.min(100,Math.round((B.heart||0)/Math.max(1,heartNeed())*100))}%</em>`:''}</div>`)).join('');
  $('#msg').innerHTML=lines.slice(-3).map(l=>`<p>${l}</p>`).join('')+(B.sanct?`<p class="habit">守りの力 あと${B.sanct}ターン</p>`:'');
 }
 /* ===== バトルエフェクト（キャラ・技ごとに違う見た目と効果音） ===== */
@@ -5897,6 +5899,7 @@ function autoAct(m){
  P=m;const sk=allSkills().filter(s=>P.mp>=cost(s));
  const low=alive().some(x=>ratio(x)<.4),hs=sk.find(s=>s.type==='heal');
  if(low&&hs)return {kind:'skill',s:hs};
+ if(aliveF().some(e=>e.chg))return {kind:'guard'};
  if(party().some(x=>x.hp<=0)&&GS.items.rev&&Math.random()<.5)return {kind:'item',k:'rev'};
  {const js=sk.filter(s=>s.type==='sig'&&sigOk(s));if(js.length&&Math.random()<.45)return {kind:'skill',s:pick(js)};}
  const dm=sk.filter(s=>['phys','mag','multi','hybrid'].includes(s.type));
@@ -5980,13 +5983,15 @@ async function resolve(){
  order.sort((a,b)=>b.spd-a.spd);
  for(const o of order){
   if(o.foe){if(o.e.hp<=0||o.e.gone)continue;E=o.e;if(await foeAct())return;}
-  else{if(o.m.hp<=0)continue;P=o.m;if(await act(o.a))return;}
+  else{if(o.m.hp<=0)continue;P=o.m;if(o.m.bs.slp>0){o.m.bs.slp--;await say(`${o.m.name}は 眠っている…`);if(!o.m.bs.slp)await say(`${o.m.name}は 目をさました！`);continue;}
+   let a=o.a;if(a.kind==='skill'&&o.m.bs.seal>0){await say(`${o.m.name}は とくぎを 封じられている！ かわりに こうげき！`);a={kind:'atk',t:a.t};}if(await act(a))return;}
   if(await heartCheck())return;
  }
  for(const m of alive()){P=m;const md=mods();
   if(md.mpRegen)m.mp=Math.min(maxMP(),m.mp+Math.min(md.mpRegen,Math.max(1,Math.round(maxMP()*.2))));
   if(md.hpRegen&&m.hp<maxHP()){const r=Math.max(1,Math.round(maxHP()*md.hpRegen));heartAdd(Math.min(r,maxHP()-m.hp));m.hp=Math.min(maxHP(),m.hp+r);await say(`${m.name}の HPが <span class="heal">${r}</span> 自然回復。`);}
  }
+ await aiEnd();if(!alive().length){await lose();return;}
  if(B.sanct)B.sanct--;
  if(B.regen&&B.regen.n>0){B.regen.n--;for(const m of alive()){P=m;const r=Math.max(1,Math.round(maxHP()*(B.regen.p||.08)));heartAdd(Math.min(r,maxHP()-m.hp));m.hp=Math.min(maxHP(),m.hp+r);}if(await heartCheck())return;await say(`自動回復で みんなのHPが 少し回復した。`);}
  for(const e of aliveF())if(e.dotT>0){e.dotT--;E=e;const d=Math.max(1,e.dot);e.hp=Math.max(0,e.hp-d);pop(d,'','foe');await say(`${e.name}は 毒で <span class="dmg">${d}</span> のダメージ！`);if(e.hp<=0&&await settleDowns())return;}
@@ -6016,7 +6021,8 @@ function mult(kind,normal){
  return x;
 }
 let LASTCRIT=false;
-const hitFoe=async n=>{if(E.mark&&E.mark.n>0)n*=1+E.mark.v;n=Math.max(1,Math.round(n));if(E.metal)n=Math.min(n,LASTCRIT?Math.ceil(E.max/2):Math.random()<.3?2:1);const wc=LASTCRIT;LASTCRIT=false;pop(n,wc?'crit':'','foe');SE(wc?'crit':'hit');E.hp=Math.max(0,E.hp-n);if(E.sleep){E.sleep=0;setTimeout(()=>{},0);}const f=fel(E);if(f){f.classList.remove('hit');void f.offsetWidth;f.classList.add('hit');}await say(`${E.name}に <span class="dmg">${n}</span> のダメージ！`);return n;};
+const hitFoe=async n=>{if(E.mark&&E.mark.n>0)n*=1+E.mark.v;if(B&&B.pdown&&B.pdown.n>0)n*=1-B.pdown.v;if(E.tired&&B&&B.turn<=E.tired)n*=1.5;n=Math.max(1,Math.round(n));if(E.metal)n=Math.min(n,LASTCRIT?Math.ceil(E.max/2):Math.random()<.3?2:1);if(E.hard)n=LASTCRIT?3:1;
+ if(E.sh>0&&!E.hard){const pm=PIERCE?2:1,ab=Math.min(E.sh,n*pm);E.sh-=ab;n-=Math.ceil(ab/pm);if(ab)await say(`${E.name}の シールドが ${ab} ふせいだ！${E.sh?'':'（シールドが くだけた！）'}`);if(n<=0){LASTCRIT=false;draw();return 0;}}const wc=LASTCRIT;LASTCRIT=false;pop(n,wc?'crit':'','foe');SE(wc?'crit':'hit');E.hp=Math.max(0,E.hp-n);if(E.sleep){E.sleep=0;setTimeout(()=>{},0);}const f=fel(E);if(f){f.classList.remove('hit');void f.offsetWidth;f.classList.add('hit');}await say(`${E.name}に <span class="dmg">${n}</span> のダメージ！`);return n;};
 async function critRoll(force){const m=mods();if(force||(B&&B.critAll>0&&!P.mon)||Math.random()<0.08+(m.crit||0)){fxPlay('crit','foe',{wait:0});await say('かいしんの いちげき！');hab('crit');LASTCRIT=true;return 1.6+(m.critDmg||0);}return 1;}
 let PIERCE=false;
 const physHit=async(pow,normal,force)=>{const c=await critRoll(force);return hitFoe(S('str')*2*pow*c*mult('phys',normal)*rnd(.9,1.1)-(PIERCE?0:E.def));};
@@ -6036,7 +6042,7 @@ async function heartCheck(){const o=heartOwner();if(!o||!B||!B.heart||B.heart<he
  return false;}
 async function healP(base,target){
  const md=mods(),t=target||alive().reduce((a,b)=>ratio(a)<=ratio(b)?a:b);
- const h=as(t,()=>{const v=Math.min(maxHP()-t.hp,Math.round(base*(1+(md.healPct||0))*rnd(.9,1.1)));t.hp+=v;return v;});
+ const h=as(t,()=>{const v=Math.min(maxHP()-t.hp,Math.round(base*(1+(md.healPct||0))*rnd(.9,1.1)*(B&&B.hcut>0?.5:1)));t.hp+=v;return v;});
  fxPlay('heal',t,{mute:true,wait:0});pop('+'+h,'heal',t);SE('heal');await say(`${t.name}の HPが <span class="heal">${h}</span> 回復した！`);heartAdd(h);
  if(md.healToDmg&&h>0&&E&&E.hp>0&&!E.gone)await hitFoe(h*md.healToDmg);
 }
@@ -6119,6 +6125,74 @@ async function act(a){
  return false;
 }
 
+
+/* ===== 敵AI：くふうして戦う敵（通常の階層はたまに・5層ごとのボスはしっかり。ただし必ず隙をつくる） ===== */
+const AIT={
+ poison:{n:'毒の牙',d:'攻撃した相手を毒にする'},sleep:{n:'ねむりの息',d:'仲間を眠らせる'},weak:{n:'威圧の雄たけび',d:'先手で味方の与ダメージを下げる'},
+ shield:{n:'魔力の盾',d:'自分にシールドを張る'},pierce:{n:'バリア砕き',d:'バリアを無視して砕く'},steal:{n:'バリア吸収',d:'味方のバリアを奪って自分の盾にする'},
+ dispel:{n:'いてつく波動',d:'味方の強化を消す'},seal:{n:'封印の呪い',d:'とくぎを封じる'},hcut:{n:'回復封じ',d:'味方の回復量を半分にする'},
+ charge:{n:'力をためる',d:'ためたあと強烈な一撃（そのあと息切れする）'},regen:{n:'再生',d:'毎ターンHPが回復'},mpdrain:{n:'魔力吸い',d:'MPを吸いとる'},
+ shell:{n:'鉄壁の殻',d:'どんな攻撃も1ダメージ（会心は3）'}};
+const AI_ACT=['poison','sleep','weak','shield','pierce','steal','dispel','seal','hcut','charge','mpdrain'];
+const AI_BOSS=['sleep','weak','shield','pierce','steal','dispel','seal','hcut','poison','mpdrain'];
+/* 敵AIはこの日時より後に作られた共通階層だけ（それより前の階層は今まで通り） */
+const AI_T=Date.UTC(2026,10,27,17,40);
+const aiLayerOK=L=>{const v=GLAY&&GLAY.spec&&GLAY.spec[L];return !!(v&&+v.at>=AI_T);};
+function aiAssign(foes){if(!D||!D.L||D.special||!aiLayerOK(D.L))return;const L=D.L,bossL=!!layerInfo(L).bossL;
+ foes.forEach(e=>{if(e.metal||e.casino||e.mirror)return;
+  if(e.kind==='boss'){const pool=AI_BOSS.slice().sort(()=>Math.random()-.5);const n=L<10?1:L<30?2:3;e.ai=['charge',...pool.slice(0,n)];if(L>=20&&Math.random()<.5)e.ai.push('regen');e.aiB=true;e.aiP=Math.min(.55,.3+L*.005);e.aiK=L<10?1.4:L<30?1.6:1.9;return;}
+  const p=Math.min(.5,(bossL?.4:.15)+L*.003);if(Math.random()>=p)return;
+  if(L>=8&&Math.random()<.07){e.ai=['shell'];e.hard=true;e.hp=e.max=Math.round(Math.min(60,16+L*.35));e.def=0;return;}
+  const t=[pick(AI_ACT)];if(L>=30&&Math.random()<.2){let u=pick(AI_ACT);if(u!==t[0])t.push(u);}if(Math.random()<.15)t.push('regen');
+  e.ai=t;e.aiP=bossL?.35:.25;});}
+function aiPre(){/* 先手の雄たけび（戦闘開始時、こちらが動く前） */
+ for(const e of ES){if(!(e.ai||[]).includes('weak')||e.metal)continue;const v=e.aiB?.3:.2,n=e.aiB?3:2;B.pdown={n,v};e.cd=e.cd||{};e.cd.weak=n+2;
+  lines.push(`<span class="dmg">${e.name}の ${AIT.weak.n}！</span> 味方の与えるダメージが ${Math.round(v*100)}% さがった！（${n}ターン）`);break;}}
+const aiTgt=(tg,how)=>{if(B.taunt&&B.taunt.n>0&&B.taunt.m.hp>0)return B.taunt.m;const by=f=>tg.reduce((a,b)=>f(b)>f(a)?b:a);
+ if(how==='low')return tg.reduce((a,b)=>as(a,()=>a.hp/maxHP())<=as(b,()=>b.hp/maxHP())?a:b);
+ if(how==='atk')return by(m=>as(m,()=>Math.max(S('str'),S('int'))));if(how==='int')return by(m=>as(m,()=>S('int')+m.mp/5));
+ if(how==='bar')return by(m=>m.bs.barrier||0);return pick(tg);};
+async function aiAct(tg){
+ const e=E;e.cd=e.cd||{};const T=B.turn;
+ if(e.tired&&T<=e.tired){await say(`${e.name}は 息を切らしている…（スキだらけだ！）`);return false;}
+ if(e.chg&&e.chgT===T){await say(`${e.name}は 力を ためつづけている…`);return false;}
+ if(e.chg){e.chg=false;e.tired=T+1;await say(`<span class="dmg">${e.name}の 渾身の一撃！</span>`);await fxPlay(FAMATK[e.fam]||'claw','party',{wait:380});
+  for(const t of alive()){if(t.hp>0&&await hitMember(t,e.atk*(e.aiK||1.5),false))return true;}e.sh=0;await say(`${e.name}は 力を使いはたした！ 次のターンは 動けない！`);return false;}
+ if(e.aiS===T&&e.aiB)return null;/* 同じターンに特殊行動を2回はしない */
+ if(Math.random()>=(e.aiP||.25))return null;
+ const has=k=>(e.ai||[]).includes(k)&&!(e.cd[k]>T);
+ const anyBar=alive().reduce((a,m)=>a+(m.bs.barrier||0),0),buffed=alive().some(m=>m.buff)||(B.pbuff&&B.pbuff.n>0)||B.sanct>0||(B.regen&&B.regen.n>0);
+ const opts=[];
+ if(has('steal')&&anyBar>e.max*.05)opts.push('steal','steal');if(has('pierce')&&anyBar>0)opts.push('pierce','pierce');
+ if(has('dispel')&&buffed)opts.push('dispel','dispel');if(has('shield')&&!(e.sh>0))opts.push('shield');
+ if(has('sleep')&&alive().filter(m=>!(m.bs.slp>0)).length>1)opts.push('sleep');if(has('seal')&&alive().some(m=>!(m.bs.seal>0)))opts.push('seal');
+ if(has('hcut')&&!(B.hcut>0))opts.push('hcut');if(has('weak')&&!(B.pdown&&B.pdown.n>0))opts.push('weak');
+ if(has('poison'))opts.push('poison');if(has('mpdrain')&&alive().some(m=>m.mp>5))opts.push('mpdrain');
+ if(has('charge')&&e.hp<e.max*.85)opts.push('charge');
+ if(!opts.length)return null;const k=pick(opts);e.aiS=T;e.cd[k]=T+(e.aiB?2:3);const N=AIT[k].n;
+ switch(k){
+  case 'charge':e.chg=true;e.chgT=T;e.cd.charge=T+(e.aiB?3:5);await say(`<span class="uqt">${e.name}は 力を ためている…！</span> 次は強烈な一撃が来る！（ぼうぎょで しのごう）`);return false;
+  case 'shield':{e.sh=Math.round(e.max*(e.aiB?.12:.15));await fxPlay('buff','foe',{wait:200});await say(`${e.name}の ${N}！ ${e.sh} のシールドを まとった！（守備無視の技で 壊しやすい）`);draw();return false;}
+  case 'steal':{let tot=0;for(const m of alive()){tot+=m.bs.barrier||0;m.bs.barrier=0;}const g=Math.round(tot*.8);e.sh=(e.sh||0)+g;await say(`<span class="dmg">${e.name}の ${N}！</span> 味方のバリアを うばって ${g} のシールドにした！`);draw();return false;}
+  case 'pierce':{const t=aiTgt(alive(),'bar');await say(`${e.name}の ${N}！`);await fxPlay(FAMATK[e.fam]||'claw',t);if(t.bs.barrier){t.bs.barrier=0;await say(`${t.name}の バリアが くだけちった！`);}return hitMember(t,e.atk*1.1,false,{noBar:1});}
+  case 'dispel':{for(const m of alive())m.buff=false;B.pbuff=null;B.sanct=0;if(B.regen)B.regen.n=0;await fxPlay('ice','party',{wait:260});await say(`<span class="dmg">${e.name}の ${N}！</span> 味方の強化が すべて消えた！`);draw();return false;}
+  case 'sleep':{const c=alive().filter(m=>!(m.bs.slp>0));const n=e.aiB?Math.min(2,c.length-1):1;await say(`${e.name}の ${N}！`);for(let i=0;i<n;i++){const t=i===0?aiTgt(c,'atk'):pick(c.filter(x=>!(x.bs.slp>0)));if(!t)break;
+    if(as(t,mods).evade&&Math.random()<as(t,mods).evade){await say(`${t.name}は 息を かわした！`);continue;}t.bs.slp=1;await say(`${t.name}は 眠ってしまった！（攻撃を受けると 目をさます）`);}draw();return false;}
+  case 'seal':{const t=aiTgt(alive().filter(m=>!(m.bs.seal>0)),'int');t.bs.seal=2;await say(`${e.name}の ${N}！ ${t.name}は とくぎを 封じられた！（2ターン）`);draw();return false;}
+  case 'hcut':{B.hcut=3;await say(`${e.name}の ${N}！ 3ターンの間 味方の回復量が 半分になる！`);return false;}
+  case 'weak':{const v=e.aiB?.3:.2;B.pdown={n:2,v};await say(`<span class="dmg">${e.name}の ${N}！</span> 味方の与えるダメージが ${Math.round(v*100)}% さがった！`);return false;}
+  case 'mpdrain':{const t=aiTgt(alive(),'int');const d=Math.round(t.mp*.3);t.mp-=d;await say(`${e.name}の ${N}！ ${t.name}の MPを ${d} 吸いとった！`);draw();return false;}
+  case 'poison':{const t=aiTgt(alive(),e.aiB?'low':'');await say(`${e.name}の ${N}！`);await fxPlay(FAMATK[e.fam]||'claw',t);const r=await hitMember(t,e.atk,false);if(r)return true;
+    if(t.hp>0&&!(t.bs.psn>0)){t.bs.psn=3;await say(`${t.name}は 毒に おかされた！`);draw();}return false;}
+ }
+ return null;}
+async function aiEnd(){/* ターンの終わり */
+ for(const m of alive()){P=m;if(m.bs.psn>0){m.bs.psn--;const d=Math.max(1,Math.round(maxHP()*.06));m.hp=Math.max(1,m.hp-d);pop(d,'hurt',m);await say(`${m.name}は 毒で <span class="dmg">${d}</span> のダメージ！${m.bs.psn?'':'（毒が消えた）'}`);}
+  if(m.bs.seal>0)m.bs.seal--;}
+ if(B.pdown&&B.pdown.n>0){B.pdown.n--;if(!B.pdown.n){B.pdown=null;await say('味方の力が もとにもどった。');}}
+ if(B.hcut>0)B.hcut--;
+ for(const e of aliveF())if((e.ai||[]).includes('regen')&&e.hp<e.max){const h=Math.round(e.max*(e.aiB?.03:.05));e.hp=Math.min(e.max,e.hp+h);await say(`${e.name}の HPが ${h} 再生した。`);}
+}
 async function foeAct(){
  if(E.frozen){E.frozen=false;await say(`${E.name}は こおっていて うごけない！`);return false;}
  if(E.stunned){E.stunned=false;await say(`${E.name}は しびれて うごけない！`);return false;}
@@ -6127,6 +6201,7 @@ async function foeAct(){
  const tg=alive();if(!tg.length)return false;
  if(E.casino)return casinoAct(tg);
  if(E.fusionBoss&&!E.healed&&E.hp<E.max*.4){E.healed=true;const h=Math.round(E.max*.25);E.hp+=h;await say(`<span class="uqt">${E.name}の 合体の力が みなぎる！</span> HPが ${h} 回復した！`);draw();return false;}
+ if(E.ai){const r=await aiAct(tg);if(r!==null)return r;}
  const spc=E.moves?pick(E.moves):FAMS[E.fam].sp,useSp=!E.metal&&Math.random()<(E.spRate||(E.kind==='boss'||E.kind==='raid'?.4:.25));
  const fk=elemOf(spc[0])||FAMATK[E.fam]||'claw';
  const pickT=()=>B.taunt&&B.taunt.n>0&&B.taunt.m.hp>0?B.taunt.m:pick(tg);
@@ -6152,8 +6227,8 @@ async function casinoAct(tg){
  const d=Math.round(E.max*.06);E.hp=Math.max(0,E.hp-d);await say(`コインが はねかえった！ ${E.name}に <span class="dmg">${d}</span> のダメージ！`);draw();
  if(E.hp<=0)return await settleDowns();return false;
 }
-async function hitMember(t,raw,mag){
- P=t;const m=mods();
+async function hitMember(t,raw,mag,opt){
+ P=t;const m=mods();opt=opt||{};
  if(P.bs.dodge>0||(m.evade&&Math.random()<m.evade)){await say(`${P.name}は ひらりと かわした！`);return false;}
  if(m.mikiri&&E&&E.hp>0&&Math.random()<m.mikiri){await say(`${P.name}は 攻撃を 見切った！`);await say(`${P.name}の 返し技！`);await physHit(m.mikiriCrit?1.6:1.2,false,!!m.mikiriCrit);if(E.hp<=0&&await settleDowns())return true;return false;}
  let d=Math.max(1,(raw*(1-(m.foeAtk||0))*rnd(.85,1.15)-(mag?S('int')*.6:S('def')*1.2))*(1+(m.taken||0)));
@@ -6161,8 +6236,9 @@ async function hitMember(t,raw,mag){
  if(B.sanct)d/=2;
  if(P.bs.tough>0)d*=.4;
  d=Math.max(1,Math.round(d));
- if(P.bs.barrier){const ab=Math.min(P.bs.barrier,d);P.bs.barrier-=ab;d-=ab;if(ab)await say(`${P.name}の バリアが ${ab} を ふせいだ！`);}
+ if(P.bs.barrier&&!opt.noBar){const ab=Math.min(P.bs.barrier,d);P.bs.barrier-=ab;d-=ab;if(ab)await say(`${P.name}の バリアが ${ab} を ふせいだ！`);}
  const app=$('#app');app.classList.remove('shake');void app.offsetWidth;app.classList.add('shake');
+ if(d>0&&P.bs.slp>0){P.bs.slp=0;await say(`${P.name}は 目をさました！`);}
  if(d>0){P.bs.took=true;P.bs.lastTaken=d;P.hp=Math.max(0,P.hp-d);pop(d,'hurt',P);FLASH=P.id;SE('hurt');await say(`${P.name}は <span class="dmg">${d}</span> のダメージを うけた！`);}
  if(P.hp<=0&&P.bs.endure>0){P.bs.endure--;P.hp=1;await say(`<span class="uqt">${P.name}は ふんばって HP1で たえた！</span>`);}
  P.bs.minR=Math.min(P.bs.minR,P.hp/maxHP());
