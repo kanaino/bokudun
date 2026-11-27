@@ -1006,7 +1006,7 @@ const FX={autoSpd:v=>`オートバトルの速さ×${v}`,s_str:v=>`力+${v}`,s_v
  foeAtk:v=>`敵の攻撃力-${pc(v)}`,mpCut:v=>`とくぎの消費MP-${v}`,endure:v=>`戦闘ごとに${v}回 HP1で耐える`,barrier:v=>`戦闘開始時 最大HPの${pc(v)}のバリア`,
  itemPct:v=>`道具の効果+${pc(v)}`,dropPct:v=>`道具の入手率+${pc(v)}`,runPct:v=>`逃走成功率+${pc(v)}`,firstPct:v=>`1ターン目の与ダメージ+${pc(v)}`,
  streakPct:v=>`同じ行動を続けるたび与ダメージ+${pc(v)}`,magCrit:v=>`呪文の会心率+${pc(v)}`,healToDmg:v=>`回復量の${pc(v)}を敵にダメージ`,buffPct:v=>`気合ため等の倍率+${pc(v)}`,scoutPct:v=>`スカウト成功率+${pc(v)}`,
- winGold:v=>`戦闘で得るゴールド+${pc(v)}`,winExp:v=>`戦闘で得る経験値+${pc(v)}`,postHeal:v=>`戦闘後 HPが最大の${pc(v)}回復`,killHeal:v=>`敵を倒すと HPが最大の${pc(v)}回復`,killMp:v=>`敵を倒すと MP+${v}`,
+ winGold:v=>`戦闘で得るジンバブエ+${pc(v)}`,winExp:v=>`戦闘で得る経験値+${pc(v)}`,postHeal:v=>`戦闘後 HPが最大の${pc(v)}回復`,killHeal:v=>`敵を倒すと HPが最大の${pc(v)}回復`,killMp:v=>`敵を倒すと MP+${v}`,
  atkPoison:()=>'「たたかう」で敵を毒にする',atkStun:v=>`「たたかう」で${pc(v)}の確率でしびれさせる`,atkSteal:v=>`「たたかう」で${pc(v)}の確率で道具を盗む`,openPbuff:v=>`戦闘開始から2ターン 全員の与ダメージ+${pc(v)}`,
  itemFree:v=>`${pc(v)}の確率で道具を消費しない`,evade:v=>`${pc(v)}の確率で敵の攻撃をかわす`,guardHeal:v=>`ぼうぎょすると HPが最大の${pc(v)}回復`,teamRegen:v=>`毎ターン 仲間全員のHPが${pc(v)}回復`,
  thorns:v=>`攻撃を受けると ダメージの${pc(v)}をやり返す`,bossPct:v=>`ボスへのダメージ+${pc(v)}`,multiPct:v=>`敵が2体以上のとき与ダメージ+${pc(v)}`};
@@ -1148,7 +1148,7 @@ const STN={str:'力',int:'魔力',def:'守備',agi:'素早さ'};
 const KAN=['','','弐','参','肆','伍','陸','漆','捌','玖','拾'];
 const thr=(c,n)=>Math.round(CATS[c].base*Math.pow(n,1.5));
 let uqSeq=0;
-function tagTxt(s){return (s.aoe?'・全体攻撃':'')+(s.poison?'・毒':'')+(s.stun?`・${pc(s.stun)}でしびれ`:'')+(s.weaken?'・敵の攻撃ダウン':'')+(s.armor?'・敵の守備ダウン':'')+(s.pierce?'・守備無視':'')+(s.gold?'・ゴールドを得る':'')+(s.summon?'・仲間モンスターが多いほど強い':'')+(s.revive?'・倒れた仲間を1人復活':'')+(s.regen?`・${s.regen}ターン自動回復`:'')+(s.mpAll?'・みんなのMP回復':'')+(s.taunt?'・敵の攻撃を引きつける':'');}
+function tagTxt(s){return (s.aoe?'・全体攻撃':'')+(s.poison?'・毒':'')+(s.stun?`・${pc(s.stun)}でしびれ`:'')+(s.weaken?'・敵の攻撃ダウン':'')+(s.armor?'・敵の守備ダウン':'')+(s.pierce?'・守備無視':'')+(s.gold?'・ジンバブエを得る':'')+(s.summon?'・仲間モンスターが多いほど強い':'')+(s.revive?'・倒れた仲間を1人復活':'')+(s.regen?`・${s.regen}ターン自動回復`:'')+(s.mpAll?'・みんなのMP回復':'')+(s.taunt?'・敵の攻撃を引きつける':'');}
 function skillDesc(s){const b=skillDesc0(s);return b+tagTxt(s);}
 function skillDesc0(s){
  if(s.type==='sig')return s.desc;
@@ -2377,12 +2377,12 @@ const SIGD={
  berserk:p=>`自分のHPが減っているほど強い一撃（最大${+(p.k*3).toFixed(1)}倍）`,crowd:p=>`敵全体に攻撃。戦える仲間が多いほど強い`,reviveAll:p=>`倒れた仲間を全員HP${Math.round(p.p*100)}%で復活`,
  execute:p=>`HPが${Math.round(p.th*100)}%以下の敵（ボス以外）を一撃で倒す。それ以外は強い一撃`,sacrHeal:p=>`自分のHPを${Math.round(p.cost*100)}%けずって、仲間を大きく回復`,fullHeal:()=>`いちばん弱っている仲間1人を全回復`,
  regenAll:p=>`${p.n}ターンの間 毎ターン全員のHPが${Math.round(p.p*100)}%回復`,buffMeal:p=>`${p.n}ターンの間 全員の攻撃力アップ＋少し回復`,sleep:p=>p.all?`敵全体を${p.n}ターン眠らせる（攻撃すると起きる）`:`敵1体を${p.n}ターン眠らせる（攻撃すると起きる）`,
- random:()=>`何が起きるかはお楽しみ！（大ダメージ・全回復・ゴールド・すべる…）`,swap:()=>`敵の攻撃力と守備力を入れかえる`,lesson:p=>`この戦闘の経験値が${p.x}倍になる`,
+ random:()=>`何が起きるかはお楽しみ！（大ダメージ・全回復・ジンバブエ・すべる…）`,swap:()=>`敵の攻撃力と守備力を入れかえる`,lesson:p=>`この戦闘の経験値が${p.x}倍になる`,
  timestop:()=>`敵全体を1ターン動けなくする（ボスは50%）`,bomb:p=>`${p.t}ターン後に 敵全体へ大爆発`,arrows:p=>`${p.n}回、${p.one?'同じ敵':'ランダムな敵'}を攻撃`,critAll:p=>`${p.n}ターンの間 仲間の物理攻撃がすべて会心になる`,
  barrier:p=>`全員にバリアをはる（魔力・守備に応じた量）`,harvest:()=>`やくそう・まほうの水などの道具を手に入れる（1戦闘1回）`,charm:p=>`${p.dmg?'攻撃しながら、':''}この敵のスカウト成功率を大きく上げる`,
  charge:p=>`使うたびに威力がたまる一撃（4回まで）`,counter:p=>`${p.n}回、攻撃されたら反撃する`,sumo:p=>`${p.n}ターン 敵の攻撃を引きつけ、受けるダメージを大きく減らす`,dodge:p=>`${p.n}ターン 自分への攻撃をすべてかわす`,
- goldDmg:p=>`ゴールドを払って、払った額に応じたダメージ（最大 Lv×${p.pay}G）`,weakAll:p=>`敵全体の攻撃力と守備力を下げる`,petHeal:p=>p.atk?`仲間のモンスター全員が攻撃に参加する`:`仲間のモンスターを大きく回復し、攻撃力アップ`,
- richDmg:p=>`持っているゴールドが多いほど強い一撃＋${p.g?`${p.g[0].toLocaleString()}〜${p.g[1].toLocaleString()}Gを手に入れる`:'ゴールドを奪う'}`,dropUp:()=>`この戦闘の敵が 必ず道具を落とす`,lucky:p=>`当たれば${p.k}倍の大ダメージ、外れると敵が回復することも`,
+ goldDmg:p=>`ジンバブエを払って、払った額に応じたダメージ（最大 Lv×${p.pay}Z）`,weakAll:p=>`敵全体の攻撃力と守備力を下げる`,petHeal:p=>p.atk?`仲間のモンスター全員が攻撃に参加する`:`仲間のモンスターを大きく回復し、攻撃力アップ`,
+ richDmg:p=>`持っているジンバブエが多いほど強い一撃＋${p.g?`${p.g[0].toLocaleString()}〜${p.g[1].toLocaleString()}Zを手に入れる`:'ジンバブエを奪う'}`,dropUp:()=>`この戦闘の敵が 必ず道具を落とす`,lucky:p=>`当たれば${p.k}倍の大ダメージ、外れると敵が回復することも`,
  mpDrain:p=>`呪文で攻撃し、与えたダメージの一部を全員のMPに変える`,selfBomb:p=>`自分のHPを1にして、敵全体に超ダメージ`,burnAll:p=>`敵全体に毒（毎ターンダメージ）`,mpAll:p=>`全員のMPを${p.v}回復`,
  breakDef:p=>`敵全体の守備力を${p.n}ターン0にする`,revenge:p=>`さっき受けたダメージの${p.k}倍で やり返す`,allyHit:p=>`${p.n}ターンの間 ${p.name}が毎ターン敵を攻撃する`};
 function makeSig(k){const d=SIGS[k];if(!d)return null;const [name,kind,p,mp]=d;return {name,type:'sig',kind,p,mp,sig:true,desc:'【固有】'+SIGD[kind](p)};}
@@ -2404,7 +2404,7 @@ async function sigAct(s,me){
   case 'random':{const r=Math.random();
    if(r<.25){await say('大ウケ！ 敵全体に大ダメージ！');for(const e of [...aliveF()]){E=e;await fxPlay('explode','foe',{wait:100});await hitFoe((st('str')+st('int'))*3-E.def*.3);}}
    else if(r<.45){await say('みんな元気になった！');for(const t of alive())await healP(9999,t);}
-   else if(r<.65){const g=50+me.lv*20;GS.gold+=g;await say(`おひねりが飛んできた！ <span class="gold">${g}G</span>`);}
+   else if(r<.65){const g=50+me.lv*20;GS.gold+=g;await say(`おひねりが飛んできた！ <span class="gold">${g}Z</span>`);}
    else if(r<.85){for(const e of aliveF())e.stunned=true;await say('敵は あっけにとられて 動けない！');}
    else await say('……しーん。すべった。');break;}
   case 'swap':{E=tg();[E.atk,E.def]=[E.def,E.atk];await say(`${E.name}の 攻撃力と守備力が 入れかわった！`);break;}
@@ -2420,12 +2420,12 @@ async function sigAct(s,me){
   case 'counter':{B.counter=B.counter||{};B.counter[me.id]={n:p.n,k:p.k};await say(`${me.name}は 反撃の構えを とった！`);break;}
   case 'sumo':{B.taunt={m:me,n:p.n};me.bs.tough=p.n;await say(`${me.name}は どっしりと 構えた！ 攻撃を引きつける！`);break;}
   case 'dodge':{me.bs.dodge=p.n;await say(`${me.name}は 攻撃を かわす構えだ！`);break;}
-  case 'goldDmg':{const pay=Math.min(GS.gold,me.lv*p.pay);if(pay<=0){await say('ゴールドが ない…');break;}GS.gold-=pay;await say(`<span class="gold">${pay}G</span> を 支払った！`);await dmg1(pay*2.2+st('int'),'holy');break;}
+  case 'goldDmg':{const pay=Math.min(GS.gold,me.lv*p.pay);if(pay<=0){await say('ジンバブエが ない…');break;}GS.gold-=pay;await say(`<span class="gold">${pay}Z</span> を 支払った！`);await dmg1(pay*2.2+st('int'),'holy');break;}
   case 'weakAll':{for(const e of aliveF()){e.atk0=e.atk0||e.atk;e.def0=e.def0||e.def;e.atk=Math.max(Math.round(e.atk0*.5),Math.round(e.atk*(1-p.v)));e.def=Math.max(Math.round(e.def0*.4),Math.round(e.def*(1-p.v)));}await fxPlay('dark','foe',{wait:200});await say('敵全体の 攻撃力と守備力が さがった！');break;}
   case 'petHeal':{const mons=party().filter(x=>x.mon&&x.hp>0);if(!mons.length){await say('仲間のモンスターが いない…');break;}
    if(p.atk){for(const mo of mons){E=tg();if(!E)break;await say(`${mo.name}の 攻撃！`);await fxPlay(atkFx(mo),'foe',{wait:120});await hitFoe(as(mo,()=>S('str'))*2*p.k*.5-E.def);if(E.hp<=0&&await settleDowns())return true;}}
    else{for(const mo of mons)await healP(st('int')*p.k+20,mo);B.pbuff={n:3,v:.25};await say('モンスターたちが 元気いっぱいだ！');}break;}
-  case 'richDmg':{const g=GS.gold;await dmg1(st('str')*2*p.k*(1+Math.log10(1+g)/3)*mult('phys'),'claw');const t=p.g?Math.round(p.g[0]+Math.random()*(p.g[1]-p.g[0])):Math.round(10+me.lv*3);GS.gold+=t;await say(`<span class="gold">${t}G</span> を うばった！`);break;}
+  case 'richDmg':{const g=GS.gold;await dmg1(st('str')*2*p.k*(1+Math.log10(1+g)/3)*mult('phys'),'claw');const t=p.g?Math.round(p.g[0]+Math.random()*(p.g[1]-p.g[0])):Math.round(10+me.lv*3);GS.gold+=t;await say(`<span class="gold">${t}Z</span> を うばった！`);break;}
   case 'dropUp':{B.dropx=true;await say('この戦闘の敵は 必ず道具を落とす！');break;}
   case 'lucky':{const r=Math.random();E=tg();if(r<.45){await say('大当たり！');await dmg1(st('str')*2*p.k*mult('phys'),'crit');}else if(r<.8){await say('まあまあ…');await dmg1(st('str')*2*mult('phys'));}else{const h=Math.round(E.max*.1);E.hp=Math.min(E.max,E.hp+h);await say(`大はずれ！ ${E.name}が ${h} 回復した…`);}break;}
   case 'mpDrain':{const d=await dmg1(st('int')*2*p.k*mult('mag'),'dark');const g=Math.max(1,Math.round(d/6));for(const t of alive())as(t,()=>{t.mp=Math.min(maxMP(),t.mp+g);});await say(`みんなの MPが ${g} 回復した！`);break;}
@@ -2727,7 +2727,7 @@ oracle:{t:{'運命の糸':['swap',{},5],'占星':['lucky',{k:3.5},6],'神託':['
 beastfighter:{t:{'獣の連撃':['arrows',{n:4,k:.9,one:true},6],'野生の勘':['dodge',{n:2},4],'群れの力':['petHeal',{k:2.5,atk:true},7],'獣王の一撃':['hit',{k:2.4,x:{stun:.35}},7]},
  p:[['野性',{lowAtk:.3}],['狩りの本能',{killHeal:.1}],['獣の皮',{taken:-.08}]]}
 };
-const XTX=x=>!x?'':(x.crit?'・必ず会心':'')+(x.pierce?'・守備無視':'')+(x.stun?`・${pc(x.stun)}でしびれ`:'')+(x.poison?'・毒':'')+(x.freeze?`・${pc(x.freeze)}で凍結`:'')+(x.weaken?'・敵の攻撃ダウン':'')+(x.armor?'・敵の守備ダウン':'')+(x.drain?'・与ダメの一部を吸収':'')+(x.steal?`・${pc(Math.min(1,x.steal))}で道具を盗む`:'')+(x.gold?'・ゴールドを奪う':'')+(x.self?'・反動あり':'');
+const XTX=x=>!x?'':(x.crit?'・必ず会心':'')+(x.pierce?'・守備無視':'')+(x.stun?`・${pc(x.stun)}でしびれ`:'')+(x.poison?'・毒':'')+(x.freeze?`・${pc(x.freeze)}で凍結`:'')+(x.weaken?'・敵の攻撃ダウン':'')+(x.armor?'・敵の守備ダウン':'')+(x.drain?'・与ダメの一部を吸収':'')+(x.steal?`・${pc(Math.min(1,x.steal))}で道具を盗む`:'')+(x.gold?'・ジンバブエを奪う':'')+(x.self?'・反動あり':'');
 Object.assign(SIGD,{
  hit:p=>`${p.mag?'魔力':'力'}×${p.k}の一撃${XTX(p.x)}`,aoe:p=>`敵全体に${p.mag?'呪文':'攻撃'}（${p.mag?'魔力':'力'}×${p.k}）${XTX(p.x)}`,
  heal1:p=>`仲間1人のHPを大きく回復（魔力×${p.k}）`,healAll:p=>`仲間全員のHPを回復（魔力×${p.k}）`,guardAll:p=>`${p.n}ターン 全員の受けるダメージ半減`,
@@ -3068,7 +3068,7 @@ function renderJob(o){
  $('#jbk').onclick=()=>renderCreator({app:o.app,name:o.name});
  document.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{
   uqSeq=0;
-  GS={v:2,layV:2,free:{comp:1,skill:1},cnt:{},treeV:TREE_V,gold:100,gems:500,items:{herb:3,water:1,bomb:1,rev:1,ball:3},bag:{},sbag:[],roster:[],party:[],mseq:0,dg:{},spx:{},sound:true,friendCode:makeCode(),friends:[]};
+  GS={v:2,layV:2,free:{comp:1,skill:1},cnt:{},treeV:TREE_V,gold:10000,zim:1,zim2:1,gems:500,items:{herb:3,water:1,bomb:1,rev:1,ball:3},bag:{},sbag:[],roster:[],party:[],mseq:0,dg:{},spx:{},sound:true,friendCode:makeCode(),friends:[]};
   normalize(GS);
   const name=($('#nm').value||'').trim().slice(0,8)||'ゆうしゃ';
   const h=newMember({name,jobKey:b.dataset.job,hero:true});h.app={...o.app};h.trees={[h.jobKey]:h.tree};h.jobsOwned=[h.jobKey];GS.roster.push(h);GS.party=[h.id];P=h;normalize(GS);
@@ -3111,6 +3111,8 @@ function normalize(g){
   g.lay.max=Math.max(1,c+1);g.lay.prog={};for(let L=1;L<g.lay.max;L++)g.lay.prog[L]=[true];g.layV=2;if(c)g.layNote=1;}
  g.dex=g.dex||{};g.dexOrder=g.dexOrder||[];(g.roster||[]).forEach(m=>{if(m.mon&&m.sid){g.dex[m.sid]=2;if(!g.dexOrder.includes(m.sid))g.dexOrder.push(m.sid);}});
  migrateTree(g);
+ if(!g.zim2){if(g.coin!==undefined)g.coin=1000;g.zim2=1;if(g.zim&&!g.zimNote)g.coinNote=1;}
+ if(!g.zim){g.gold=10000;g.zim=1;g.zimNote=1;}
  g.spx=g.spx||{};if(g.sound===undefined)g.sound=true;if(g.bgm===undefined)g.bgm=true;g.seenJobs=g.seenJobs||[];
  (g.roster||[]).forEach(m=>{if(!m.mon&&!m.hero&&!g.seenJobs.includes(m.jobKey)&&JOBS[m.jobKey]&&!JOBS[m.jobKey].special)g.seenJobs.push(m.jobKey);if(m.hero){m.trees=m.trees||{[m.jobKey]:m.tree};m.trees[m.jobKey]=m.tree;m.jobsOwned=m.jobsOwned||[m.jobKey];}});if(g.items.ball===undefined)g.items.ball=3;
  g.dg=g.dg||{};if(!g.xcode)g.xcode=Array.from({length:12},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('').replace(/^(.{4})(.{4})/,'$1-$2-');if(!g.gid)g.gid=Math.random().toString(36).slice(2,12)+Date.now().toString(36).slice(-4);g.pvp=g.pvp||{w:0,l:0};g.mclr=g.mclr||{};
@@ -3206,13 +3208,13 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 /* ===== メイン画面（下のタブ） ===== */
 let TAB='dungeon';
 const TABN={dungeon:'ダンジョン',party:'なかま',multi:'マルチ',gacha:'ガチャ',casino:'ギャンブル',shop:'ショップ',friend:'フレンド'};
-function header(t){return `<div class="tbar"><span class="ttl">${t||TABN[TAB]}</span>${GS&&!NET.R&&t!=='ミッション'?misBtn():''}<span class="money"><span class="gold">${GS.gold}G</span> <span class="gem">◆${GS.gems}</span><button class="tg" id="tg-bgm" aria-label="BGM">${GS.bgm?'♪ON':'♪OFF'}</button><button class="tg" id="tg-se" aria-label="効果音">${GS.sound?'SE':'SE×'}</button></span></div>`;}
+function header(t){return `<div class="tbar"><span class="ttl">${t||TABN[TAB]}</span>${GS&&!NET.R&&t!=='ミッション'?misBtn():''}<span class="money"><span class="gold">${GS.gold}Z</span> <span class="gem">◆${GS.gems}</span><button class="tg" id="tg-bgm" aria-label="BGM">${GS.bgm?'♪ON':'♪OFF'}</button><button class="tg" id="tg-se" aria-label="効果音">${GS.sound?'SE':'SE×'}</button></span></div>`;}
 function partyBox(){
  return `<div class="win party">${party().map(m=>as(m,()=>`<div class="prow ${m.hp<=0?'down':''}"><span class="pn">${esc(m.name)}<small>${jobN(m)} Lv${m.lv}</small></span>
   <span>HP ${m.hp}/${maxHP()}<div class="bar"><i style="width:${m.hp/maxHP()*100}%;background:var(--hp)"></i></div></span>
   <span>MP ${m.mp}/${maxMP()}<div class="bar"><i style="width:${m.mp/maxMP()*100}%;background:var(--mp)"></i></div></span></div>`)).join('')}</div>`;
 }
-const innCost=()=>party().reduce((s,m)=>s+5+m.lv*3,0);
+const innCost=()=>Math.min(100,party().reduce((s,m)=>s+5+m.lv*3,0));
 const needsRest=()=>party().some(m=>m.hp<as(m,maxHP)||m.mp<as(m,maxMP));
 const rest=()=>{GS.gold-=innCost();party().forEach(m=>as(m,heal));};
 /* ===== 運営からの贈り物（アプリ版のみ）：Firestore の gift/{引き継ぎコード} に置いた贈り物を受け取る ===== */
@@ -3249,6 +3251,8 @@ function renderMain(tab,notes){
 
 function treeNotice(){
  if(GS&&GS.layNote&&!$('#tut')){delete GS.layNote;saveGame();const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>ダンジョンが新しくなりました</h2><p>1つの階層＝1つのダンジョンになり、5層ごとにボスだけの階層があります。これまでにクリアしたダンジョンの数だけ、階層を進めた状態にしています（今は 第${GS.lay.max}層 から）。</p><button class="cta" id="tutok">わかった！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
+ if(GS&&GS.zimNote&&!$('#tut')){delete GS.zimNote;saveGame();const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>新しいお金「ジンバブエ」</h2><p>これまでのゴールド（G）は廃止になり、新しいお金<b>ジンバブエ（Z）</b>に切り替わりました。</p><p>これまでのゴールドのかわりに、全員に <b class="gold">10,000Z</b> を配っています。</p><p>ダンジョンでは、クリア時に <b>500Z</b>（ボス階層は <b>1,000Z</b>）が手に入ります。</p><p>ギャンブルのコインもリセットし、全員 <b class="coin">1,000コイン</b> からのやり直しです。</p><button class="cta" id="tutok">わかった！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
+ if(GS&&GS.coinNote&&!$('#tut')){delete GS.coinNote;saveGame();const el=document.createElement('div');el.id='tut';el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>ギャンブルのコインをリセットしました</h2><p>全員のコインを <b class="coin">1,000コイン</b> にそろえて、やり直しにしています。</p><button class="cta" id="tutok">わかった！</button></div>`;document.body.appendChild(el);$('#tutok').onclick=()=>el.remove();return;}
  if(!GS||!GS.treeNote||$('#tut'))return;delete GS.treeNote;saveGame();
  const el=document.createElement('div');el.id='tut';
  el.innerHTML=`<div class="tbox"><p class="tt">お知らせ</p><h2>スキルツリーが新しくなりました</h2>
@@ -3780,10 +3784,10 @@ function tabCasino(n){
  <button class="pan casino race" id="g-race"><span class="pt">モンスターレース</span><span class="pic">${['beast2','bird3','dragon1'].map(id=>`<i>${monSprite(SPECIES[id],false)}</i>`).join('')}</span><small>6匹のモンスターが走る！ 単勝・モンスター連・三連単${isSun()?'<br><b class="gold">🎉 日曜日はオッズ2倍！</b>':''}</small></button>
  <button class="pan casino prize" id="g-prize"><span class="pt">景品交換所</span><small>コインで ★5確定チケット・転職玉・強い装備やスキル・限定モンスターと交換</small></button>
  <button class="pan casino slot" id="g-slot"><span class="pt">スロット「${SLN}」</span><span class="pic">${lamp(true).replace('class="tlamp on"','class="tlamp on" style="width:70px;height:56px"')}<span class="reel0">${SL_SYM['7']}</span><span class="reel0">${SL_SYM['7']}</span><span class="reel0">${SL_SYM['7']}</span></span><small>宝箱が開いたらボーナス確定！ 5ライン・3台・毎日設定が変わる${isSat()?'<br><b class="gold">🎰 土曜日は どれか1台が設定6！</b>':''}</small></button>
- <div class="win"><h2>コイン両替</h2><p class="sub">ゴールドをコインにかえられます（10G＝1コイン）。コインはギャンブルでだけ使えます。</p>
+ <div class="win"><h2>コイン両替</h2><p class="sub">ジンバブエをコインにかえられます（10Z＝1コイン）。コインはギャンブルでだけ使えます。</p>
   ${(()=>{const mx=Math.floor(GS.gold/10);CXN=Math.max(0,Math.min(CXN,mx));return `<div class="cxbox"><div class="cxrow"><button class="cxs" data-d="-1000">−1000</button><button class="cxs" data-d="-100">−100</button><div class="cxv"><b id="cxn">${CXN.toLocaleString()}</b><small>コイン</small></div><button class="cxs" data-d="100">＋100</button><button class="cxs" data-d="1000">＋1000</button></div>
    <div class="cxrow2"><button class="cxs" data-d="10000">＋1万</button><button class="cxs" data-d="100000">＋10万</button><button class="cxs" data-m="0">0にする</button><button class="cxs" data-m="1">最大</button></div>
-   <p class="sub" style="text-align:center;margin:4px 0">必要なゴールド：<b id="cxg">${(CXN*10).toLocaleString()}</b>G（所持 ${GS.gold.toLocaleString()}G）</p>
+   <p class="sub" style="text-align:center;margin:4px 0">必要なジンバブエ：<b id="cxg">${(CXN*10).toLocaleString()}</b>Z（所持 ${GS.gold.toLocaleString()}Z）</p>
    <button class="cta" id="cxgo" ${CXN>0?'':'disabled'} style="margin-top:2px">両替する</button>${CXMSG?`<p class="note" style="text-align:center;margin:6px 0 0">${CXMSG}</p>`:''}</div>`;})()}
   ${resc?'<button id="resc" style="margin-top:6px">救済コインをもらう（100コイン・1日1回）</button>':''}</div>`;
  $('#g-slot').onclick=()=>{CASV='slot';tabSlot();};
@@ -3791,7 +3795,7 @@ function tabCasino(n){
  $('#g-race').onclick=()=>{CASV='race';if(!RACE)RACE=genRace();renderRace();};
  const cxUpd=()=>{const mx=Math.floor(GS.gold/10);CXN=Math.max(0,Math.min(CXN,mx));$('#cxn').textContent=CXN.toLocaleString();$('#cxg').textContent=(CXN*10).toLocaleString();$('#cxgo').disabled=CXN<=0;};
  document.querySelectorAll('.cxs').forEach(b=>b.onclick=()=>{SE('click');if(b.dataset.m!=null)CXN=b.dataset.m==='1'?Math.floor(GS.gold/10):0;else CXN+=+b.dataset.d;cxUpd();});
- $('#cxgo').onclick=()=>{const c=Math.min(CXN,Math.floor(GS.gold/10));if(c<=0)return;GS.gold-=c*10;GS.coin+=c;SE('chime');saveGame();CXMSG=`${(c*10).toLocaleString()}G を ${c.toLocaleString()}コインに両替した。`;CXN=0;
+ $('#cxgo').onclick=()=>{const c=Math.min(CXN,Math.floor(GS.gold/10));if(c<=0)return;GS.gold-=c*10;GS.coin+=c;SE('chime');saveGame();CXMSG=`${(c*10).toLocaleString()}Z を ${c.toLocaleString()}コインに両替した。`;CXN=0;
   const y=window.scrollY;renderMain('casino');window.scrollTo(0,y);requestAnimationFrame(()=>window.scrollTo(0,y));CXMSG='';};
  if($('#resc'))$('#resc').onclick=()=>{GS.coin+=100;GS.coinDay=day;SE('chime');saveGame();renderMain('casino',['救済コイン 100枚を受け取った。']);};
 }
@@ -4168,10 +4172,10 @@ let SHOPT='item';
 function tabShop(n){
  const segs=[['item','どうぐ'],['equip','そうび'],['inn','宿屋']];
  let body='';
- if(SHOPT==='item')body=Object.entries(ITEMS).map(([k,it])=>`<button class="buy" data-k="${k}" ${GS.gold<PRICE[k]?'disabled':''}>${it.name}（${it.desc}）<small>${PRICE[k]}G　所持 ${GS.items[k]||0}</small></button>`).join('')
-  +(GS.lay.max>JOBBALL_LAYER?`<button class="buy jb" data-k="jobball" ${GS.gold<JOBBALL?'disabled':''}><span class="gold">転職玉</span>（主人公が転職できる・とても貴重）<small>${JOBBALL}G　所持 ${GS.items.jobball||0}</small></button>`:`<p class="sub" style="margin-top:6px">？？？ … 第${JOBBALL_LAYER}層をこえると 新しい品物が入荷するらしい</p>`);
- if(SHOPT==='equip')body=Object.keys(SLOTN).map(sl=>`<p class="sub" style="margin:8px 0 2px">${SLOTN[sl]}</p>`+Object.entries(EQUIP).filter(([,e])=>e.slot===sl&&!e.prize).map(([k,e])=>`<button class="buyeq" data-k="${k}" ${GS.gold<e.price?'disabled':''}>${e.name}<small>${descOf(e.eff)}　${e.price}G　持っている ${GS.bag[k]||0}</small></button>`).join('')).join('')+'<p class="sub" style="margin-top:6px">買った装備は「なかま」から装備できます。</p>';
- if(SHOPT==='inn')body=`<button id="inn" ${GS.gold<innCost()||!needsRest()?'disabled':''}>泊まる<small>パーティ全員のHP・MP全回復　${innCost()}G</small></button>`;
+ if(SHOPT==='item')body=Object.entries(ITEMS).map(([k,it])=>`<button class="buy" data-k="${k}" ${GS.gold<PRICE[k]?'disabled':''}>${it.name}（${it.desc}）<small>${PRICE[k]}Z　所持 ${GS.items[k]||0}</small></button>`).join('')
+  +(GS.lay.max>JOBBALL_LAYER?`<button class="buy jb" data-k="jobball" ${GS.gold<JOBBALL?'disabled':''}><span class="gold">転職玉</span>（主人公が転職できる・とても貴重）<small>${JOBBALL}Z　所持 ${GS.items.jobball||0}</small></button>`:`<p class="sub" style="margin-top:6px">？？？ … 第${JOBBALL_LAYER}層をこえると 新しい品物が入荷するらしい</p>`);
+ if(SHOPT==='equip')body=Object.keys(SLOTN).map(sl=>`<p class="sub" style="margin:8px 0 2px">${SLOTN[sl]}</p>`+Object.entries(EQUIP).filter(([,e])=>e.slot===sl&&!e.prize).map(([k,e])=>`<button class="buyeq" data-k="${k}" ${GS.gold<e.price?'disabled':''}>${e.name}<small>${descOf(e.eff)}　${e.price}Z　持っている ${GS.bag[k]||0}</small></button>`).join('')).join('')+'<p class="sub" style="margin-top:6px">買った装備は「なかま」から装備できます。</p>';
+ if(SHOPT==='inn')body=`<button id="inn" ${GS.gold<innCost()||!needsRest()?'disabled':''}>泊まる<small>パーティ全員のHP・MP全回復　${innCost()}Z</small></button>`;
  $('#app').innerHTML=`${header()}${n?`<div class="win">${n}</div>`:''}
  <div class="seg">${segs.map(([k,t])=>`<button data-s="${k}" class="${SHOPT===k?'on':''}">${t}</button>`).join('')}</div>
  <div class="win menu">${body}</div>`;
@@ -4578,7 +4582,7 @@ function tabDungeon(n){
  }
  $('#app').innerHTML=`${header('ダンジョン')}${n?`<div class="win">${n}</div>`:''}
  <div class="seg two">${segs.map(([k,t])=>`<button data-s="${k}" class="${DTAB===k?'on':''}">${t}</button>`).join('')}</div>
- ${DTAB==='normal'?`<div class="win rest"><span>到達：<b class="gold">第${max}層</b>${FRONT>max?`<small>　全体の最前線：第${FRONT}層</small>`:''}</span><span class="rbtns"><button id="recb">みんなの<br>記録</button><button id="inn" ${GS.gold<innCost()||!needsRest()?'disabled':''}>宿屋で休む<small>${innCost()}G</small></button></span>${(()=>{const x=layerRate(max);return `<div class="lrate">次の第${max}層${x.boss?'（ボス）':''}：<b style="color:${x.lab[1]}">${x.lab[0]}</b>　推奨Lv${x.need}<span class="sub">（あなた Lv${x.al}）</span></div>`;})()}</div>`:''}
+ ${DTAB==='normal'?`<div class="win rest"><span>到達：<b class="gold">第${max}層</b>${FRONT>max?`<small>　全体の最前線：第${FRONT}層</small>`:''}</span><span class="rbtns"><button id="recb">みんなの<br>記録</button><button id="inn" ${GS.gold<innCost()||!needsRest()?'disabled':''}>宿屋で休む<small>${innCost()}Z</small></button></span>${(()=>{const x=layerRate(max);return `<div class="lrate">次の第${max}層${x.boss?'（ボス）':''}：<b style="color:${x.lab[1]}">${x.lab[0]}</b>　推奨Lv${x.need}<span class="sub">（あなた Lv${x.al}）</span></div>`;})()}</div>`:''}
  <div class="lays">${body}</div>`;
  document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{SE('click');DTAB=b.dataset.s;tabDungeon('');if(DTAB!=='normal')window.scrollTo(0,0);});
  if(DTAB==='normal'){const c=document.querySelector('.stn.cur');if(c)requestAnimationFrame(()=>c.scrollIntoView({block:'nearest'}));}
@@ -5115,7 +5119,7 @@ function battleIn(foe){
 function clearDungeon(notes){
  bump('clr');
  const dn=D.dun,dropN=[],rew=[];giveDrops(D.drops,dropN);
- let gold=dn.gold,gems=10,first=false,unlockL=0;const L=D.L,di=D.di;if(L&&!D.special)adaptAfter('clear',L);
+ let gold=D.L&&layerInfo(D.L).bossL?1000:500,gems=10,first=false,unlockL=0;const L=D.L,di=D.di;if(L&&!D.special)adaptAfter('clear',L);
  if(D.special==='raid'){gems=100;GS.items.ball=(GS.items.ball||0)+3;rew.push('スカウト玉 ×3');}
  if(D.special==='kira')gems=15;
  if(D.special==='mirror'){gems=50;GS.items.fbook=(GS.items.fbook||0)+1;GS.spx.mirror=dayId();rew.push('<span class="uqt">★ 合体の書 ×1</span>');}
@@ -5127,7 +5131,7 @@ function clearDungeon(notes){
  if(L){const p=layerProg(L);first=!p[0];p[0]=true;const bl=layerInfo(L).bossL;
   if(first){gems=bl?100:30;if(bl){GS.items.ball=(GS.items.ball||0)+2;rew.push('スカウト玉 ×2');}}
   if(L>=GS.lay.max){GS.lvh=GS.lvh||{};if(GS.lvh[L]==null)GS.lvh[L]=avgLv();GS.lpred=GS.lpred||{};const pn=predLv(L+1);if(pn!=null)GS.lpred[L+1]=+pn.toFixed(1);GS.lay.max=L+1;unlockL=L+1;FRONT_AT=0;frontierSync();}}
- GS.gold+=gold;GS.gems+=gems;rew.unshift(`${gold}G`,`ジェム◆${gems}${first?'（初回クリア）':''}`);
+ GS.gold+=gold;GS.gems+=gems;rew.unshift(`${gold}Z`,`ジェム◆${gems}${first?'（初回クリア）':''}`);
  const spK=D.special;D=null;saveGame();playBGM('clear');
  wide(false);tabbar(false);
  $('#app').innerHTML=`<div class="clearscr"><div class="fw">${Array.from({length:7},(_,i)=>`<i style="left:${8+i*13}%;top:${10+(i%3)*12}%;animation-delay:${i*.35}s;--c:hsl(${i*50} 90% 60%)"></i>`).join('')}</div>
@@ -5692,8 +5696,8 @@ function clientRes(d){
     else await say(`しかし 失敗した…`,400);}
    else if(k==='X'){const exp=clampN(a,0,1e6),gold=clampN(b,0,1e6);M.gold+=gold;M.exp+=exp;SE('win');
     Object.values(M.mem).forEach(id=>{const m=GS.roster.find(x=>x.id===id);if(!m)return;m.exp+=exp;let up=0;while(m.exp>=expNeed(m.lv)){m.exp-=expNeed(m.lv);m.lv++;up++;}if(up){m.pend+=up;const lb=lvBonus(m)*up;if(lb)m.pts+=lb;M.notes.push(`${m.name}は レベル${m.lv}に あがった！`);}});
-    GS.gold+=gold;if(Math.random()<.5+(+c||1)*.04){const it=pick(['herb','water','ball','gem','seed']);M.bag[it]=(M.bag[it]||0)+(it==='gem'?5+(+c||1)*2:1);}
-    await say(`${exp} の けいけんちと ${gold}G を手に入れた！`,500);}
+    if(Math.random()<.5+(+c||1)*.04){const it=pick(['herb','water','ball','gem','seed']);M.bag[it]=(M.bag[it]||0)+(it==='gem'?5+(+c||1)*2:1);}
+    await say(`${exp} の けいけんちを手に入れた！`,500);}
   }
   M.st=d.st;saveGame();
  });
@@ -5703,13 +5707,13 @@ function clientEnd(d){
  M.q=M.q.then(async()=>{
   await sleep(400);const notes=[...M.notes];let title,cls;
   if(M.mode==='battle'){const win=d.win===M.side;title=win?'WIN!':'LOSE…';cls=win?'cl':'cl lose';GS.pvp[win?'w':'l']++;const g=win?20:5;GS.gems+=g;notes.unshift(`ジェム◆${g}`);SE(win?'levelup':'hurt');playBGM(win?'clear':'main');}
-  else if(d.clear){title='CLEAR!';cls='cl';const k=MD.some(x=>x.key===d.dk)?d.dk:'kizuna',first=!GS.mclr[k];GS.mclr[k]=(GS.mclr[k]||0)+1;const g=first?80:30,gd=k==='giga'?800:200;GS.gems+=g;GS.gold+=gd;
-   const dn=[];giveDrops(M.bag,dn);notes.unshift(`${gd}G`,`ジェム◆${g}${first?'（初回クリア）':''}`,...dn);playBGM('clear');}
+  else if(d.clear){title='CLEAR!';cls='cl';const k=MD.some(x=>x.key===d.dk)?d.dk:'kizuna',first=!GS.mclr[k];GS.mclr[k]=(GS.mclr[k]||0)+1;const g=first?80:30,gd=k==='giga'?1000:500;GS.gems+=g;GS.gold+=gd;
+   const dn=[];giveDrops(M.bag,dn);notes.unshift(`${gd}Z`,`ジェム◆${g}${first?'（初回クリア）':''}`,...dn);playBGM('clear');}
   else{title='全滅…';cls='cl lose';const dn=[];giveDrops(M.bag,dn,true);notes.unshift('拾ったアイテムの半分を持ち帰った。',...dn);playBGM('main');}
   saveGame();
   $('#app').innerHTML=`<div class="clearscr">${cls==='cl'?`<div class="fw">${Array.from({length:6},(_,i)=>`<i style="left:${10+i*15}%;top:${10+(i%3)*12}%;animation-delay:${i*.35}s;--c:hsl(${i*60} 90% 60%)"></i>`).join('')}</div>`:''}
    <p class="${cls}">${title}</p><p class="sname">${M.mode==='battle'?'対戦':'協力ダンジョン'}（マルチ）</p>
-   <div class="win rew"><h2>結果</h2>${notes.length?notes.map(x=>`<p>${x}</p>`).join(''):'<p class="sub">なし</p>'}<p class="sub">けいけんち合計 ${M.exp}・ゴールド ${M.gold}G</p></div>
+   <div class="win rew"><h2>結果</h2>${notes.length?notes.map(x=>`<p>${x}</p>`).join(''):'<p class="sub">なし</p>'}<p class="sub">けいけんち合計 ${M.exp}</p></div>
    <button class="cta" id="ok">ルームにもどる</button></div>`;
   $('#ok').onclick=()=>{NET.M=null;if(NET.host)NET.H=null;lvChoices(()=>{playBGM('main');NET.R?renderRoom():renderMain('multi');});};
  });
@@ -5892,7 +5896,7 @@ async function onHitTags(s,dealt){
  if(s.stun&&Math.random()<s.stun&&E.kind!=='raid'){E.stunned=true;await say(`${E.name}は しびれて 動けなくなった！`);}
  if(s.weaken){E.atk0=E.atk0||E.atk;if(E.atk>E.atk0*.5){E.atk=Math.round(E.atk*(1-s.weaken));await say(`${E.name}の 攻撃力が さがった！`);}}
  if(s.armor){E.def0=E.def0||E.def;if(E.def>E.def0*.4){E.def=Math.round(E.def*(1-s.armor));await say(`${E.name}の 守備力が さがった！`);}}
- if(s.gold&&dealt>0){const g=Math.max(1,Math.round(dealt*s.gold));GS.gold+=g;await say(`<span class="gold">${g}G</span> を 手に入れた！`);}
+ if(s.gold&&dealt>0){const g=Math.max(1,Math.round(dealt*s.gold));GS.gold+=g;await say(`<span class="gold">${g}Z</span> を 手に入れた！`);}
 }
 async function settleDowns(){
  const kp=P&&!P.foe&&P.hp>0&&GS.party.includes(P.id)?P:null;
@@ -6137,8 +6141,8 @@ async function hitMember(t,raw,mag){
 async function win(){
  if(ES.length===1){$('#foe').classList.add('dead');if(!E.scouted)await say(`${E.name}を たおした！`);}else await say('魔物の群れを やっつけた！');SE('win');
  if(C.drop)for(const e of ES)if(!e.scouted&&!e.fled)for(const l of C.drop(e))await say(l);
- const notes=[],WB=party().reduce((a,m)=>{const d=as(m,mods);a.g+=d.winGold||0;a.x+=d.winExp||0;return a;},{g:0,x:0}),TX=Math.round(ES.reduce((a,e)=>a+e.exp,0)*(B.expx||1)*(1+WB.x)),TG=Math.round(ES.reduce((a,e)=>a+e.gold,0)*(1+WB.g));
- GS.gold+=TG;if(D)D.earned+=TG;notes.push(`${TX} の けいけんちと ${TG}G を かくとく`);
+ const notes=[],WB=party().reduce((a,m)=>{const d=as(m,mods);a.g+=d.winGold||0;a.x+=d.winExp||0;return a;},{g:0,x:0}),TX=Math.round(ES.reduce((a,e)=>a+e.exp,0)*(B.expx||1)*(1+WB.x)),TG=0;
+ notes.push(`${TX} の けいけんちを かくとく`);
  for(const m of party()){P=m;const md=mods();
   ES.forEach(e=>hab('slay_'+e.fam));if(B.turn===1)hab('quick');if(m.hp>0&&!m.bs.took)hab('nodmg');if(m.hp>0&&m.bs.minR<=.15)hab('comeback');
   if(m.hp>0&&md.postHeal&&m.hp<maxHP()){m.hp=Math.min(maxHP(),m.hp+Math.round(maxHP()*md.postHeal));}
