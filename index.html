@@ -5195,7 +5195,7 @@ function doBreed(a,b,pick4){
  const child=newMonster(sid,Math.random()<pl.shinyP,pl.plus,inh,makeMonMix(a.jobKey,b.jobKey));
  const ba=monBase(a),bb=monBase(b);STATS.forEach(([k])=>child.st[k]+=Math.floor(((ba[k]||0)+(bb[k]||0))*.05));
  /* 血統（何代重ねたか）：両親の平均+1。代を重ねるほど能力が少しずつ上がる（進化形は進化で伸びるので対象外） */
- child.lg=Math.floor(((a.lg||0)+(b.lg||0))/2)+1;if(!SPECIES[child.sid].evo){const add=Math.round(.3*child.lg);STATS.forEach(([k])=>child.st[k]+=add);}
+ child.lg=Math.floor(((a.lg||0)+(b.lg||0))/2)+1;if(SPECIES[child.sid].evo)child.lg=Math.max(child.lg,SPECIES[child.sid].evoGen||1);if(!SPECIES[child.sid].evo){const add=Math.round(.3*child.lg);STATS.forEach(([k])=>child.st[k]+=add);}
  child.bst={...child.st};
  /* レベルは親の高いほうを引き継ぐ（上がったぶんのポイントは「バランス」で上げたのと同じだけもらえる） */
  {const L=Math.max(a.lv||1,b.lv||1);if(L>1){child.lv=L;child.exp=0;child.pts+=(3+lvBonus(child))*(L-1);child.sp+=(L-1);}}
@@ -5215,7 +5215,7 @@ function renderBreed(selA,selB,msg){
  let prev='<p class="sub">親を2体えらんでください（Lv5以上）。1体目の「系統」が子に引き継がれやすく、組み合わせ次第で別の系統や上のランクが生まれます。</p>';
  const bk=(selA||'')+'|'+(selB||'');if(window._brk!==bk){window._brk=bk;BRSK=[];}
  if(A&&Bm){const pl=breedPlan(A,Bm);
-  prev=pl.secret?`<p class="note story">ひみつの組み合わせ！ 何が生まれるかは お楽しみ…</p>`:pl.ev?(()=>{const es=SPECIES[pl.ev];return `<div class="fzprev"><div class="fzpic">${monSprite(es,false)}</div><div><p class="note story">🔥 同じ系統の血が目覚める！ 新たな姿へ進化する！</p><p class="sub"><b>${esc(es.name)}</b>　${FAMS[es.fam].name}　ランク${es.rank}　第${es.evo}世代</p></div></div>`;})():
+  prev=pl.secret?`<p class="note story">ひみつの組み合わせ！ 何が生まれるかは お楽しみ…</p>`:pl.ev?(()=>{const es=SPECIES[pl.ev];return `<div class="fzprev"><div class="fzpic">${monSprite(es,false)}</div><div><p class="note story">🔥 同じ系統の血が目覚める！ 新たな姿へ進化する！</p><p class="sub"><b>${esc(es.name)}</b>　${FAMS[es.fam].name}　ランク${es.rank}　第${es.evoGen}世代</p></div></div>`;})():
    (fzBreedId(A,Bm)?(()=>{const fs=SPECIES[fzBreedId(A,Bm)];return `<div class="fzprev"><div class="fzpic">${monSprite(fs,false)}</div><div><p class="note story">✨ 相性ばつぐん！ 2体の姿がまざった新しいモンスターが生まれる！</p><p class="sub"><b>${esc(fs.name)}</b>　${FAMS[fs.fam].name}　ランク${fs.rank}</p></div></div>`;})():
    `<p class="note">生まれる系統：<b>${FAMS[pl.fam].name}</b>　ランク${pl.rank}${pl.mix?'（相性のよい組み合わせ！）':''}</p><p class="sub">候補：${pl.cands.map(c=>SPECIES[c].name).join('・')}　まれに突然変異で別の種族に</p>`);
   {const mk=makeMonMix(A.jobKey,Bm.jobKey);prev+=`<p class="note">子のスキルツリー：<b>${esc(JOBS[mk].name)}</b>${A.jobKey===Bm.jobKey?'（両親と同じ系統のツリー）':'（両親の特徴をあわせ持つ新しいツリー）'}</p>`;}
