@@ -4291,10 +4291,9 @@ async function gStart(){
  return GLAY.start=Math.max(6,+v.L||9999);
 }
 /* 共通階層の強さは1層ずつなだらかに上げる（最強プレイヤーが一気に強くなっても急に跳ね上がらない） */
-const GFIX_T=Date.UTC(2026,10,27,2,0);/* これより前に作られた階層は、前のルール（最低+1.2）のまま */
-function gSmooth(L,st,x,prev){let lv=+x.lv||expLv(L),pk=Math.max(1,+x.pk||1);const mn=(+x.at||0)&&+x.at<GFIX_T?1.2:3;
- if(prev){lv=Math.min(Math.max(lv,prev.lv+mn),prev.lv+7);pk=Math.min(Math.max(pk,prev.pk),prev.pk+.06);}
- else{lv=Math.min(lv,expLv(L)*4+20);}
+function gSmooth(L,st,x,prev){let lv=+x.lv||expLv(L),pk=Math.max(1,+x.pk||1);
+ if(prev){lv=Math.min(Math.max(lv,prev.lv+3),prev.lv+7);pk=Math.min(Math.max(pk,prev.pk),prev.pk+.06);}
+ else{lv=Math.min(lv,expLv(L)*1.35+5);pk=Math.min(pk,1.2);}
  return {lv,pk:Math.min(3.5,pk)};}
 async function gSpec(L,depth){
  if(!gOn())return null;if(GLAY.spec[L])return GLAY.spec[L];
@@ -4312,7 +4311,7 @@ async function gSpec(L,depth){
   const spec={L,lv:+lv.toFixed(1),pk:+Math.min(3.5,pk).toFixed(2),ad:+Math.min(.6,.35+.012*(L-st)).toFixed(3),by:String(c.n||'').slice(0,10),at:Date.now()};
   await gMake('layers/'+L,spec);v=await gGet('layers/'+L)||spec;
  }
- if(v&&typeof v==='object'){const prev=L>st?await gSpec(L-1):null;const sm=gSmooth(L,st,{lv:+v.lv||expLv(L),pk:+v.pk||1,at:+v.at||0},prev);v={...v,lv:+sm.lv.toFixed(1),pk:+sm.pk.toFixed(2)};}
+ if(v&&typeof v==='object'){const prev=L>st?await gSpec(L-1):null;const sm=gSmooth(L,st,{lv:+v.lv||expLv(L),pk:+v.pk||1},prev);v={...v,lv:+sm.lv.toFixed(1),pk:+sm.pk.toFixed(2)};}
  return GLAY.spec[L]=v;
 }
 const gSpecT=L=>Promise.race([gSpec(L).catch(()=>null),new Promise(r=>setTimeout(()=>r(null),12000))]);
