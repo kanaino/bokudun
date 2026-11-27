@@ -4561,9 +4561,9 @@ function tabDungeon(n){
    <button class="cta" id="sp-casino" ${cdone?'disabled':''}>${cdone?'今日は挑戦済み':'挑戦する'}</button></div>`
    :`<div class="win dcard sp lockd" style="--d1:#2a2a3a;--d2:#0a0a14"><h2>？？？の賭場 <small class="sub">（封印中）</small></h2><p class="sub">ギャンブル（レース・スロット）で 合計${GWIN_NEED.toLocaleString()}枚 勝つと 何かが現れるらしい…</p>
    <div class="barw"><i style="width:${Math.min(100,gw/GWIN_NEED*100)}%"></i></div><p class="sub" style="text-align:right">${Math.min(gw,GWIN_NEED).toLocaleString()} / ${GWIN_NEED.toLocaleString()}枚</p></div>`;
-  if(fuseOpen()){const mp=mirrorPair(),md=GS.spx.mirror===dayId();
+  if(fuseOpen()){const mp=mirrorPair(),md=GS.spx.mirror===dayId(),ml=mirLeft();
    body+=`<div class="win dcard sp" style="--d1:#3a3a5a;--d2:#0a0a18"><h2>鏡の試練 <span class="live-b">合体の書</span></h2><div class="raid">${mp[0]?`<span style="width:64px;flex:none">${heroSprite({...fzSnap(mp[0]),id:'mpv'+mp[0].id},'bust')}</span>`:''}<p class="sub">自分のなかまの「影」と戦う。1階：パーティで強い2人の影（本人より5%強い）。2階：その2人が合体した影のボス。<br>報酬：<b class="gold">合体の書 ×1</b>（1日1回）${mp.length<2?'<br><b style="color:#ff8a80">主人公以外のなかまを2人以上パーティに入れてください</b>':`<br>今日の影：${esc(mp[0].name)}・${esc(mp[1].name)}`}</p></div>
-   <button class="cta" id="sp-mirror" ${md||mp.length<2?'disabled':''}>${md?'今日はクリア済み':'挑戦する'}</button></div>`;}
+   <button class="cta" id="sp-mirror" ${md||ml<=0||mp.length<2?'disabled':''}>${md?'今日はクリア済み':ml<=0?'今日はもう挑戦できない（3回負けた）':`挑戦する<small>今日あと${ml}回まで負けられる</small>`}</button></div>`;}
   body+=spdCards();
  }
  $('#app').innerHTML=`${header('ダンジョン')}${n?`<div class="win">${n}</div>`:''}
@@ -4582,7 +4582,7 @@ function tabDungeon(n){
   enterDungeon({key:'kira',name:'キラキラの洞穴',floors:3,bg:['#5b4a1a','#1a1406'],gold:100},{special:'kira'});};
  if($('#sp-ph'))$('#sp-ph').onclick=()=>{if(!ok())return;const sid=GS.phantom.sid;GS.phantom=null;saveGame();
   enterDungeon({key:'phantom',name:'幻の泉',floors:1,bg:['#4a2a6a','#0e0620'],gold:200},{special:'phantom',phSid:sid});};
- if($('#sp-mirror'))$('#sp-mirror').onclick=()=>{if(!ok())return;const mp=mirrorPair();if(mp.length<2)return;SE('click');
+ if($('#sp-mirror'))$('#sp-mirror').onclick=()=>{if(!ok())return;if(mirLeft()<=0||GS.spx.mirror===dayId())return;const mp=mirrorPair();if(mp.length<2)return;SE('click');
   enterDungeon({key:'mirror',name:'鏡の試練',floors:2,bg:['#3a3a5a','#0a0a18'],gold:500},{special:'mirror',mir:mp.map(m=>m.id)});};
  document.querySelectorAll('.tier').forEach(b=>b.onclick=()=>{SE('click');const [k,r]=b.dataset.t.split(':');if(k==='sp')GS.spTier=+r;else GS.cxTier=+r;const y=window.scrollY;tabDungeon('');window.scrollTo(0,y);});
  document.querySelectorAll('.sp-gods').forEach(b=>b.onclick=()=>{if(!ok())return;const sd=spdOf(b.dataset.k);SE('click');
@@ -4896,11 +4896,15 @@ function canFuse(a,b){
  if(a.hero)return b.rarity===7;if(b.hero)return a.rarity===7;
  return a.rarity===b.rarity&&a.rarity>=2;
 }
-function fusePreview(A,B){const st={};STATS.forEach(([k])=>st[k]=Math.max(Math.round((A.st[k]+B.st[k])*.75),Math.max(A.st[k],B.st[k])+1));return st;}
+/* 合体の能力：2人の合計の何％になるか（レアなほど高い）。★7どうし115%・主人公＋★7 100%・★6 95%・それ以外85% */
+const fuseRate=(A,B)=>A.rarity===7&&B.rarity===7?1.15:(A.hero||B.hero)?1:A.rarity===6?.95:.85;
+function fusePreview(A,B){const r=fuseRate(A,B),st={};STATS.forEach(([k])=>st[k]=Math.max(Math.round((A.st[k]+B.st[k])*r),Math.max(A.st[k],B.st[k])+1));return st;}
+/* 合体の書はレアリティの数だけ必要（★5なら5冊、主人公＋★7は7冊） */
+const fuseCost=(A,B)=>A&&B?((A.hero||B.hero)?7:Math.max(1,A.rarity||1)):1;
 function doFuse(A,B,pickJob){
- if(!canFuse(A,B)||(GS.items.fbook||0)<1)return null;
+ const cost=fuseCost(A,B);if(!canFuse(A,B)||(GS.items.fbook||0)<cost)return null;
  if(B.hero)[A,B]=[B,A];
- GS.items.fbook--;
+ GS.items.fbook-=cost;
  const treeRefund=m=>{let s=0;const add=(job,ids)=>ids.forEach(id=>{const n=(job.G||(job.G=buildTree(job))).by[id];if(n)s+=n.cost||0;});
   if(m.hero&&m.trees)Object.entries(m.trees).forEach(([k,ids])=>JOBS[k]&&add(JOBS[k],ids));else add(m.job,m.tree||[]);return s;};
  const sp=(A.sp||0)+(B.sp||0);
@@ -4950,8 +4954,8 @@ function renderFusion(aId,bId,pj,msg){
    ${A.hero||B.hero?'<p class="sub">主人公は 名前はそのまま、見た目が合体の姿になります。</p>':''}
    <p class="sub" style="margin:6px 0 2px">職業をえらぶ</p><div class="frow"><button class="cta fzj ${pj!==1?'on':''}" data-j="0" style="margin:0">${esc(JOBS[A.jobKey].name)}</button><button class="cta fzj ${pj===1?'on':''}" data-j="1" style="margin:0">${esc(JOBS[B.jobKey].name)}</button></div>
    <p class="sub">${A.hero||B.hero?'':'まれに 新しい職業が生まれることも…！　'}合体すると：能力アップ・新しい合体技・<b>合体専用スキルツリー</b>が開放。${A.rarity===7||B.rarity===7?'<br><b class="uqt">★7がかかわる合体なので、新しい固有スキルも目覚める！</b>':''}<br>2人のスキルツリーはそのまま残り、合体ツリーが追加されます。装備品とガチャスキルは持ち物にもどります。2人は1人になります。</p>
-   <button class="cta" id="fzgo" ${books>0?'':'disabled'}>合体する（合体の書 ×1）</button></div>`;}
- $('#app').innerHTML=`${header('合体')}<div class="win"><p class="sub" style="margin:0">同じレアリティのなかま2人を、合体の書で1人にする。主人公は★7のなかまとだけ合体できる。<br>合体の書：<b class="gold">${books}冊</b>（スペシャル「鏡の試練」で手に入る）</p>${msg?`<p class="note">${msg}</p>`:''}</div>
+   <button class="cta" id="fzgo" ${books>=fuseCost(A,B)?'':'disabled'}>合体する（合体の書 ×${fuseCost(A,B)}）</button>${books<fuseCost(A,B)?`<p class="sub" style="text-align:center">合体の書が あと${fuseCost(A,B)-books}冊 たりません</p>`:''}</div>`;}
+ $('#app').innerHTML=`${header('合体')}<div class="win"><p class="sub" style="margin:0">同じレアリティのなかま2人を、合体の書で1人にする。主人公は★7のなかまとだけ合体できる。<br>必要な合体の書：レアリティの数だけ（★5なら5冊・★7や主人公は7冊）<br>合体の書：<b class="gold">${books}冊</b>（スペシャル「鏡の試練」で手に入る）</p>${msg?`<p class="note">${msg}</p>`:''}</div>
   ${prev}
   <div class="win"><h2>${A?'2人目をえらぶ':'1人目をえらぶ'}</h2><div class="menu">${list.map(m=>card(m,m===A||m===B,!A?list.some(x=>canFuse(m,x)):(m===A||canFuse(A,m)))).join('')||'<p class="sub">合体できるなかまがいません。</p>'}</div></div>
   <button class="cta" id="bk">もどる</button>`;
@@ -5080,7 +5084,11 @@ function bossAlert(name,next){
  let done=false;const fin=()=>{if(done)return;done=true;el.remove();next();};
  el.onclick=fin;setTimeout(fin,2600);
 }
+/* 鏡の試練：1日3回まで負けられる（あきらめた場合も1回と数える） */
+const mirLeft=()=>{const x=GS.spx.mirL;return 3-(x&&x.d===dayId()?x.n:0);};
+const mirLoseAdd=()=>{const d=dayId(),x=GS.spx.mirL;GS.spx.mirL={d,n:(x&&x.d===d?x.n:0)+1};};
 function retreatDungeon(msg){
+ if(D&&D.special==='mirror')mirLoseAdd();
  const nt=[];giveDrops(D.drops,nt);const L=D.L;D=null;playBGM('main');
  if(L)renderLayer(L,[msg,...(nt.length?['持ち帰ったもの：'+nt.join('、')]:[])].join('<br>'));else renderMain('dungeon',[msg.replace('戻ってきた','撤退した')]);
 }
@@ -5088,7 +5096,7 @@ function battleIn(foe){
  startBattle(foe,{label:`${D.floor}/${D.total}`,bg:D.dun.bg,
   drop:e=>{if(e.metal&&e.kind!=='boss')return [];const l=rollDrops(e);addDrops(D.drops,l);return l.map(([k,c])=>`${e.name}は ${DROPN[k]}${k==='gem'?`◆${c}`:''}を 落とした！`);},
   onWin:notes=>{if(D.floor>=D.total)return clearDungeon(notes);D.floor++;saveGame();runFloor(notes);},
-  onLose:()=>{const nt=[];giveDrops(D.drops,nt,true);const L=D.L;if(L&&!D.special)adaptAfter('wipe',L);D=null;party().forEach(m=>as(m,heal));playBGM('main');
+  onLose:()=>{if(D&&D.special==='mirror')mirLoseAdd();const nt=[];giveDrops(D.drops,nt,true);const L=D.L;if(L&&!D.special)adaptAfter('wipe',L);D=null;party().forEach(m=>as(m,heal));playBGM('main');
    const msg=['全滅して 町へ運ばれた…','拾ったアイテムの半分だけ 持ち帰った。経験・成長はそのまま。',...(nt.length?['持ち帰ったもの：'+nt.join('、')]:[])];
    if(L)renderLayer(L,msg.join('<br>'));else renderMain('dungeon',msg);},
   onRun:()=>retreatDungeon('戦いから逃げて、ダンジョンを脱出した。'),
