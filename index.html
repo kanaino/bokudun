@@ -1348,12 +1348,11 @@ function renderUniq(back){
   const hw=P.hwin||{},hints=Object.keys(CATS).map(c=>{const w=hw[c]||[],t=P.tier[c]||0,N=uqNext(t);if(!N)return {c,done:true,t,h:1,r:2};const ww=w.slice(-N),h=ww.reduce((a,b)=>a+b,0),need=Math.ceil(N*UQ_RATE);return {c,h,n:ww.length,N,need,t,r:h/need};})
    .filter(x=>x.h>0).sort((a,b)=>(b.t-a.t)||(b.r-a.r)).slice(0,8);
   const eq=P.uqEq.length,max=slots();
-  $('#app').innerHTML=`<div class="win"><h2>固有スキル</h2><p class="sub">戦い方のクセから生まれる、その人だけの力（技や能力アップ）。目覚めるのは<b>主人公と★7のなかまだけ</b>。<br>直近10戦のうち9割で同じクセが出ると目覚め、その後 直近30戦→50戦→100戦の9割で 同じ力が進化します（最大4段階）。いくつものクセが同時に育ちます。2つのクセが2段階以上になると複合技も生まれ、いっしょに進化します。</p>${canUq(P)?'':'<p class="note">このなかまは 新しい固有スキルには目覚めません（今持っている力は使えます）。</p>'}
+  $('#app').innerHTML=`<button id="bk" class="backb" style="margin:0 0 8px">◀ もどる</button><div class="win"><h2>固有スキル</h2><p class="sub">戦い方のクセから生まれる、その人だけの力（技や能力アップ）。目覚めるのは<b>主人公と★7のなかまだけ</b>。<br>直近10戦のうち9割で同じクセが出ると目覚め、その後 直近30戦→50戦→100戦の9割で 同じ力が進化します（最大4段階）。いくつものクセが同時に育ちます。2つのクセが2段階以上になると複合技も生まれ、いっしょに進化します。</p>${canUq(P)?'':'<p class="note">このなかまは 新しい固有スキルには目覚めません（今持っている力は使えます）。</p>'}
    <p style="margin:6px 0 0">装備中 <span class="pts">${eq}/${max}</span><span class="sub">（4レベルごとに枠+1）</span></p></div>
   <div class="win"><h2>目覚めそうな力</h2>${!canUq(P)?'<p class="sub">—</p>':hints.length?hints.map(x=>x.done?`<div class="hint">「${CATS[x.c].label}」 <b class="gold">最大まで進化（段階4）</b></div>`:`<div class="hint">「${CATS[x.c].label}」 ${x.t?`段階${x.t} → ${x.t+1}`:'目覚め'}：直近${x.N}戦中 <b>${x.h}</b>戦（${x.need}戦で${x.t?'進化':'目覚める'}）${x.n<x.N?`<small>　記録 ${x.n}/${x.N}戦</small>`:''}<div class="barw"><i style="width:${Math.min(100,x.r*100)}%"></i></div></div>`).join(''):'<p class="sub">戦えばクセが記録されていきます。</p>'}</div>
   <div class="win">${P.uniq.length?P.uniq.map(u=>{const on=P.uqEq.includes(u.id);return `<div class="uq"><div><b class="uqt">★ ${u.name}</b><small>${u.cat}のクセから　${u.desc}</small></div>
-   <button class="eq ${on?'on':''}" data-id="${u.id}" ${!on&&eq>=max?'disabled':''}>${on?'装備中':'装備'}</button></div>`;}).join(''):'<p class="sub">まだ目覚めた力はありません。</p>'}
-  <button class="cta" id="bk">もどる</button></div>`;
+   <button class="eq ${on?'on':''}" data-id="${u.id}" ${!on&&eq>=max?'disabled':''}>${on?'装備中':'装備'}</button></div>`;}).join(''):'<p class="sub">まだ目覚めた力はありません。</p>'}</div>`;
   document.querySelectorAll('.eq').forEach(b=>b.onclick=()=>{const id=b.dataset.id;P.uqEq=P.uqEq.includes(id)?P.uqEq.filter(x=>x!==id):[...P.uqEq,id];draw();});
   $('#bk').onclick=back;
  };
@@ -3412,20 +3411,18 @@ let PICKCB=null;
 function renderPick(title,cb,unusedFirst){
  if(cb)PICKCB=cb;tabbar(false);
  const list=sortMembers([...GS.roster],(a,b)=>(GS.party.includes(b.id)-GS.party.includes(a.id))||((b.pts+b.sp>0)-(a.pts+a.sp>0)));
- $('#app').innerHTML=`${header(title)}${sortBar('おすすめ')}<div class="win"><div class="mgrid">${list.map(m=>`<button class="mc" data-m="${m.id}">${avatar(m,'bust')}${mcInfo(m)}${GS.party.includes(m.id)?'<em class="inp">PT</em>':''}${m.pts||m.sp?'<em class="up">UP</em>':''}</button>`).join('')||'<p class="sub">該当するなかまがいません</p>'}</div></div>
- <button class="cta" id="bkp">もどる</button>`;
+ $('#app').innerHTML=`${header(title)}<button id="bkp" class="backb" style="margin:0 0 8px">◀ もどる</button>${sortBar('おすすめ')}<div class="win"><div class="mgrid">${list.map(m=>`<button class="mc" data-m="${m.id}">${avatar(m,'bust')}${mcInfo(m)}${GS.party.includes(m.id)?'<em class="inp">PT</em>':''}${m.pts||m.sp?'<em class="up">UP</em>':''}</button>`).join('')||'<p class="sub">該当するなかまがいません</p>'}</div></div>`;
  document.querySelectorAll('.mc').forEach(b=>b.onclick=()=>{SE('click');PICKCB(GS.roster.find(x=>x.id===b.dataset.m));});
  $('#bkp').onclick=()=>renderMain('party');bindSort(()=>renderPick(title));bindToggles();
 }
 let FSLOT=null;
 function renderFormation(msg){
  tabbar(false);const ps=party();
- $('#app').innerHTML=`${header('パーティ編成')}${msg?`<div class="win"><p class="note">${msg}</p></div>`:''}
+ $('#app').innerHTML=`${header('パーティ編成')}<button id="bkf" class="backb" style="margin:0 0 8px">◀ 決定してもどる</button>${msg?`<div class="win"><p class="note">${msg}</p></div>`:''}
  <div class="win"><p class="sub">枠をタップして選び、下のなかまをタップで入れ替え。最大4人。</p>
   <div class="slots">${[0,1,2,3].map(i=>{const m=ps[i];return `<button class="slot ${FSLOT===i?'sel':''}" data-i="${i}">${m?`${avatar(m,'full')}<b>${esc(m.name)}</b><small class="ml">${rlab(m)}<span>Lv${m.lv}</span></small><small>${jobN(m)}</small>`:'<span class="plus">＋</span><small>あき</small>'}</button>`;}).join('')}</div>
   ${FSLOT!==null&&ps[FSLOT]&&ps.length>1?`<button id="rm">この枠を空ける</button>`:''}</div>
- <div class="win"><h2>なかま（${GS.roster.length}）</h2>${sortBar('入手順')}<div class="mgrid">${sortMembers([...GS.roster]).map(m=>`<button class="mc ${GS.party.includes(m.id)?'inpt':''}" data-m="${m.id}">${avatar(m,'bust')}${mcInfo(m)}<small class="mj">${jobN(m)}</small>${GS.party.includes(m.id)?'<em class="inp">PT</em>':''}</button>`).join('')||'<p class="sub">該当するなかまがいません</p>'}</div></div>
- <button class="cta" id="bkf">決定</button>`;
+ <div class="win"><h2>なかま（${GS.roster.length}）</h2>${sortBar('入手順')}<div class="mgrid">${sortMembers([...GS.roster]).map(m=>`<button class="mc ${GS.party.includes(m.id)?'inpt':''}" data-m="${m.id}">${avatar(m,'bust')}${mcInfo(m)}<small class="mj">${jobN(m)}</small>${GS.party.includes(m.id)?'<em class="inp">PT</em>':''}</button>`).join('')||'<p class="sub">該当するなかまがいません</p>'}</div></div>`;
  document.querySelectorAll('.slot').forEach(b=>b.onclick=()=>{SE('click');const i=+b.dataset.i;FSLOT=FSLOT===i?null:i;renderFormation();});
  if($('#rm'))$('#rm').onclick=()=>{GS.party.splice(FSLOT,1);FSLOT=null;saveGame();renderFormation();};
  document.querySelectorAll('.mc').forEach(b=>b.onclick=()=>{SE('click');const id=b.dataset.m,cur=GS.party.indexOf(id);
@@ -3449,7 +3446,7 @@ function renderBox(){
 function renderMember(id,msg){
  const m=GS.roster.find(x=>x.id===id);P=m;tabbar(false);wide(false);
  const inP=GS.party.includes(m.id),back=()=>renderMember(id);
- $('#app').innerHTML=as(m,()=>`<div class="win mhead">${avatar(m)}<div><h2 style="margin:0">${esc(m.name)}</h2><span class="star">${badge(m)}</span><p class="sub">${jobN(m)} Lv${m.lv}　EXP ${m.exp}/${expNeed(m.lv)}${m.mon?`　${STYLE[SPECIES[m.sid].style]}`:''}</p>${m.hero?`<button class="minib" id="rnbtn">✏️ 名前を変える</button>`:''}</div></div>
+ $('#app').innerHTML=as(m,()=>`<button id="bk" class="backb" style="margin:0 0 8px">◀ もどる</button><div class="win mhead">${avatar(m)}<div><h2 style="margin:0">${esc(m.name)}</h2><span class="star">${badge(m)}</span><p class="sub">${jobN(m)} Lv${m.lv}　EXP ${m.exp}/${expNeed(m.lv)}${m.mon?`　${STYLE[SPECIES[m.sid].style]}`:''}</p>${m.hero?`<button class="minib" id="rnbtn">✏️ 名前を変える</button>`:''}</div></div>
  ${m.mon&&monSig(SPECIES[m.sid],m.jobKey)?`<div class="win sigb"><b class="sigt">◎ 種族固有技「${monSig(SPECIES[m.sid],m.jobKey).name}」</b> <small>MP${monSig(SPECIES[m.sid],m.jobKey).mp}</small><p class="sub" style="margin:4px 0 0">${monSig(SPECIES[m.sid],m.jobKey).desc}</p><p class="sub" style="margin:2px 0 0">スキルツリー：<b>${esc(m.job.name)}</b></p></div>`:''}${!m.mon&&m.job&&m.job.sig?`<div class="win sigb"><b class="sigt">◎ 職業固有技「${m.job.sig.name}」</b> <small>MP${m.job.sig.mp}</small><p class="sub" style="margin:4px 0 0">${m.job.sig.desc.replace('【固有】','')}</p></div>`:''}
  ${m.mon?`<div class="win"><p class="sub">種族のとくぎ・引き継いだスキル：${m.mskills.map(x=>x.name).join('・')}</p></div>`:''}
  ${msg?`<div class="win"><p class="note">${msg}</p></div>`:''}
@@ -3463,8 +3460,7 @@ function renderMember(id,msg){
   <button id="g-uq">固有スキル<small>${canUq(m)?`${m.uniq.length}個 目覚め・装備 ${m.uqEq.length}/${slots()}`:m.uniq.length?`${m.uniq.length}個（新しくは目覚めない）`:'主人公と★7だけが目覚める'}</small></button>
   ${m.hero?`<button id="appc">見た目を変える<small>髪型・色・顔のパーツ</small></button>`:''}
   ${m.hero?`<button id="jobc">転職<small>${JOBS[m.jobKey].name}　転職玉 ${GS.items.jobball||0}個・解放済み ${m.jobsOwned.length}職</small></button>`:''}
-  <button id="swap" ${inP&&GS.party.length<=1||!inP&&GS.party.length>=4?'disabled':''}>${inP?'パーティから外す':'パーティに入れる'}<small>${!inP&&GS.party.length>=4?'パーティが満員です（先に誰かを外す）':inP&&GS.party.length<=1?'最低1人は必要です':''}</small></button>
-  <button class="cta" id="bk" style="margin:0">もどる</button></div>`);
+  <button id="swap" ${inP&&GS.party.length<=1||!inP&&GS.party.length>=4?'disabled':''}>${inP?'パーティから外す':'パーティに入れる'}<small>${!inP&&GS.party.length>=4?'パーティが満員です（先に誰かを外す）':inP&&GS.party.length<=1?'最低1人は必要です':''}</small></button></div>`);
  $('#g-st').onclick=()=>{P=m;renderAlloc('ポイントを振りましょう（貯めておくこともできます）',back);};
  $('#g-tr').onclick=()=>{P=m;renderTree(back);};
  $('#g-uq').onclick=()=>{P=m;renderUniq(back);};
@@ -3478,18 +3474,18 @@ function renderMember(id,msg){
 }
 function pickEquip(m,sl){
  const own=Object.entries(GS.bag).filter(([k,c])=>c>0&&EQUIP[k].slot===sl);
- $('#app').innerHTML=`<div class="win"><h2>${esc(m.name)}の${SLOTN[sl]}</h2><p class="sub">いま：${m.eq[sl]?EQUIP[m.eq[sl]].name:'なし'}</p></div>
+ $('#app').innerHTML=`<button id="bk" class="backb" style="margin:0 0 8px">◀ もどる</button><div class="win"><h2>${esc(m.name)}の${SLOTN[sl]}</h2><p class="sub">いま：${m.eq[sl]?EQUIP[m.eq[sl]].name:'なし'}</p></div>
  <div class="win menu">${own.length?own.map(([k,c])=>`<button class="pk" data-k="${k}">${EQUIP[k].name} ×${c}<small>${descOf(EQUIP[k].eff)}</small></button>`).join(''):'<p class="sub">持っていません。ショップで買えます。</p>'}
- ${m.eq[sl]?'<button id="off">はずす</button>':''}<button class="cta" id="bk" style="margin:0">もどる</button></div>`;
+ ${m.eq[sl]?'<button id="off">はずす</button>':''}</div>`;
  document.querySelectorAll('.pk').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(m.eq[sl])GS.bag[m.eq[sl]]=(GS.bag[m.eq[sl]]||0)+1;GS.bag[k]--;m.eq[sl]=k;fixHp(m);saveGame();renderMember(m.id,`${EQUIP[k].name}を 装備した。`);});
  if($('#off'))$('#off').onclick=()=>{GS.bag[m.eq[sl]]=(GS.bag[m.eq[sl]]||0)+1;m.eq[sl]=null;fixHp(m);saveGame();renderMember(m.id,'装備を はずした。');};
  $('#bk').onclick=()=>renderMember(m.id);
 }
 function pickGsk(m,i){
  const cur=m.gsk[i];
- $('#app').innerHTML=`<div class="win"><h2>${esc(m.name)}のガチャスキル</h2><p class="sub">ガチャで手に入れたスキルは、誰にでも自由につけかえられます。</p></div>
+ $('#app').innerHTML=`<button id="bk" class="backb" style="margin:0 0 8px">◀ もどる</button><div class="win"><h2>${esc(m.name)}のガチャスキル</h2><p class="sub">ガチャで手に入れたスキルは、誰にでも自由につけかえられます。</p></div>
  <div class="win menu">${GS.sbag.length?GS.sbag.map((u,j)=>`<button class="pk" data-j="${j}"><span class="gst">${'★'.repeat(u.rar)} ${u.name}</span><small>${u.desc}</small></button>`).join(''):'<p class="sub">持っていません。スキルガチャで手に入ります。</p>'}
- ${cur?'<button id="off">はずす</button>':''}<button class="cta" id="bk" style="margin:0">もどる</button></div>`;
+ ${cur?'<button id="off">はずす</button>':''}</div>`;
  document.querySelectorAll('.pk').forEach(b=>b.onclick=()=>{const u=GS.sbag.splice(+b.dataset.j,1)[0];if(cur)GS.sbag.push(cur);m.gsk[i]=u;m.gsk=m.gsk.filter(Boolean);fixHp(m);saveGame();renderMember(m.id,`${u.name}を つけた。`);});
  if($('#off'))$('#off').onclick=()=>{GS.sbag.push(cur);m.gsk.splice(i,1);fixHp(m);saveGame();renderMember(m.id,'スキルを はずした。');};
  $('#bk').onclick=()=>renderMember(m.id);
@@ -4235,12 +4231,12 @@ function renderDex(sel){
  else body=`<p class="sub">どこまでも増えていく新種や、幻の泉で出会った幻種の記録です。見つけた順に番号がつきます。</p>
    <div class="dxg">${extra.map((id,i)=>card(SPECIES[id],'新'+(i+1))).join('')||'<p class="sub">まだ新種を見つけていません。深い階層ほど新種に出会えます。</p>'}</div>`;
  const s=sel&&SPECIES[sel];
- $('#app').innerHTML=`${header('モンスター図鑑')}
+ $('#app').innerHTML=`${header('モンスター図鑑')}<button id="dxbk" class="backb" style="margin:0 0 8px">◀ もどる</button>
  <div class="win dxsum"><span>図鑑：<b>${fs}</b> / ${fixed.length}種 発見（仲間 ${fc}）</span><span>新種ノート：<b>${extra.length}</b>種</span>
   <div class="barw"><i style="width:${fs/fixed.length*100}%"></i></div></div>
  ${s?`<div class="win dxd"><span class="dxpic">${monSprite(s,false)}</span><div><h2>${esc(s.name)}</h2><p class="sub">${FAMS[s.fam].name}・ランク${s.rank}${s.phantom?'・幻種':''}${s.multi?'・限定':''}</p><p>${dx[s.id]>=2?'仲間にしたことがある':'見つけたことがある'}</p></div></div>`:''}
  <div class="seg two"><button data-dt="fixed" class="${DEXT==='fixed'?'on':''}">図鑑（${fixed.length}種）</button><button data-dt="extra" class="${DEXT==='extra'?'on':''}">新種ノート</button></div>
- <div class="win">${body}</div><button class="cta" id="dxbk">もどる</button>`;
+ <div class="win">${body}</div>`;
  document.querySelectorAll('[data-dt]').forEach(b=>b.onclick=()=>{DEXT=b.dataset.dt;renderDex();});
  document.querySelectorAll('.fams [data-f]').forEach(b=>b.onclick=()=>{DEXF=b.dataset.f;renderDex();});
  document.querySelectorAll('.dx[data-s]').forEach(b=>b.onclick=()=>{renderDex(b.dataset.s);window.scrollTo(0,0);});
@@ -4384,11 +4380,10 @@ function renderJobChange(h,msg){
   return `<button class="jc ${cur?'inp':''} ${mode}" data-k="${k}" data-m="${mode}" ${cur||(mode!=='own'&&balls<1)?'disabled':''}>${heroSprite({...h,jobKey:k,rarity:mode==='sp'?6:h.rarity},'bust')}
    <span><b>${j.name}</b>${mode==='sp'?' <span class="star">特別職</span>':''}${cur?' <span class="gold">いまの職業</span>':''}<small>${j.desc||''}　${j.lanes.map(l=>l.name).join('・')}の道</small>
    ${mode==='own'?`<small>習得 ${t.length}マス　${isMastered(t)?'<span class="gold">★到達・極めた！</span>':'どれかの道の★で極める'}</small>`:mode==='sp'?'<small class="gold">転職玉を1つ使う</small>':'<small>転職玉を1つ使う</small>'}</span></button>`;};
- $('#app').innerHTML=`<div class="win"><h2>${esc(h.name)}の転職</h2><p class="sub">転職玉 <span class="pts">${balls}</span> 個。一度転職玉で解放した職業へは、いつでも無料で戻れます。前の職業で覚えたスキルツリーはそのまま残り、とくぎは新しい職業でも使えます。</p>${msg?`<p class="note">${msg}</p>`:''}</div>
+ $('#app').innerHTML=`<button id="bk" class="backb" style="margin:0 0 8px">◀ もどる</button><div class="win"><h2>${esc(h.name)}の転職</h2><p class="sub">転職玉 <span class="pts">${balls}</span> 個。一度転職玉で解放した職業へは、いつでも無料で戻れます。前の職業で覚えたスキルツリーはそのまま残り、とくぎは新しい職業でも使えます。</p>${msg?`<p class="note">${msg}</p>`:''}</div>
  <div class="win"><h2>解放済みの職業</h2><div class="mlist">${owned.map(k=>card(k,'own')).join('')}</div></div>
  ${sp.length?`<div class="win spj"><h2>特別職が出現！</h2><div class="mlist">${sp.filter(k=>!owned.includes(k)).map(k=>card(k,'sp')).join('')||'<p class="sub">出現中の特別職はすべて解放済み</p>'}</div></div>`:`<div class="win"><p class="sub">どれかの職業で、スキルツリーの道の先にある★までたどり着くと、特別な職業が現れる…</p></div>`}
- <div class="win"><h2>ガチャで見たことのある職業</h2>${seen.length?`<div class="mlist">${seen.map(k=>card(k,'new')).join('')}</div>`:'<p class="sub">仲間ガチャで仲間を集めると、その職業に転職できるようになります。</p>'}</div>
- <div class="win"><button class="cta" id="bk" style="margin:0">もどる</button></div>`;
+ <div class="win"><h2>ガチャで見たことのある職業</h2>${seen.length?`<div class="mlist">${seen.map(k=>card(k,'new')).join('')}</div>`:'<p class="sub">仲間ガチャで仲間を集めると、その職業に転職できるようになります。</p>'}</div>`;
  document.querySelectorAll('.jc').forEach(b=>b.onclick=()=>{const k=b.dataset.k,mode=b.dataset.m;
   if(mode!=='own'){if(!b.dataset.arm){b.dataset.arm=1;b.querySelector('small:last-child').textContent='もう一度押すと 転職玉を使って転職';return;}GS.items.jobball--;}
   switchJob(h,k);SE('levelup');saveGame();renderJobChange(h,`${JOBS[k].name}に 転職した！`);});
@@ -5037,7 +5032,7 @@ function doFuse(A,B,pickJob){
 function renderFusion(aId,bId,pj,msg){
  wide(false);tabbar(true);
  const A=GS.roster.find(x=>x.id===aId),B=GS.roster.find(x=>x.id===bId),books=GS.items.fbook||0;
- if(!fuseOpen()){$('#app').innerHTML=`${header('合体')}<div class="win"><p class="note">合体は 第100層をこえると解放されます。</p><p class="sub">いまの到達：第${GS.lay.max}層</p></div><button class="cta" id="bk">もどる</button>`;bindToggles();$('#bk').onclick=()=>renderMain('party');return;}
+ if(!fuseOpen()){$('#app').innerHTML=`${header('合体')}<button id="bk" class="backb" style="margin:0 0 8px">◀ もどる</button><div class="win"><p class="note">合体は 第100層をこえると解放されます。</p><p class="sub">いまの到達：第${GS.lay.max}層</p></div>`;bindToggles();$('#bk').onclick=()=>renderMain('party');return;}
  const list=GS.roster.filter(m=>!m.mon&&!m.fused&&(m.hero||m.rarity>=2));
  const card=(m,sel,ok)=>`<button class="mcard ${sel?'inp':''}" data-m="${m.id}" ${ok?'':'disabled'}>${avatar(m,'bust')}<span><b>${esc(m.name)}</b> <span class="star">${badge(m)}</span><small>${jobN(m)} Lv${m.lv}</small></span></button>`;
  let prev='';
@@ -5049,10 +5044,9 @@ function renderFusion(aId,bId,pj,msg){
    <p class="sub" style="margin:6px 0 2px">職業をえらぶ</p><div class="frow"><button class="cta fzj ${pj!==1?'on':''}" data-j="0" style="margin:0">${esc(JOBS[A.jobKey].name)}</button><button class="cta fzj ${pj===1?'on':''}" data-j="1" style="margin:0">${esc(JOBS[B.jobKey].name)}</button></div>
    <p class="sub">${A.hero||B.hero?'':'まれに 新しい職業が生まれることも…！　'}合体すると：能力アップ・新しい合体技・<b>合体専用スキルツリー</b>が開放。${A.rarity===7||B.rarity===7?'<br><b class="uqt">★7がかかわる合体なので、新しい固有スキルも目覚める！</b>':''}<br>2人のスキルツリーはそのまま残り、合体ツリーが追加されます。装備品とガチャスキルは持ち物にもどります。2人は1人になります。</p>
    <button class="cta" id="fzgo" ${books>=fuseCost(A,B)?'':'disabled'}>合体する（合体の書 ×${fuseCost(A,B)}）</button>${books<fuseCost(A,B)?`<p class="sub" style="text-align:center">合体の書が あと${fuseCost(A,B)-books}冊 たりません</p>`:''}</div>`;}
- $('#app').innerHTML=`${header('合体')}<div class="win"><p class="sub" style="margin:0">同じレアリティのなかま2人を、合体の書で1人にする。主人公は★7のなかまとだけ合体できる。<br>必要な合体の書：レアリティの数だけ（★5なら5冊・★7や主人公は7冊）<br>合体の書：<b class="gold">${books}冊</b>（スペシャル「鏡の試練」で手に入る）</p>${msg?`<p class="note">${msg}</p>`:''}</div>
+ $('#app').innerHTML=`${header('合体')}<button id="bk" class="backb" style="margin:0 0 8px">◀ もどる</button><div class="win"><p class="sub" style="margin:0">同じレアリティのなかま2人を、合体の書で1人にする。主人公は★7のなかまとだけ合体できる。<br>必要な合体の書：レアリティの数だけ（★5なら5冊・★7や主人公は7冊）<br>合体の書：<b class="gold">${books}冊</b>（スペシャル「鏡の試練」で手に入る）</p>${msg?`<p class="note">${msg}</p>`:''}</div>
   ${prev}
-  <div class="win"><h2>${A?'2人目をえらぶ':'1人目をえらぶ'}</h2><div class="menu">${list.map(m=>card(m,m===A||m===B,!A?list.some(x=>canFuse(m,x)):(m===A||canFuse(A,m)))).join('')||'<p class="sub">合体できるなかまがいません。</p>'}</div></div>
-  <button class="cta" id="bk">もどる</button>`;
+  <div class="win"><h2>${A?'2人目をえらぶ':'1人目をえらぶ'}</h2><div class="menu">${list.map(m=>card(m,m===A||m===B,!A?list.some(x=>canFuse(m,x)):(m===A||canFuse(A,m)))).join('')||'<p class="sub">合体できるなかまがいません。</p>'}</div></div>`;
  bindToggles();
  document.querySelectorAll('.mcard[data-m]').forEach(b=>b.onclick=()=>{SE('click');const id=b.dataset.m;if(id===aId)return renderFusion(null,null,0);if(!A)return renderFusion(id,null,0);renderFusion(aId,id,0);});
  document.querySelectorAll('.fzj').forEach(b=>b.onclick=()=>{SE('click');renderFusion(aId,bId,+b.dataset.j);});
@@ -5317,12 +5311,11 @@ function renderBreed(selA,selB,msg){
   prev+=`<p class="sub">ツリーのポイントは引き継がず、子は新しいツリーで1から育てます。`;
   prev+=`親が覚えてきたツリーの効果は、子にそのまま引き継がれます。配合値 +${pl.plus}（ステータスが上がる）・両親の基礎値（生まれたときの能力）の15%を受け継ぐ。子のレベルは 親の高いほう（Lv${Math.max(A.lv,Bm.lv)}）を引き継ぎ、そのぶんのステータス・スキルポイントももらえます。親の2体は いなくなります。</p>`;
   const sp=breedSkillPool(A,Bm);prev+=`<div class="bsk"><p class="note">引き継ぐスキルを えらぶ（${BRSK.length}/4）</p><div class="bskl">${sp.map(k=>`<button class="bskb ${BRSK.includes(k.name)?'on':''}" data-sk="${esc(k.name)}" ${!BRSK.includes(k.name)&&BRSK.length>=4?'disabled':''}>${esc(k.name)}<small>${esc(k.desc||'')}</small></button>`).join('')}</div></div>`;}
- $('#app').innerHTML=`<div class="win"><h2>モンスター配合</h2>${msg?`<p class="note">${msg}</p>`:''}
+ $('#app').innerHTML=`<button id="bk" class="backb" style="margin:0 0 8px">◀ もどる</button><div class="win"><h2>モンスター配合</h2>${msg?`<p class="note">${msg}</p>`:''}
   <div class="bpair"><div class="bslot">${A?monSprite(SPECIES[A.sid],A.shiny)+`<b>${esc(A.name)}</b>`:'<span>親1</span>'}</div><span class="plus">＋</span><div class="bslot">${Bm?monSprite(SPECIES[Bm.sid],Bm.shiny)+`<b>${esc(Bm.name)}</b>`:'<span>親2</span>'}</div></div>
   ${prev}<button class="cta" id="go" ${A&&Bm?'':'disabled'}>配合する</button></div>
  <div class="win"><h2>モンスター（${mons.length}体）</h2>${mons.length?`<div class="mlist">${mons.map(m=>{const sel=m.id===selA||m.id===selB,ok=m.lv>=5;
-   return `<button class="mcard bm ${sel?'inp':''}" data-m="${m.id}" ${ok?'':'disabled'}>${monSprite(SPECIES[m.sid],m.shiny)}<span><b>${esc(m.name)}</b> <span class="star">ランク${SPECIES[m.sid].rank}${m.plus?' +'+m.plus:''}</span><small>${FAMS[SPECIES[m.sid].fam].name} Lv${m.lv}${ok?'':'（Lv5から配合できる）'}${sel?'　選択中':''}</small></span></button>`;}).join('')}</div>`:'<p class="sub">スカウト玉で魔物を仲間にしましょう。</p>'}
- <button class="cta" id="bk">もどる</button></div>`;
+   return `<button class="mcard bm ${sel?'inp':''}" data-m="${m.id}" ${ok?'':'disabled'}>${monSprite(SPECIES[m.sid],m.shiny)}<span><b>${esc(m.name)}</b> <span class="star">ランク${SPECIES[m.sid].rank}${m.plus?' +'+m.plus:''}</span><small>${FAMS[SPECIES[m.sid].fam].name} Lv${m.lv}${ok?'':'（Lv5から配合できる）'}${sel?'　選択中':''}</small></span></button>`;}).join('')}</div>`:'<p class="sub">スカウト玉で魔物を仲間にしましょう。</p>'}</div>`;
  document.querySelectorAll('.bm').forEach(b=>b.onclick=()=>{const id=b.dataset.m;
   if(id===selA)renderBreed(selB,null);else if(id===selB)renderBreed(selA,null);else if(!selA)renderBreed(id,selB);else if(!selB)renderBreed(selA,id);else renderBreed(selA,id);});
  document.querySelectorAll('.bskb').forEach(b=>b.onclick=()=>{const n=b.dataset.sk;if(BRSK.includes(n))BRSK=BRSK.filter(x=>x!==n);else if(BRSK.length<4)BRSK.push(n);SE('click');const y=window.scrollY;renderBreed(selA,selB);window.scrollTo(0,y);});
@@ -5397,13 +5390,12 @@ function renderSynth(ia,ib,msg){
  if(A&&Bs){const pl=synthPlan(A,Bs);
   prev=`<p class="note ${pl.kind==='secret'?'story':''}">${SYKIND[pl.kind]}</p><p class="sub">できあがり：${'★'.repeat(pl.r)}${pl.kind==='secret'&&pl.r>=7?'（★7 合成限定！）':''}${pl.upChance?`　${Math.round(pl.upChance*100)}%で ★+1`:''}　強さは元より1段階アップ</p>`;}
  const found=Object.keys(GS.syDex||{}).length;
- $('#app').innerHTML=`<div class="win"><h2>スキル合成</h2>${msg?`<p class="note">${msg}</p>`:''}
+ $('#app').innerHTML=`<button id="bk" class="backb" style="margin:0 0 8px">◀ もどる</button><div class="win"><h2>スキル合成</h2>${msg?`<p class="note">${msg}</p>`:''}
   <div class="bpair sy"><div class="bslot">${A?card(A):'<span>スキル1</span>'}</div><span class="plus">＋</span><div class="bslot">${Bs?card(Bs):'<span>スキル2</span>'}</div></div>
   ${prev}<button class="cta" id="go" ${A&&Bs?'':'disabled'}>合成する</button>
   <p class="sub" style="margin-top:6px">ひみつの組み合わせ 発見：${found} / ${SY_SECRET.length}　${found?`（${Object.keys(GS.syDex).map(esc).join('・')}）`:''}</p></div>
  <div class="win"><h2>手持ちのスキル（${bag.length}）</h2><p class="sub">だれにも つけていないスキルだけ 合成できます。</p>
-  ${bag.length?`<div class="sylist">${bag.map((u,i)=>`<button class="syb ${i===ia||i===ib?'inp':''}" data-i="${i}">${card(u)}<em>${u.skill?'技':'能力'}</em></button>`).join('')}</div>`:'<p class="sub">スキルがありません。スキルガチャで手に入ります。</p>'}</div>
- <button class="cta" id="bk">もどる</button>`;
+  ${bag.length?`<div class="sylist">${bag.map((u,i)=>`<button class="syb ${i===ia||i===ib?'inp':''}" data-i="${i}">${card(u)}<em>${u.skill?'技':'能力'}</em></button>`).join('')}</div>`:'<p class="sub">スキルがありません。スキルガチャで手に入ります。</p>'}</div>`;
  document.querySelectorAll('.syb').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;
   if(i===ia)renderSynth(ib,null);else if(i===ib)renderSynth(ia,null);else if(ia==null)renderSynth(i,ib);else if(ib==null)renderSynth(ia,i);else renderSynth(ia,i);});
  $('#go').onclick=async()=>{const {u,pl}=doSynth(A,Bs);saveGame();await synthShow(u,pl);};
