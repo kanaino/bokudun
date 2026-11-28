@@ -1084,7 +1084,7 @@ function pageJob(job,p){
 /* 上限に届いたあとのページでは、上限のある効果を能力値アップにおきかえる（ムダにならないように） */
 const OVF_ST={dmgPct:'s_str',physPct:'s_str',atkPct:'s_str',critDmg:'s_str',bossPct:'s_str',multiPct:'s_str',firstPct:'s_str',lowAtk:'s_str',openPbuff:'s_str',streakPct:'s_str',buffPct:'s_str',crit:'s_str',
  magPct:'s_int',healPct:'s_int',healToDmg:'s_int',magCrit:'s_int',echo:'s_int',foeAtk:'s_def',thorns:'s_def',taken:'s_def',
- hpRegen:'s_vit',teamRegen:'s_vit',guardHeal:'s_vit',killHeal:'s_vit',postHeal:'s_vit',barrier:'s_vit',endure:'s_vit',evade:'s_agi',atkStun:'s_agi',atkSteal:'s_agi',winExp:'all',winGold:'all',itemFree:'all'};
+ hpRegen:'s_vit',teamRegen:'s_vit',guardHeal:'s_vit',killHeal:'s_vit',postHeal:'s_vit',barrier:'s_vit',endure:'s_vit',evade:'s_agi',atkStun:'s_agi',atkSteal:'s_agi',winExp:'all',winGold:'all',itemFree:'all',scoutPct:'s_agi'};
 const ovfCap=k=>k==='taken'?.8:MOD_CAP[k];
 function rawPageSum(job,q){job._rs=job._rs||{};if(job._rs[q])return job._rs[q];const o={};
  const ns=q<=1?pageG(job,1).nodes:buildTreeRaw(pageJob(job,q)).nodes;
@@ -3043,11 +3043,11 @@ function mods(){
  for(const k of Object.keys(Bq))if(!SPLIT_CAP.has(k)){if(MOD_CAP[k]!=null&&A[k]>MOD_CAP[k])A[k]=MOD_CAP[k];if(k==='taken'&&A[k]<-.8)A[k]=-.8;}
  return A;
 }
-const SPLIT_CAP=new Set(['dmgPct','physPct','magPct','atkPct','critDmg','healPct','bossPct','multiPct','firstPct','lowAtk','openPbuff','buffPct']);
+const SPLIT_CAP=new Set(['scoutPct','dmgPct','physPct','magPct','atkPct','critDmg','healPct','bossPct','multiPct','firstPct','lowAtk','openPbuff','buffPct']);
 /* 上限：回避80%・受けるダメージ−80%まで、会心は基本とあわせて100%まで、確率の効果は100%まで（与ダメージ%などは無限） */
 const MOD_CAP={evade:.8,crit:.92,magCrit:1,echo:1,atkStun:1,atkSteal:1,itemFree:1,
  foeAtk:.8,hpRegen:.3,teamRegen:.3,guardHeal:.3,killHeal:.3,postHeal:.3,barrier:.5,thorns:1,healToDmg:1,endure:2,
- dmgPct:1,physPct:1,magPct:1,atkPct:1,critDmg:1,healPct:1,bossPct:1,multiPct:1,firstPct:1,lowAtk:1,openPbuff:1,streakPct:.2,buffPct:2,winGold:1,winExp:.5,confPct:.5,atkConf:.6};
+ dmgPct:1,physPct:1,magPct:1,atkPct:1,critDmg:1,healPct:1,bossPct:1,multiPct:1,firstPct:1,lowAtk:1,openPbuff:1,streakPct:.2,buffPct:2,winGold:1,winExp:.5,confPct:.5,atkConf:.6,scoutPct:1};
 function capMods(m){if(P&&P.jobKey==='x7e'){if(m.dblAtk){delete m.dblAtk;m.dblAct=true;}}else{delete m.dblAct;delete m.act3;}
  if(P&&P.jobKey==='x7c'){if(m.lovely2)m.lovely=1;}else{delete m.lovely;delete m.lovely2;}
  if(P&&P.jobKey==='x7d'){if(m.mikiri2){m.mikiri=.5;m.mikiriCrit=true;}if(m.mikiri>.5)m.mikiri=.5;if(m.stackPct>.08)m.stackPct=.08;}else{delete m.mikiri;delete m.mikiri2;delete m.stackPct;}for(const [k,v] of Object.entries(MOD_CAP))if(m[k]>v)m[k]=v;if(m.taken<-.8)m.taken=-.8;return m;}
@@ -3439,9 +3439,8 @@ function renderFormation(msg){
 function renderBox(){
  tabbar(false);
  const list=sortMembers([...GS.roster]);
- $('#app').innerHTML=`${header('なかま一覧')}${sortBar('入手順')}
- <div class="win"><p class="sub">${list.length}体　タップで詳しく見る</p><div class="mgrid">${list.map(m=>`<button class="mc" data-m="${m.id}">${avatar(m,'bust')}${mcInfo(m)}${GS.party.includes(m.id)?'<em class="inp">PT</em>':''}</button>`).join('')}</div></div>
- <button class="cta" id="bkb">もどる</button>`;
+ $('#app').innerHTML=`${header('なかま一覧')}<button id="bkb" class="backb" style="margin:0 0 8px">◀ もどる</button>${sortBar('入手順')}
+ <div class="win"><p class="sub">${list.length}体　タップで詳しく見る</p><div class="mgrid">${list.map(m=>`<button class="mc" data-m="${m.id}">${avatar(m,'bust')}${mcInfo(m)}${GS.party.includes(m.id)?'<em class="inp">PT</em>':''}</button>`).join('')}</div></div>`;
  bindSort(renderBox);
  document.querySelectorAll('.mc').forEach(b=>b.onclick=()=>{SE('click');MBACK=renderBox;renderMember(b.dataset.m);});
  $('#bkb').onclick=()=>renderMain('party');bindToggles();
@@ -4656,8 +4655,8 @@ function tabDungeon(n){
    <button class="cta" id="sp-casino" ${cdone?'disabled':''}>${cdone?'今日は挑戦済み':'挑戦する'}</button></div>`
    :`<div class="win dcard sp lockd" style="--d1:#2a2a3a;--d2:#0a0a14"><h2>？？？の賭場 <small class="sub">（封印中）</small></h2><p class="sub">ギャンブル（レース・スロット）で 合計${GWIN_NEED.toLocaleString()}枚 勝つと 何かが現れるらしい…</p>
    <div class="barw"><i style="width:${Math.min(100,gw/GWIN_NEED*100)}%"></i></div><p class="sub" style="text-align:right">${Math.min(gw,GWIN_NEED).toLocaleString()} / ${GWIN_NEED.toLocaleString()}枚</p></div>`;
-  if(fuseOpen()){const mp=mirrorPair(),md=GS.spx.mirror===dayId(),ml=mirLeft();
-   body+=`<div class="win dcard sp" style="--d1:#3a3a5a;--d2:#0a0a18"><h2>鏡の試練 <span class="live-b">合体の書</span></h2><div class="raid">${mp[0]?`<span style="width:64px;flex:none">${heroSprite({...fzSnap(mp[0]),id:'mpv'+mp[0].id},'bust')}</span>`:''}<p class="sub">自分のなかまの「影」と戦う。1階：パーティで強い2人の影（本人より15%強い）。2階：その2人が合体した影のボス。<br>報酬：<b class="gold">合体の書 ×1</b>（1日1回）${mp.length<2?'<br><b style="color:#ff8a80">主人公以外のなかまを2人以上パーティに入れてください</b>':`<br>今日の影：${esc(mp[0].name)}・${esc(mp[1].name)}`}</p></div>
+  if(fuseOpen()){const mp=mirrorPair(),md=false,ml=mirLeft();
+   body+=`<div class="win dcard sp" style="--d1:#3a3a5a;--d2:#0a0a18"><h2>鏡の試練 <span class="live-b">合体の書</span></h2><div class="raid">${mp[0]?`<span style="width:64px;flex:none">${heroSprite({...fzSnap(mp[0]),id:'mpv'+mp[0].id},'bust')}</span>`:''}<p class="sub">自分のなかまの「影」と戦う。1階：パーティで強い2人の影（本人より強く、本人の技を賢く使う・最初からシールド）。2階：その2人が合体した影のボス（1ターン4回行動）。<br>報酬：<b class="gold">合体の書 ×1</b>（何回でも・負けは1日3回まで）${mp.length<2?'<br><b style="color:#ff8a80">主人公以外のなかまを2人以上パーティに入れてください</b>':`<br>今日の影：${esc(mp[0].name)}・${esc(mp[1].name)}`}</p></div>
    <button class="cta" id="sp-mirror" ${md||ml<=0||mp.length<2?'disabled':''}>${md?'今日はクリア済み':ml<=0?'今日はもう挑戦できない（3回負けた）':`挑戦する<small>今日あと${ml}回まで負けられる</small>`}</button></div>`;}
   body+=spdCards();
  }
@@ -4677,7 +4676,7 @@ function tabDungeon(n){
   enterDungeon({key:'kira',name:'キラキラの洞穴',floors:3,bg:['#5b4a1a','#1a1406'],gold:100},{special:'kira'});};
  if($('#sp-ph'))$('#sp-ph').onclick=()=>{if(!ok())return;const sid=GS.phantom.sid;GS.phantom=null;saveGame();
   enterDungeon({key:'phantom',name:'幻の泉',floors:1,bg:['#4a2a6a','#0e0620'],gold:200},{special:'phantom',phSid:sid});};
- if($('#sp-mirror'))$('#sp-mirror').onclick=()=>{if(!ok())return;if(mirLeft()<=0||GS.spx.mirror===dayId())return;const mp=mirrorPair();if(mp.length<2)return;SE('click');
+ if($('#sp-mirror'))$('#sp-mirror').onclick=()=>{if(!ok())return;if(mirLeft()<=0)return;const mp=mirrorPair();if(mp.length<2)return;SE('click');
   enterDungeon({key:'mirror',name:'鏡の試練',floors:2,bg:['#3a3a5a','#0a0a18'],gold:500},{special:'mirror',mir:mp.map(m=>m.id)});};
  document.querySelectorAll('.tier').forEach(b=>b.onclick=()=>{SE('click');const [k,r]=b.dataset.t.split(':');if(k==='sp')GS.spTier=+r;else GS.cxTier=+r;const y=window.scrollY;tabDungeon('');window.scrollTo(0,y);});
  document.querySelectorAll('.sp-gods').forEach(b=>b.onclick=()=>{if(!ok())return;const sd=spdOf(b.dataset.k);SE('click');
@@ -5066,7 +5065,7 @@ function renderFusion(aId,bId,pj,msg){
  $('#bk').onclick=()=>renderMain('party');
 }
 /* 鏡の試練：自分のなかまの影と戦う。クリアで合体の書 */
-const MIR_F=[2.45,1.8,1.35];
+const MIR_F=[2.45,1.8,1.35],MIR_SH=.15;let MIR_K=1.25,MIR_HP=4.5;
 function mirrorPair(){return party().filter(m=>!m.hero&&!m.mon).sort((a,b)=>memPow(b)-memPow(a)).slice(0,2);}
 function mirrorMoves(m){
  const sk=as(m,allSkills).filter(s=>['phys','multi','mag','hybrid','sig'].includes(s.type)).slice(0,4);
@@ -5075,19 +5074,26 @@ function mirrorMoves(m){
  return mv.length?mv:[['こうげき','phys',1.2]];}
 function mirrorFoe(m,k,kind){
  const s=as(m,()=>({hp:maxHP(),atk:S('str')*2,int:S('int')*2,def:S('def')*1.2,agi:S('agi')}));
+ const canHeal=as(m,allSkills).some(q=>q.type==='heal');
  return {name:'影の'+m.name,sp:SPECIES.xs_imp,sid:'xs_imp',fam:'demon',rank:10,kind,mirror:true,shiny:false,metal:false,
   look:{id:'mir'+m.id,name:m.name,jobKey:m.jobKey,rarity:m.rarity,hero:false,app:m.app,fz:m.fz},
-  hp:Math.round(s.hp*k),atk:Math.round(s.atk*k),def:Math.round(s.def*k),int:Math.round(s.int*k),agi:s.agi,exp:Math.round(m.lv*30),gold:Math.round(m.lv*8),moves:mirrorMoves(m),spRate:.45,frozen:false};
+  hp:Math.round(s.hp*k),atk:Math.round(s.atk*k),def:Math.round(s.def*k),int:Math.round(s.int*k),agi:s.agi,exp:Math.round(m.lv*30),gold:Math.round(m.lv*8),moves:mirrorMoves(m),spRate:.45,frozen:false,mHeal:canHeal};
 }
 function mirrorFoes(){
  const [A,B]=D.mir.map(id=>GS.roster.find(x=>x.id===id));if(!A||!B)return rollGroup();
- if(D.floor<D.total){const g=[mirrorFoe(A,1.15,'elite'),mirrorFoe(B,1.15,'elite')];return g;}
- const a=mirrorFoe(A,1.15,'boss'),b=mirrorFoe(B,1.15,'boss');
+ if(D.floor<D.total){const g=[mirrorFoe(A,MIR_K,'elite'),mirrorFoe(B,MIR_K,'elite')];
+  /* 1階の影：本人の技だけを使う（＋力をためる）。賢く狙う。最初からシールド */
+  g.forEach(x=>{x.hp=Math.round(x.hp*MIR_HP);x.max=x.hp;x.ai=['charge'];x.aiP=.25;x.aiK=1.6;x.sh=Math.round(x.max*MIR_SH);x.spRate=.55;});return g;}
+ const a=mirrorFoe(A,MIR_K,'boss'),b=mirrorFoe(B,MIR_K,'boss');
  const e={...a,name:'影の'+mixName(A.name,B.name),hp:a.hp+b.hp,atk:a.atk+b.atk,def:a.def+b.def,int:a.int+b.int,agi:Math.max(a.agi,b.agi),exp:a.exp+b.exp,gold:a.gold+b.gold,
   look:{id:'mirF'+A.id+B.id,name:mixName(A.name,B.name),jobKey:A.jobKey,rarity:A.rarity,hero:false,fz:{A:fzSnap(A),B:fzSnap(B)}},
   moves:[...a.moves.slice(0,2),...b.moves.slice(0,2),['合体奥義・影','all',1.25],['ダブルインパクト','phys',2.4]],acts:2,spRate:.55,fusionBoss:true};
- {const F=window.__MF||MIR_F;e.hp=Math.round(e.hp*F[0]);e.atk=Math.round(e.atk*F[1]);e.int=Math.round(e.int*F[1]);e.def=Math.round(e.def*F[2]);}
- e.max=e.hp;return e;
+ {const F=window.__MF||MIR_F;e.hp=Math.round(e.hp*F[0]*MIR_HP);e.atk=Math.round(e.atk*F[1]);e.int=Math.round(e.int*F[1]);e.def=Math.round(e.def*F[2]);}
+ e.max=e.hp;
+ /* 影の合体ボスは敵AIをしっかり使う（ため→息切れの隙はあり） */
+ e.ai=['charge',...AI_BOSS.slice().sort(()=>Math.random()-.5).slice(0,3),'regen'];e.aiB=true;e.aiP=.5;e.aiK=1.8;
+ e.moves=[...a.moves,...b.moves,['合体奥義・影','all',1.25],['ダブルインパクト','phys',2.4]];e.acts=4;e.mHeal=a.mHeal||b.mHeal;e.sh=Math.round(e.max*MIR_SH);
+ return e;
 }
 const foeSpr=e=>e.look?heroSprite(e.look,'full'):monSprite(e.sp,e.shiny);
 
@@ -5245,11 +5251,13 @@ function newMonster(sid,shiny,plus,extra){
   tree:[],uniq:[],uqEq:[],tier:{},habit:{},eq:{weapon:null,armor:null,acc:null},gsk:[],mskills:[...own,...ex],buff:false,guard:false,hp:0,mp:0};
  as(m,heal);return m;
 }
+/* ランクごとの基本スカウト率（ランク6以上でも0にならない） */
+const scBase=r=>r<=5?.6-.1*r:r===6?.07:r===7?.05:r===8?.04:.03;
 const scoutRate=()=>{const md=mods(),hr=E.hp/E.max;
  const ch=1+(E.charm||0)*2;
  if(E.spOK)return Math.min(.45,(.06+.24*(1-hr))*(E.kind==='raid'?.6:1)*(1+(md.scoutPct||0))*ch);
  if(E.phantom)return Math.min(.7,(.15+.35*(1-hr))*(1+(md.scoutPct||0))*ch);
- return Math.max(.02,Math.min(.95,ch*(0.6-0.1*E.rank)*(1.7-1.2*hr)*(E.shiny?.6:1)*(E.kind==='boss'?.25:E.kind==='elite'?.7:1)*(1+(md.scoutPct||0))));};
+ return Math.max(.02,Math.min(.95,ch*scBase(E.rank)*(1.7-1.2*hr)*(E.shiny?.6:1)*(E.kind==='boss'?.25:E.kind==='elite'?.7:1)*(1+(md.scoutPct||0))));};
 const MIX={'material+slime':['material',0],'beast+dragon':['dragon',0],'bird+spirit':['spirit',0],'bug+undead':['demon',1],'plant+spirit':['spirit',0],
  'spirit+undead':['undead',0],'demon+dragon':['dragon',1],'material+spirit':['material',0],'beast+plant':['beast',0],'bird+dragon':['dragon',1],'demon+undead':['demon',0],'bug+plant':['bug',0]};
 const SECRET={'metal+metal':'metalK','material5+slime2':'slime5','spirit5+undead4':'undead5','beast4+plant4':'demon4','beast5+dragon5':'demon5'};
@@ -6262,6 +6270,7 @@ async function foeAct(){
  if(E.casino)return casinoAct(tg);
  if(E.fusionBoss&&!E.healed&&E.hp<E.max*.4){E.healed=true;const h=Math.round(E.max*.25);E.hp+=h;await say(`<span class="uqt">${E.name}の 合体の力が みなぎる！</span> HPが ${h} 回復した！`);draw();return false;}
  if(E.ai){const r=await aiAct(tg);if(r!==null)return r;}
+ if(E.mirror)return mirrorAct(tg);
  const spc=E.moves?pick(E.moves):FAMS[E.fam].sp,useSp=!E.metal&&Math.random()<(E.spRate||(E.kind==='boss'||E.kind==='raid'?.4:.25));
  const fk=elemOf(spc[0])||FAMATK[E.fam]||'claw';
  const pickT=()=>B.taunt&&B.taunt.n>0&&B.taunt.m.hp>0?B.taunt.m:pick(tg);
@@ -6271,6 +6280,16 @@ async function foeAct(){
  await say(`${E.name}の こうげき！`);
  {const t=pickT();if(t===B.taunt?.m)await say(`${t.name}が 攻撃を 引きつけた！`);await fxPlay(FAMATK[E.fam]||'claw',t);return hitMember(t,E.atk,false);}
 }
+/* 鏡の影：本人の技を賢く使う（倒しきれる相手・ぼうぎょしていない相手を狙う、3人以上なら全体技、ピンチなら回復） */
+async function mirrorAct(tg){const e=E,T=B.turn;
+ if(e.mHeal&&e.hp<e.max*.35&&!(e.mhT>=T-2)){e.mhT=T;const h=Math.round(e.max*.12);e.hp=Math.min(e.max,e.hp+h);await say(`${e.name}は 回復の技で HPを ${h} 回復した！`);draw();return false;}
+ const taunt=B.taunt&&B.taunt.n>0&&B.taunt.m.hp>0?B.taunt.m:null;
+ const pickT=()=>{if(taunt)return taunt;const ng=tg.filter(m=>!m.guard);const pool=ng.length?ng:tg;return pool.reduce((a,b)=>b.hp<a.hp?b:a);};
+ const mv=e.moves||[],aoe=mv.filter(x=>x[1]==='all'),single=mv.filter(x=>x[1]!=='all').sort((a,b)=>b[2]-a[2]);
+ if(Math.random()<(e.spRate||.5)){
+  if(aoe.length&&(tg.length>=3||!single.length)){const m=pick(aoe);await say(`${e.name}の ${m[0]}！`);await fxPlay(elemOf(m[0])||'claw','party',{wait:380});for(const t of tg){if(t.hp>0&&await hitMember(t,e.atk*m[2],false))return true;}return false;}
+  if(single.length){const m=Math.random()<.6?single[0]:pick(single);const t=pickT();await say(`${e.name}の ${m[0]}！`);if(t===taunt)await say(`${t.name}が 攻撃を 引きつけた！`);await fxPlay(elemOf(m[0])||'claw',t);return hitMember(t,m[1]==='mag'?e.int*m[2]:e.atk*m[2],m[1]==='mag');}}
+ const t=pickT();await say(`${e.name}の こうげき！`);if(t===taunt)await say(`${t.name}が 攻撃を 引きつけた！`);await fxPlay('claw',t);return hitMember(t,e.atk,false);}
 async function casinoAct(tg){
  const x=Math.random();
  if(x<.45){const d=1+Math.floor(Math.random()*6),g=[.3,.6,1,1.4,2,3][d-1];
